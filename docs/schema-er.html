@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albatros Manager - Schema ER</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        h1 {
+            text-align: center;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        .mermaid {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .blue { background: #4a90d9; }
+        .green { background: #5cb85c; }
+        .orange { background: #f0ad4e; }
+        .red { background: #d9534f; }
+        .purple { background: #9b59b6; }
+        .info-box {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-left: 4px solid #00d4ff;
+        }
+        .info-box h3 {
+            margin: 0 0 10px 0;
+            color: #00d4ff;
+        }
+        .info-box code {
+            background: #0f3460;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Albatros Manager - Schema ER</h1>
+    <p class="subtitle">Database per la gestione docenti FSE/PNRR</p>
+
+    <div class="info-box">
+        <h3>Funzionalità trasversali</h3>
+        <p><strong>Soft Delete:</strong> Tutte le tabelle hanno <code>deleted_at</code> per cancellazione logica</p>
+        <p><strong>Audit Log:</strong> Ogni modifica viene tracciata nella tabella <code>audit_log</code></p>
+    </div>
+
+    <div class="mermaid">
+erDiagram
+    FONTE_FINANZIAMENTO {
+        int id PK
+        varchar codice UK
+        varchar descrizione
+        text note
+        timestamp deleted_at
+    }
+
+    CONTO_CORRENTE {
+        int id PK
+        varchar banca
+        varchar iban UK
+        varchar intestatario
+        timestamp deleted_at
+    }
+
+    SEDE {
+        int id PK
+        varchar nome
+        varchar indirizzo
+        varchar citta
+        varchar provincia
+        timestamp deleted_at
+    }
+
+    UTENTE {
+        int id PK
+        varchar username UK
+        varchar password_hash
+        varchar email UK
+        enum ruolo
+        int status
+        timestamp deleted_at
+    }
+
+    TIPO_DOCUMENTO {
+        int id PK
+        varchar codice UK
+        varchar descrizione
+        bool richiede_scadenza
+        bool attivo
+        timestamp deleted_at
+    }
+
+    PROGETTO {
+        int id PK
+        int fonte_finanziamento_id FK
+        int conto_corrente_id FK
+        varchar codice_progetto UK
+        varchar titolo
+        decimal budget_totale
+        date data_inizio
+        date data_fine
+        enum status
+        timestamp deleted_at
+    }
+
+    AVVISO {
+        int id PK
+        int progetto_id FK
+        varchar codice_avviso
+        varchar titolo
+        date data_pubblicazione
+        date data_scadenza
+        enum status
+        timestamp deleted_at
+    }
+
+    DOCENTE {
+        char codice_fiscale PK
+        varchar cognome
+        varchar nome
+        date data_nascita
+        varchar email
+        varchar telefono
+        varchar partita_iva
+        varchar iban
+        timestamp deleted_at
+    }
+
+    ALLIEVO {
+        char codice_fiscale PK
+        varchar cognome
+        varchar nome
+        date data_nascita
+        varchar email
+        varchar telefono
+        timestamp deleted_at
+    }
+
+    MODULO {
+        int id PK
+        int avviso_id FK
+        int sede_id FK
+        varchar codice
+        varchar titolo
+        int ore_totali
+        decimal compenso_orario
+        date data_inizio
+        date data_fine
+        enum status
+        timestamp deleted_at
+    }
+
+    DOCUMENTAZIONE {
+        int id PK
+        int tipo_documento_id FK
+        char docente_codice_fiscale FK
+        char allievo_codice_fiscale FK
+        varchar titolo
+        varchar file_path
+        date data_scadenza
+        enum status
+        timestamp deleted_at
+    }
+
+    ISTANZA {
+        int id PK
+        int avviso_id FK
+        char docente_codice_fiscale FK
+        int modulo_id FK
+        date data_presentazione
+        decimal punteggio_totale
+        int posizione_graduatoria
+        enum status
+        timestamp deleted_at
+    }
+
+    ASSEGNAZIONE {
+        int id PK
+        int modulo_id FK
+        char docente_codice_fiscale FK
+        int istanza_id FK
+        date data_assegnazione
+        varchar delibera_cts
+        enum status
+        timestamp deleted_at
+    }
+
+    CONTRATTO {
+        int id PK
+        int assegnazione_id FK
+        enum tipo
+        varchar numero_contratto UK
+        date data_stipula
+        decimal compenso_totale
+        int ore_contrattualizzate
+        enum status
+        timestamp deleted_at
+    }
+
+    CALENDARIO {
+        int id PK
+        int modulo_id FK
+        char docente_codice_fiscale FK
+        date data
+        time ora_inizio
+        time ora_fine
+        decimal ore
+        varchar aula
+        enum status
+        timestamp deleted_at
+    }
+
+    ISCRIZIONE {
+        int id PK
+        int modulo_id FK
+        char allievo_codice_fiscale FK
+        date data_iscrizione
+        decimal percentuale_frequenza
+        enum esito_finale
+        enum status
+        timestamp deleted_at
+    }
+
+    PRESENZA_ALLIEVO {
+        int id PK
+        int calendario_id FK
+        char allievo_codice_fiscale FK
+        bool presente
+        decimal ore_presenza
+        bool giustificato
+        timestamp deleted_at
+    }
+
+    PAGAMENTO {
+        int id PK
+        int contratto_id FK
+        decimal importo_lordo
+        decimal importo_netto
+        date data_pagamento
+        enum tipo
+        varchar numero_mandato
+        enum status
+        timestamp deleted_at
+    }
+
+    VALUTAZIONE_DOCENTE {
+        int id PK
+        int modulo_id FK
+        char docente_codice_fiscale FK
+        int punteggio_globale
+        text commento
+        date data_valutazione
+        timestamp deleted_at
+    }
+
+    AUDIT_LOG {
+        bigint id PK
+        varchar table_name
+        varchar record_id
+        enum action
+        json old_values
+        json new_values
+        json changed_fields
+        int user_id FK
+        varchar username
+        varchar ip_address
+        timestamp created_at
+    }
+
+    %% Relazioni
+    FONTE_FINANZIAMENTO ||--o{ PROGETTO : "finanzia"
+    CONTO_CORRENTE ||--o{ PROGETTO : "gestisce"
+    PROGETTO ||--o{ AVVISO : "pubblica"
+    AVVISO ||--o{ MODULO : "contiene"
+    SEDE ||--o{ MODULO : "ospita"
+
+    TIPO_DOCUMENTO ||--o{ DOCUMENTAZIONE : "classifica"
+    DOCENTE ||--o{ DOCUMENTAZIONE : "possiede"
+    ALLIEVO ||--o{ DOCUMENTAZIONE : "possiede"
+
+    AVVISO ||--o{ ISTANZA : "riceve"
+    DOCENTE ||--o{ ISTANZA : "presenta"
+    MODULO ||--o{ ISTANZA : "richiesto"
+
+    MODULO ||--o{ ASSEGNAZIONE : "assegnato"
+    DOCENTE ||--o{ ASSEGNAZIONE : "riceve"
+    ISTANZA ||--o| ASSEGNAZIONE : "genera"
+
+    ASSEGNAZIONE ||--|| CONTRATTO : "formalizza"
+    CONTRATTO ||--o{ PAGAMENTO : "genera"
+
+    MODULO ||--o{ CALENDARIO : "programma"
+    DOCENTE ||--o{ CALENDARIO : "tiene"
+
+    MODULO ||--o{ ISCRIZIONE : "accoglie"
+    ALLIEVO ||--o{ ISCRIZIONE : "effettua"
+
+    CALENDARIO ||--o{ PRESENZA_ALLIEVO : "registra"
+    ALLIEVO ||--o{ PRESENZA_ALLIEVO : "partecipa"
+
+    MODULO ||--o{ VALUTAZIONE_DOCENTE : "valuta"
+    DOCENTE ||--o{ VALUTAZIONE_DOCENTE : "riceve"
+
+    UTENTE ||--o{ AUDIT_LOG : "esegue"
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color blue"></div>
+            <span>Configurazione (Fonte, Conto, Sede, Tipo Doc)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color green"></div>
+            <span>Progetto → Avviso → Modulo</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color orange"></div>
+            <span>Docente/Allievo (PK = Codice Fiscale)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color red"></div>
+            <span>Contratti e Pagamenti</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color purple"></div>
+            <span>Calendario e Presenze</span>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            er: {
+                diagramPadding: 20,
+                layoutDirection: 'TB',
+                minEntityWidth: 100,
+                minEntityHeight: 75,
+                entityPadding: 15,
+                useMaxWidth: true
+            }
+        });
+    </script>
+</body>
+</html>
