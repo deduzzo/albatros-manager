@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aa69ce3fbce484320f70850b3d977c06",
+    "content-hash": "7309b9d2e4518ad52988e780a875afc0",
     "packages": [
         {
             "name": "bower-asset/inputmask",
@@ -1240,66 +1240,6 @@
                 }
             ],
             "time": "2025-07-15T11:30:57+00:00"
-        },
-        {
-            "name": "synamen/yii2-tabler-theme",
-            "version": "1.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/synamen/yii2-tabler-theme.git",
-                "reference": "f52379b03912d52fc6e26ceb691d16928492e830"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/synamen/yii2-tabler-theme/zipball/f52379b03912d52fc6e26ceb691d16928492e830",
-                "reference": "f52379b03912d52fc6e26ceb691d16928492e830",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.4.0",
-                "yiisoft/yii2": "~2.0.0"
-            },
-            "type": "yii2-extension",
-            "extra": {
-                "asset-installer-paths": {
-                    "npm-asset-library": "vendor/npm",
-                    "bower-asset-library": "vendor/bower"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "synamen\\yii2tabler\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Synamen",
-                    "email": "info@synamen.com",
-                    "homepage": "https://github.com/synamen",
-                    "role": "Creator"
-                }
-            ],
-            "description": "Free Yii2 admin template for backend",
-            "keywords": [
-                "admin",
-                "backend",
-                "bootsprap4",
-                "extension",
-                "tabler",
-                "theme",
-                "yii2",
-                "yii2 admin theme",
-                "yii2 tabler"
-            ],
-            "support": {
-                "issues": "https://github.com/synamen/yii2-tabler-theme/issues",
-                "source": "https://github.com/synamen/yii2-tabler-theme/tree/master"
-            },
-            "time": "2018-09-21T11:04:44+00:00"
         },
         {
             "name": "twbs/bootstrap",

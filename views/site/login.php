@@ -1,55 +1,79 @@
 <?php
 
 /** @var yii\web\View $this */
-/** @var yii\bootstrap5\ActiveForm $form */
-
 /** @var app\models\LoginForm $model */
 
-use yii\bootstrap5\ActiveForm;
-use yii\bootstrap5\Html;
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
 
-$this->title = 'Login';
-$this->params['breadcrumbs'][] = $this->title;
+$this->title = 'Accedi';
+
+// Usa il layout login senza menu
+$this->context->layout = 'login';
 ?>
-<div class="site-login">
-    <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>Please fill out the following fields to login:</p>
+<div class="container container-tight py-4">
+    <div class="text-center mb-4">
+        <a href="." class="navbar-brand navbar-brand-autodark">
+            <img src="<?= Yii::$app->request->baseUrl ?>/images/logo-badge-small.png" height="48" alt="Albatros">
+        </a>
+        <h2 class="mt-3">Albatros Manager</h2>
+        <p class="text-muted">Sistema di gestione docenti FSE/PNRR</p>
+    </div>
 
-    <div class="row">
-        <div class="col-lg-5">
+    <div class="card card-md">
+        <div class="card-body">
+            <h2 class="h2 text-center mb-4">Accedi al portale</h2>
 
             <?php $form = ActiveForm::begin([
                 'id' => 'login-form',
                 'fieldConfig' => [
-                    'template' => "{label}\n{input}\n{error}",
-                    'labelOptions' => ['class' => 'col-lg-1 col-form-label mr-lg-3'],
-                    'inputOptions' => ['class' => 'col-lg-3 form-control'],
-                    'errorOptions' => ['class' => 'col-lg-7 invalid-feedback'],
+                    'template' => "{input}\n{error}",
+                    'errorOptions' => ['class' => 'invalid-feedback d-block'],
                 ],
             ]); ?>
 
-            <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <?= $form->field($model, 'username')->textInput([
+                    'class' => 'form-control',
+                    'placeholder' => 'Inserisci username',
+                    'autofocus' => true,
+                ]) ?>
+            </div>
 
-            <?= $form->field($model, 'password')->passwordInput() ?>
+            <div class="mb-3">
+                <label class="form-label">
+                    Password
+                    <span class="form-label-description">
+                        <a href="#">Password dimenticata?</a>
+                    </span>
+                </label>
+                <?= $form->field($model, 'password')->passwordInput([
+                    'class' => 'form-control',
+                    'placeholder' => 'Inserisci password',
+                ]) ?>
+            </div>
 
-            <?= $form->field($model, 'rememberMe')->checkbox([
-                'template' => "<div class=\"custom-control custom-checkbox\">{input} {label}</div>\n<div class=\"col-lg-8\">{error}</div>",
-            ]) ?>
+            <div class="mb-3">
+                <label class="form-check">
+                    <?= Html::activeCheckbox($model, 'rememberMe', [
+                        'class' => 'form-check-input',
+                        'label' => false,
+                    ]) ?>
+                    <span class="form-check-label">Ricordami su questo dispositivo</span>
+                </label>
+            </div>
 
-            <div class="form-group">
-                <div>
-                    <?= Html::submitButton('Login', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>
-                </div>
+            <div class="form-footer">
+                <?= Html::submitButton('Accedi', ['class' => 'btn btn-primary w-100']) ?>
             </div>
 
             <?php ActiveForm::end(); ?>
-
-            <div style="color:#999;">
-                You may login with <strong>admin/admin</strong> or <strong>demo/demo</strong>.<br>
-                To modify the username/password, please check out the code <code>app\models\User::$users</code>.
-            </div>
-
         </div>
+    </div>
+
+    <div class="text-center text-muted mt-3">
+        <small>&copy; <?= date('Y') ?> Fondazione ITS Albatros Academy</small>
     </div>
 </div>

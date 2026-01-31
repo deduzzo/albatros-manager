@@ -2,55 +2,76 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 ?>
-<div class="header py-4">
-    <div class="container">
-        <div class="d-flex">
-            <a class="header-brand" href="<?= Url::home() ?>">
-                <i class="fe fe-feather" style="font-size: 2rem; color: #467fcf;"></i>
-                <span class="ml-2" style="font-size: 1.25rem; font-weight: 600;">Albatros Manager</span>
+<header class="navbar navbar-expand-md d-print-none">
+    <div class="container-xl">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+            <a href="<?= Url::home() ?>">
+                <img src="<?= Yii::$app->request->baseUrl ?>/images/logo-badge-small.png" alt="Albatros" height="32">
+                <span class="ms-2">Albatros Manager</span>
             </a>
-            <div class="d-flex order-lg-2 ml-auto">
-                <div class="dropdown d-none d-md-flex">
-                    <a class="nav-link icon" data-toggle="dropdown">
-                        <i class="fe fe-bell"></i>
-                        <span class="nav-unread"></span>
+        </h1>
+        <div class="navbar-nav flex-row order-md-last">
+            <div class="d-none d-md-flex">
+                <!-- Theme Toggle -->
+                <a href="#" class="nav-link px-0 me-3" id="theme-toggle" title="Cambia tema">
+                    <i class="ti ti-moon" id="theme-icon"></i>
+                </a>
+                <div class="nav-item dropdown d-none d-md-flex me-3">
+                    <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Notifiche">
+                        <i class="ti ti-bell"></i>
+                        <span class="badge bg-red badge-notification badge-blink"></span>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                        <a href="#" class="dropdown-item d-flex">
-                            <div>
-                                <strong>Sistema</strong> Benvenuto in Albatros Manager
-                                <div class="small text-muted">Adesso</div>
+                    <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Notifiche</h3>
                             </div>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item text-center text-muted-dark">Segna tutto come letto</a>
-                    </div>
-                </div>
-                <div class="dropdown">
-                    <a href="#" class="nav-link pr-0 leading-none" data-toggle="dropdown">
-                        <span class="avatar bg-blue-lt">A</span>
-                        <span class="ml-2 d-none d-lg-block">
-                            <span class="text-default">Admin</span>
-                            <small class="text-muted d-block mt-1">Amministratore</small>
-                        </span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                        <a class="dropdown-item" href="#">
-                            <i class="dropdown-icon fe fe-user"></i> Profilo
-                        </a>
-                        <a class="dropdown-item" href="#">
-                            <i class="dropdown-icon fe fe-settings"></i> Impostazioni
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">
-                            <i class="dropdown-icon fe fe-log-out"></i> Esci
-                        </a>
+                            <div class="list-group list-group-flush list-group-hoverable">
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <span class="status-dot status-dot-animated bg-green d-block"></span>
+                                        </div>
+                                        <div class="col text-truncate">
+                                            <a href="#" class="text-body d-block">Sistema</a>
+                                            <div class="d-block text-secondary text-truncate mt-n1">
+                                                Benvenuto in Albatros Manager
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <a href="#" class="header-toggler d-lg-none ml-3 ml-lg-0" data-toggle="collapse" data-target="#headerMenuCollapse">
-                <span class="header-toggler-icon"></span>
-            </a>
+            <?php if (!Yii::$app->user->isGuest): ?>
+            <div class="nav-item dropdown">
+                <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Account">
+                    <span class="avatar avatar-sm bg-blue-lt"><?= strtoupper(substr(Yii::$app->user->identity->username, 0, 1)) ?></span>
+                    <div class="d-none d-xl-block ps-2">
+                        <div><?= Html::encode(ucfirst(Yii::$app->user->identity->username)) ?></div>
+                        <div class="mt-1 small text-secondary"><?= Html::encode(Yii::$app->user->identity->getRuoloLabel()) ?></div>
+                    </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                    <a href="#" class="dropdown-item">
+                        <i class="ti ti-user me-2"></i> Profilo
+                    </a>
+                    <a href="#" class="dropdown-item">
+                        <i class="ti ti-settings me-2"></i> Impostazioni
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <?= Html::a('<i class="ti ti-logout me-2"></i> Esci', ['/site/logout'], [
+                        'class' => 'dropdown-item',
+                        'data-method' => 'post',
+                    ]) ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
-</div>
+</header>

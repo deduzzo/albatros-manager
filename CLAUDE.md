@@ -7,8 +7,67 @@ Sistema di gestione per docenti e corsi finanziati da FSE (Fondo Sociale Europeo
 - **Framework**: Yii2 Basic Template
 - **PHP**: 8.4
 - **Database**: MySQL 8.0
-- **UI**: Tabler Dashboard Theme (synamen/yii2-tabler-theme)
+- **UI**: Tabler Dashboard Theme v1.4.0 (@tabler/core)
+- **Icons**: Tabler Icons v3.36.1 (@tabler/icons-webfont)
 - **Container**: Docker
+
+### Tabler UI Kit
+
+Tabler v1.4.0 è installato via npm e gli asset sono in `web/assets/tabler/`:
+- CSS: `tabler.min.css`, `tabler-vendors.min.css`, `tabler-icons.min.css`
+- JS: `tabler.min.js`
+- Fonts: `css/fonts/tabler-icons.*`
+
+Asset Bundle: `app\components\assets\TablerAsset`
+
+Icone: usare `<i class="ti ti-{nome}"></i>` (es: `ti ti-home`, `ti ti-settings`)
+Documentazione icone: https://tabler.io/icons
+
+## Autenticazione
+
+### Credenziali Default
+- **Username**: `admin`
+- **Password**: `admin`
+- **Email**: `admin@albatros.it`
+- **Ruolo**: Amministratore
+
+### Sistema Autenticazione
+L'autenticazione usa la tabella `utente` del database con password hashate (bcrypt).
+
+```php
+// Model: app\models\User (tabella utente)
+// Ruoli disponibili: admin, segreteria, coordinatore, operatore
+
+// Verificare ruolo utente
+if (Yii::$app->user->identity->isAdmin()) { ... }
+$ruolo = Yii::$app->user->identity->getRuoloLabel(); // "Amministratore"
+
+// Creare nuovo utente
+$user = new User();
+$user->username = 'nuovo';
+$user->email = 'nuovo@example.com';
+$user->setPassword('password123');
+$user->generateAuthKey();
+$user->ruolo = User::RUOLO_OPERATORE;
+$user->save();
+```
+
+### Protezione Controller
+Tutti i controller devono avere il filtro AccessControl:
+
+```php
+public function behaviors()
+{
+    return [
+        'access' => [
+            'class' => AccessControl::class,
+            'rules' => [
+                ['allow' => true, 'roles' => ['@']], // Solo utenti autenticati
+            ],
+        ],
+    ];
+}
+```
 
 ## Ambiente Docker
 
@@ -91,6 +150,30 @@ Docente::findDeleted();       // Solo record eliminati
 Docente::findWithDeleted();   // Tutti i record
 ```
 
+#### Audit User Fields
+Tutte le tabelle tracciano CHI ha eseguito le operazioni:
+
+| Campo | Tipo | Descrizione |
+|-------|------|-------------|
+| `created_at` | timestamp | Data/ora creazione |
+| `updated_at` | timestamp | Data/ora ultima modifica |
+| `deleted_at` | timestamp | Data/ora soft delete |
+| `created_by` | int FK → utente | Utente che ha creato |
+| `updated_by` | int FK → utente | Utente che ha modificato |
+| `deleted_by` | int FK → utente | Utente che ha eliminato |
+
+I campi `*_by` vengono popolati automaticamente dal `AuditBehavior`.
+
+```php
+// Ottenere l'utente che ha creato il record
+$fonte = FonteFinanziamento::findOne(1);
+$creatore = $fonte->createdByUser;  // Relazione con User
+echo $creatore->username;
+
+// Verificare chi ha modificato
+$modificatore = $fonte->updatedByUser;
+```
+
 #### Audit Log
 Ogni INSERT, UPDATE, DELETE viene tracciato automaticamente nella tabella `audit_log`:
 - Tabella e ID record modificato
@@ -109,34 +192,69 @@ AuditLog::getRecordHistory('docente', 'RSSMRA80A01F205X');
 AuditLog::getUserActivity($userId);
 ```
 
+## Linee Guida CRUD
+
+**IMPORTANTE**: Prima di creare qualsiasi pagina CRUD, leggere `docs/CRUD_GUIDELINES.md`
+
+Il documento definisce:
+- Layout responsive mobile-first
+- Integrazione Tabler + Yii2 widgets
+- Schema pulsanti standard (colori, icone, posizioni)
+- Breadcrumb obbligatorio
+- Messaggi flash e conferme
+- Formattazione date/numeri in italiano
+- Validazione client/server
+- Filtri, paginazione, ordinamento
+- Stati e badge con colori consistenti
+- Accessibilità base
+- Checklist pre-rilascio
+
 ## Struttura Codice
 
 ```
 albatros-manager-yii2/
 ├── components/
+│   ├── assets/
+│   │   ├── TablerAsset.php           # Asset bundle Tabler v1.4.0
+│   │   └── ApexChartsAsset.php       # Asset bundle ApexCharts (grafici)
 │   ├── base/
 │   │   └── BaseActiveRecord.php      # Classe base (soft delete + audit)
 │   ├── behaviors/
 │   │   ├── SoftDeleteBehavior.php    # Behavior soft delete
-│   │   └── AuditLogBehavior.php      # Behavior audit logging
-│   └── traits/
-│       └── SoftDeleteTrait.php       # Query scope soft delete
+│   │   ├── AuditLogBehavior.php      # Behavior audit logging
+│   │   └── AuditBehavior.php         # Behavior campi *_by (user tracking)
+│   ├── traits/
+│   │   └── SoftDeleteTrait.php       # Query scope soft delete
+│   └── widgets/
+│       ├── AppGridView.php           # GridView stilizzato Tabler
+│       ├── AppActiveForm.php         # ActiveForm stilizzato Tabler
+│       └── Alert.php                 # Flash messages Tabler
 ├── config/
 │   ├── db.php                        # Configurazione database
 │   └── web.php                       # Configurazione app
 ├── migrations/                        # 21 migration files
 ├── models/
-│   └── AuditLog.php                  # Model audit log
+│   ├── User.php                      # Model utente (autenticazione DB)
+│   ├── LoginForm.php                 # Form login
+│   ├── AuditLog.php                  # Model audit log
+│   ├── FonteFinanziamento.php        # Model fonte finanziamento
+│   ├── Sede.php                      # Model sede
+│   └── *Search.php                   # Model di ricerca per GridView
 ├── views/
 │   ├── layouts/
 │   │   ├── main.php                  # Layout principale Tabler
+│   │   ├── login.php                 # Layout pagina login (no menu)
 │   │   ├── header.php                # Header con notifiche/profilo
 │   │   ├── menu.php                  # Menu navigazione
 │   │   └── footer.php                # Footer
 │   └── site/
-│       └── index.php                 # Dashboard demo
+│       ├── index.php                 # Dashboard con grafici
+│       └── login.php                 # Pagina login Tabler
 ├── docs/
-│   └── schema-er.html                # Diagramma ER interattivo
+│   ├── schema-er.html                # Diagramma ER interattivo
+│   └── CRUD_GUIDELINES.md            # Linee guida sviluppo CRUD
+├── web/
+│   └── assets/tabler/                # Asset Tabler (CSS, JS, fonts)
 ├── docker-compose.yml                # Configurazione Docker
 └── CLAUDE.md                         # Questo file
 ```
@@ -218,8 +336,30 @@ class Docente extends BaseActiveRecord
 - Lingua UI: Italiano
 - Commenti codice: Italiano
 
+## Documentazione
+
+**IMPORTANTE**: Usare sempre Context7 per trovare la documentazione aggiornata dei framework:
+
+```
+# Yii2 Framework
+mcp__plugin_context7_context7__resolve-library-id: yiisoft/yii2
+mcp__plugin_context7_context7__query-docs: /yiisoft/yii2 "query"
+
+# Tabler UI Kit
+mcp__plugin_context7_context7__resolve-library-id: tabler
+mcp__plugin_context7_context7__query-docs: /websites/tabler_io "query"
+
+# Bootstrap 5
+mcp__plugin_context7_context7__resolve-library-id: bootstrap
+mcp__plugin_context7_context7__query-docs: /twbs/bootstrap "query"
+```
+
+Prima di implementare funzionalità, cercare sempre esempi e best practices nella documentazione ufficiale tramite Context7.
+
 ## Link Utili
 
 - Schema ER: `docs/schema-er.html`
 - phpMyAdmin: http://localhost:8080
 - App: http://localhost:8000
+- Tabler Icons: https://tabler.io/icons
+- Tabler Docs: https://tabler.io/docs

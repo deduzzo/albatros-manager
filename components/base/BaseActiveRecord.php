@@ -5,6 +5,7 @@ namespace app\components\base;
 use yii\db\ActiveRecord;
 use app\components\behaviors\SoftDeleteBehavior;
 use app\components\behaviors\AuditLogBehavior;
+use app\components\behaviors\AuditBehavior;
 use app\components\traits\SoftDeleteTrait;
 
 /**
@@ -40,10 +41,13 @@ abstract class BaseActiveRecord extends ActiveRecord
             'softDelete' => [
                 'class' => SoftDeleteBehavior::class,
             ],
-            'audit' => [
+            'auditLog' => [
                 'class' => AuditLogBehavior::class,
                 'excludedAttributes' => $this->auditExcludedAttributes(),
                 'maskedAttributes' => $this->auditMaskedAttributes(),
+            ],
+            'auditUser' => [
+                'class' => AuditBehavior::class,
             ],
         ]);
     }
@@ -55,7 +59,7 @@ abstract class BaseActiveRecord extends ActiveRecord
      */
     protected function auditExcludedAttributes()
     {
-        return ['created_at', 'updated_at'];
+        return ['created_at', 'updated_at', 'created_by', 'updated_by', 'deleted_by'];
     }
 
     /**
