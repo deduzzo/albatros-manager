@@ -1,0 +1,54 @@
+services:
+  php:
+    image: webdevops/php-apache:8.4
+    container_name: albatros-php
+    volumes:
+      - ./:/app:delegated
+    ports:
+      - '8000:80'
+    environment:
+      - WEB_DOCUMENT_ROOT=/app/web
+    depends_on:
+      - db
+    networks:
+      - albatros-network
+
+  db:
+    image: mysql:8.0
+    container_name: albatros-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: albatros
+      MYSQL_USER: albatros
+      MYSQL_PASSWORD: albatros
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - albatros-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: albatros-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - '8080:80'
+    depends_on:
+      - db
+    networks:
+      - albatros-network
+
+networks:
+  albatros-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
