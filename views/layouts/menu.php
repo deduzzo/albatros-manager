@@ -59,20 +59,20 @@ $isActive = function($controllers) use ($currentController) {
                             <span class="nav-link-title">Progetti</span>
                         </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'progetto' ? 'active' : '' ?>" href="<?= Url::to(['/progetto/index']) ?>">
                                 <i class="ti ti-folder me-2"></i> Progetti
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'avviso' ? 'active' : '' ?>" href="<?= Url::to(['/avviso/index']) ?>">
                                 <i class="ti ti-file me-2"></i> Avvisi/Bandi
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'modulo' ? 'active' : '' ?>" href="<?= Url::to(['/modulo/index']) ?>">
                                 <i class="ti ti-book me-2"></i> Moduli/Corsi
                             </a>
                         </div>
                     </li>
 
                     <!-- Personale -->
-                    <li class="nav-item dropdown <?= $isActive(['docente', 'allievo']) ?>">
+                    <li class="nav-item dropdown <?= $isActive(['docente', 'allievo', 'tag-categoria', 'tag-curriculum']) ?>">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-users"></i>
@@ -80,7 +80,7 @@ $isActive = function($controllers) use ($currentController) {
                             <span class="nav-link-title">Personale</span>
                         </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'docente' ? 'active' : '' ?>" href="<?= Url::to(['/docente/index']) ?>">
                                 <i class="ti ti-user me-2"></i> Docenti
                             </a>
                             <a class="dropdown-item" href="#">
@@ -88,6 +88,14 @@ $isActive = function($controllers) use ($currentController) {
                             </a>
                             <a class="dropdown-item" href="#">
                                 <i class="ti ti-file-plus me-2"></i> Documentazione
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <span class="dropdown-header">Tag Curriculum</span>
+                            <a class="dropdown-item <?= $currentController == 'tag-categoria' ? 'active' : '' ?>" href="#">
+                                <i class="ti ti-category me-2"></i> Categorie Tag
+                            </a>
+                            <a class="dropdown-item <?= $currentController == 'tag-curriculum' ? 'active' : '' ?>" href="#">
+                                <i class="ti ti-tags me-2"></i> Gestione Tag
                             </a>
                         </div>
                     </li>
@@ -101,7 +109,7 @@ $isActive = function($controllers) use ($currentController) {
                             <span class="nav-link-title">Gestione</span>
                         </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'istanza' ? 'active' : '' ?>" href="<?= Url::to(['/istanza/index']) ?>">
                                 <i class="ti ti-send me-2"></i> Istanze
                             </a>
                             <a class="dropdown-item" href="#">

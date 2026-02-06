@@ -24,6 +24,17 @@ $config = [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
         ],
+        'docenteUser' => [
+            'class' => 'yii\web\User',
+            'identityClass' => 'app\models\DocenteAuth',
+            'enableAutoLogin' => true,
+            'identityCookie' => ['name' => '_docenteIdentity', 'httpOnly' => true],
+            'idParam' => '__docenteId',
+            'authTimeoutParam' => '__docenteAuthExpire',
+            'absoluteAuthTimeoutParam' => '__docenteAbsoluteAuthExpire',
+            'returnUrlParam' => '__docenteReturnUrl',
+            'loginUrl' => ['docente-area/login'],
+        ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
@@ -59,6 +70,20 @@ $config = [
             'rules' => [
                 // Dashboard
                 '' => 'site/index',
+
+                // Area Docenti (priorità alta)
+                'area-docenti' => 'docente-area/index',
+                'area-docenti/login' => 'docente-area/login',
+                'area-docenti/registrazione' => 'docente-area/registrazione',
+                'area-docenti/verifica-email/<token:[\w-]+>' => 'docente-area/verifica-email',
+                'area-docenti/password-dimenticata' => 'docente-area/password-dimenticata',
+                'area-docenti/reset-password/<token:[\w-]+>' => 'docente-area/reset-password',
+                'area-docenti/logout' => 'docente-area/logout',
+                'area-docenti/profilo' => 'docente-area/profilo',
+                'area-docenti/bandi' => 'docente-area/bandi',
+                'area-docenti/bandi/<id:\d+>' => 'docente-area/bando',
+                'area-docenti/iscrizione/<moduloId:\d+>' => 'docente-area/iscrizione',
+                'area-docenti/le-mie-iscrizioni' => 'docente-area/le-mie-iscrizioni',
 
                 // CRUD standard per ogni entità
                 '<controller:[\w-]+>' => '<controller>/index',
