@@ -232,12 +232,17 @@ $('#import-form').on('submit', function(e) {
         $('#progress-container').hide();
         $('#results-icon').html('<i class="ti ti-alert-circle me-2 text-danger"></i>');
         $('#results-title').text('Errore durante l\'upload');
+
+        console.error('Errore fetch:', error);
+
         $('#errors-container').html(
             '<div class="alert alert-danger">' +
             '<i class="ti ti-alert-circle me-2"></i>' +
-            'Errore di connessione: ' + error.message +
+            '<strong>Errore di connessione:</strong> ' + error.message + '<br>' +
+            '<small>Controlla la console del browser (F12) per dettagli tecnici.</small>' +
             '</div>'
         );
+        $('#results-footer').show();
         $('#submit-btn').prop('disabled', false);
     });
 });
@@ -249,6 +254,9 @@ function updateProgress(percent) {
 
 function handleResponse(data, isDryRun) {
     lastValidationData = data;
+
+    // Debug: mostra risposta completa
+    console.log('Risposta server:', data);
 
     if (data.success) {
         $('#results-icon').html('<i class="ti ti-check me-2 text-success"></i>');
@@ -310,6 +318,9 @@ function handleResponse(data, isDryRun) {
         $('#results-icon').html('<i class="ti ti-alert-circle me-2 text-danger"></i>');
         $('#results-title').text('Errori di validazione');
 
+        // Gestione errori
+        let hasErrors = false;
+
         if (data.errors && data.errors.length > 0) {
             let errHtml = '<div class="alert alert-danger"><h4>Errori trovati:</h4><ul class="mb-0">';
             data.errors.forEach(msg => {
@@ -317,6 +328,38 @@ function handleResponse(data, isDryRun) {
             });
             errHtml += '</ul></div>';
             $('#errors-container').html(errHtml);
+            hasErrors = true;
+        }
+
+        // Errore generico se presente
+        if (data.error) {
+            let errHtml = '<div class="alert alert-danger">' +
+                '<i class="ti ti-alert-circle me-2"></i>' +
+                '<strong>Errore:</strong> ' + data.error +
+                '</div>';
+            $('#errors-container').html(errHtml);
+            hasErrors = true;
+        }
+
+        // Se non ci sono errori specificati, mostra messaggio generico
+        if (!hasErrors) {
+            let errHtml = '<div class="alert alert-warning">' +
+                '<i class="ti ti-alert-triangle me-2"></i>' +
+                '<strong>Errore sconosciuto</strong><br>' +
+                'Nessun dettaglio disponibile. Controlla la console del browser (F12) per maggiori informazioni.' +
+                '</div>';
+            $('#errors-container').html(errHtml);
+            console.error('Risposta errore senza dettagli:', data);
+        }
+
+        // Mostra warnings se presenti
+        if (data.warnings && data.warnings.length > 0) {
+            let warnHtml = '<div class="alert alert-warning mt-3"><h4>Avvisi:</h4><ul class="mb-0">';
+            data.warnings.forEach(msg => {
+                warnHtml += '<li>' + msg + '</li>';
+            });
+            warnHtml += '</ul></div>';
+            $('#warnings-container').html(warnHtml);
         }
 
         $('#results-footer').show();
