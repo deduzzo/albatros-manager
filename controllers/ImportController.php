@@ -322,7 +322,7 @@ class ImportController extends Controller
             $this->errors[] = "Fonte finanziamento '$fonteCodice' non trovata";
             return false;
         }
-        $this->log[] = "✓ Fonte finanziamento: {$fonte->nome}";
+        $this->log[] = "✓ Fonte finanziamento: {$fonte->descrizione}";
 
         // 2. Crea/trova sede
         $sedeNome = $infoProgetto['SEDE_NOME'] ?? 'Sede Principale';
