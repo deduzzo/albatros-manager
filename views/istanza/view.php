@@ -160,6 +160,56 @@ $tagsNonPromossi = $model->getTagsNonPromossiCount();
                         </div>
                     </div>
 
+                    <!-- Storico Esiti -->
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0"><i class="ti ti-history me-2"></i>Storico Esiti CTS</h3>
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modal-nuovo-esito">
+                                <i class="ti ti-plus me-1"></i> Nuovo Esito
+                            </button>
+                        </div>
+                        <?php $storicoEsiti = $model->storicoEsiti; ?>
+                        <?php if ($storicoEsiti): ?>
+                        <div class="card-body">
+                            <ul class="timeline">
+                                <?php foreach ($storicoEsiti as $esito): ?>
+                                <li class="timeline-event">
+                                    <div class="timeline-event-icon <?= $esito->getEsitoBadgeClass() ?>">
+                                        <i class="<?= $esito->getEsitoIconClass() ?>"></i>
+                                    </div>
+                                    <div class="card timeline-event-card">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <span class="badge <?= $esito->getEsitoBadgeClass() ?>"><?= $esito->getEsitoLabel() ?></span>
+                                                <small class="text-muted">
+                                                    <?php if ($esito->data_esito): ?>
+                                                        <?= Yii::$app->formatter->asDate($esito->data_esito) ?>
+                                                    <?php endif; ?>
+                                                </small>
+                                            </div>
+                                            <?php if ($esito->note): ?>
+                                                <p class="text-muted mb-1 small"><?= Html::encode($esito->note) ?></p>
+                                            <?php endif; ?>
+                                            <small class="text-muted">
+                                                Registrato: <?= Yii::$app->formatter->asDatetime($esito->created_at) ?>
+                                                <?php if ($esito->createdByUser): ?>
+                                                    da <?= Html::encode($esito->createdByUser->username) ?>
+                                                <?php endif; ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                        <?php else: ?>
+                        <div class="card-body text-muted text-center">
+                            <i class="ti ti-history-off mb-2" style="font-size: 2rem;"></i>
+                            <p>Nessun esito registrato</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+
                     <!-- Documenti Caricati -->
                     <div class="card mb-3">
                         <div class="card-header">
@@ -307,3 +357,78 @@ $tagsNonPromossi = $model->getTagsNonPromossiCount();
         </div>
     </div>
 </div>
+
+<!-- Modal Nuovo Esito -->
+<div class="modal modal-blur fade" id="modal-nuovo-esito" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <?= Html::beginForm(['aggiungi-esito', 'id' => $model->id], 'post') ?>
+            <div class="modal-header">
+                <h5 class="modal-title">Registra Nuovo Esito</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label required">Esito</label>
+                    <select name="StoricoEsito[esito]" class="form-select" required>
+                        <option value="">-- Seleziona --</option>
+                        <?php foreach (\app\models\StoricoEsito::getEsitoLabels() as $value => $label): ?>
+                            <option value="<?= $value ?>"><?= $label ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Data Esito</label>
+                    <input type="date" name="StoricoEsito[data_esito]" class="form-control" value="<?= date('Y-m-d') ?>">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Note</label>
+                    <textarea name="StoricoEsito[note]" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="submit" class="btn btn-primary"><i class="ti ti-check me-1"></i> Salva Esito</button>
+            </div>
+            <?= Html::endForm() ?>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    list-style: none;
+    padding: 0;
+    position: relative;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e6e7e9;
+}
+.timeline-event {
+    position: relative;
+    padding-left: 45px;
+    margin-bottom: 1rem;
+}
+.timeline-event-icon {
+    position: absolute;
+    left: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    z-index: 1;
+}
+.timeline-event-card {
+    border-left: 3px solid #e6e7e9;
+}
+</style>

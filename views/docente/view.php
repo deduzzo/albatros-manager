@@ -30,6 +30,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     </h2>
                     <div class="text-muted mt-1">
                         <code><?= Html::encode($model->codice_fiscale) ?></code>
+                        <?php if ($model->codice_fiscale_validato): ?>
+                            <span class="badge bg-success ms-2"><i class="ti ti-check me-1"></i>CF Validato</span>
+                        <?php else: ?>
+                            <span class="badge bg-warning ms-2"><i class="ti ti-alert-triangle me-1"></i>CF Non Validato</span>
+                        <?php endif; ?>
                         <?php if ($model->email): ?>
                             <span class="mx-2">|</span>
                             <i class="ti ti-mail me-1"></i>
@@ -91,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
                 <div class="col-sm-6 col-lg-3">
-                    <div class="card">
+                    <a href="#moduli-assegnati" class="card text-decoration-none" style="cursor:pointer;">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div class="subheader">Moduli Assegnati</div>
@@ -103,10 +108,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                 assegnazioni attive
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-sm-6 col-lg-3">
-                    <div class="card">
+                    <a href="#candidature-presentate" class="card text-decoration-none" style="cursor:pointer;">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div class="subheader">Istanze</div>
@@ -118,7 +123,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 domande presentate
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
                 <!-- Anagrafica -->
@@ -134,7 +139,14 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div class="datagrid">
                                 <div class="datagrid-item">
                                     <div class="datagrid-title">Codice Fiscale</div>
-                                    <div class="datagrid-content"><code><?= Html::encode($model->codice_fiscale) ?></code></div>
+                                    <div class="datagrid-content">
+                                        <code><?= Html::encode($model->codice_fiscale) ?></code>
+                                        <?php if ($model->codice_fiscale_validato): ?>
+                                            <span class="badge bg-success ms-1"><i class="ti ti-check"></i></span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning ms-1" title="Non validato"><i class="ti ti-alert-triangle"></i></span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                                 <div class="datagrid-item">
                                     <div class="datagrid-title">Nome Completo</div>
@@ -314,6 +326,155 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </div>
                             <?php endif; ?>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Moduli Assegnati -->
+                <div class="col-12" id="moduli-assegnati">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-books me-2"></i>Moduli Assegnati</h3>
+                        </div>
+                        <?php $assegnazioni = $model->assegnazioni; ?>
+                        <?php if ($assegnazioni): ?>
+                        <div class="table-responsive">
+                            <table class="table table-vcenter card-table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Codice Modulo</th>
+                                        <th>Titolo</th>
+                                        <th>Avviso</th>
+                                        <th>Ore</th>
+                                        <th>Compenso/h</th>
+                                        <th>Ore Rendicontate</th>
+                                        <th>Contratto</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($assegnazioni as $assegnazione): ?>
+                                    <?php $modulo = $assegnazione->modulo; ?>
+                                    <tr>
+                                        <td>
+                                            <?php if ($modulo): ?>
+                                                <?= Html::a('<span class="badge bg-blue-lt">' . Html::encode($modulo->codice) . '</span>', ['/modulo/view', 'id' => $modulo->id]) ?>
+                                            <?php else: ?>
+                                                -
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?= $modulo ? Html::a(Html::encode($modulo->titolo), ['/modulo/view', 'id' => $modulo->id]) : '-' ?></td>
+                                        <td>
+                                            <?php if ($modulo && $modulo->avviso): ?>
+                                                <?= Html::a(Html::encode($modulo->avviso->codice_avviso), ['/avviso/view', 'id' => $modulo->avviso_id]) ?>
+                                            <?php else: ?>
+                                                -
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?= $modulo ? $modulo->ore_totali : '-' ?></td>
+                                        <td><?= $modulo ? Yii::$app->formatter->asCurrency($modulo->compenso_orario) : '-' ?></td>
+                                        <td>
+                                            <?php
+                                                $oreRendicontateApp = \app\models\RendicontazioneOre::getTotaleOreApprovate($assegnazione->id);
+                                                $oreRendicontateIns = \app\models\RendicontazioneOre::getTotaleOreInserite($assegnazione->id);
+                                                $oreTotModulo = $modulo ? $modulo->ore_totali : 0;
+                                            ?>
+                                            <?= Html::a(
+                                                '<span class="text-success fw-bold">' . number_format($oreRendicontateApp, 1, ',', '.') . '</span>' .
+                                                ($oreRendicontateIns > 0 ? ' <small class="text-warning">(+' . number_format($oreRendicontateIns, 1, ',', '.') . ')</small>' : '') .
+                                                ' / ' . $oreTotModulo,
+                                                ['/rendicontazione-ore/index', 'assegnazione_id' => $assegnazione->id],
+                                                ['class' => 'text-decoration-none', 'title' => 'Dettaglio ore rendicontate']
+                                            ) ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($assegnazione->contratto): ?>
+                                                <?= Html::a('<span class="badge bg-green-lt">' . Html::encode($assegnazione->contratto->numero_contratto ?: 'Visualizza') . '</span>', ['/contratto/view', 'id' => $assegnazione->contratto->id]) ?>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-end">
+                                            <?php if ($modulo): ?>
+                                                <?= Html::a('<i class="ti ti-eye"></i>', ['/modulo/view', 'id' => $modulo->id], ['class' => 'btn btn-sm btn-outline-primary', 'title' => 'Dettaglio modulo']) ?>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <?php else: ?>
+                        <div class="card-body text-muted text-center">
+                            <i class="ti ti-books mb-2" style="font-size: 2rem;"></i>
+                            <p>Nessun modulo assegnato a questo docente</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Istanze/Candidature -->
+                <div class="col-12" id="candidature-presentate">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-file-description me-2"></i>Candidature Presentate</h3>
+                        </div>
+                        <?php $istanze = $model->istanze; ?>
+                        <?php if ($istanze): ?>
+                        <div class="table-responsive">
+                            <table class="table table-vcenter card-table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Modulo</th>
+                                        <th>Avviso</th>
+                                        <th>Punteggio</th>
+                                        <th>Storico Esiti</th>
+                                        <th>Stato Attuale</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($istanze as $istanza): ?>
+                                    <tr>
+                                        <td>
+                                            <?php if ($istanza->modulo): ?>
+                                                <?= Html::a(Html::encode($istanza->modulo->codice . ' - ' . $istanza->modulo->titolo), ['/modulo/view', 'id' => $istanza->modulo_id]) ?>
+                                            <?php else: ?>
+                                                -
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($istanza->avviso): ?>
+                                                <?= Html::a(Html::encode($istanza->avviso->codice_avviso), ['/avviso/view', 'id' => $istanza->avviso_id]) ?>
+                                            <?php else: ?>
+                                                -
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?= $istanza->punteggio ?? '-' ?></td>
+                                        <td>
+                                            <?php foreach ($istanza->storicoEsiti as $esito): ?>
+                                                <span class="badge <?= $esito->getEsitoBadgeClass() ?> me-1" title="<?= $esito->data_esito ? Yii::$app->formatter->asDate($esito->data_esito) : '' ?>">
+                                                    <i class="<?= $esito->getEsitoIconClass() ?> me-1"></i><?= $esito->getEsitoLabel() ?>
+                                                </span>
+                                            <?php endforeach; ?>
+                                            <?php if (empty($istanza->storicoEsiti)): ?>
+                                                <?= $istanza->getEsitoCtsBadgeHtml() ?>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><span class="badge <?= $istanza->getStatusBadgeClass() ?>"><?= $istanza->getStatusLabel() ?></span></td>
+                                        <td class="text-end">
+                                            <?= Html::a('<i class="ti ti-eye"></i>', ['/istanza/view', 'id' => $istanza->id], ['class' => 'btn btn-sm btn-outline-primary', 'title' => 'Dettaglio istanza']) ?>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <?php else: ?>
+                        <div class="card-body text-muted text-center">
+                            <i class="ti ti-file-off mb-2" style="font-size: 2rem;"></i>
+                            <p>Nessuna candidatura presentata da questo docente</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 

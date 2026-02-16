@@ -10,6 +10,7 @@ use yii\db\Expression;
  * Model per la tabella docente.
  *
  * @property string $codice_fiscale
+ * @property bool $codice_fiscale_validato
  * @property string $cognome
  * @property string $nome
  * @property string|null $data_nascita
@@ -37,6 +38,7 @@ use yii\db\Expression;
  * @property Assegnazione[] $assegnazioni
  * @property Calendario[] $calendari
  * @property ValutazioneDocente[] $valutazioni
+ * @property Documentazione[] $documentazioni
  * @property DocenteTag[] $docenteTags
  * @property TagCurriculum[] $tags
  * @property User $createdByUser
@@ -87,6 +89,7 @@ class Docente extends BaseActiveRecord
             [['codice_fiscale'], 'unique'],
             [['codice_fiscale'], 'match', 'pattern' => '/^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/i', 'message' => 'Codice fiscale non valido'],
             [['email'], 'email'],
+            [['codice_fiscale_validato'], 'boolean'],
             [['cap'], 'match', 'pattern' => '/^\d{5}$/', 'message' => 'Il CAP deve essere di 5 cifre'],
             [['provincia'], 'match', 'pattern' => '/^[A-Z]{2}$/', 'message' => 'La provincia deve essere di 2 lettere maiuscole'],
             [['partita_iva'], 'match', 'pattern' => '/^\d{11}$/', 'message' => 'La partita IVA deve essere di 11 cifre'],
@@ -119,6 +122,7 @@ class Docente extends BaseActiveRecord
     {
         return [
             'codice_fiscale' => 'Codice Fiscale',
+            'codice_fiscale_validato' => 'CF Validato',
             'cognome' => 'Cognome',
             'nome' => 'Nome',
             'data_nascita' => 'Data di Nascita',
@@ -171,6 +175,11 @@ class Docente extends BaseActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getDocumentazioni()
+    {
+        return $this->hasMany(Documentazione::class, ['docente_codice_fiscale' => 'codice_fiscale']);
+    }
+
     public function getCalendari()
     {
         return $this->hasMany(Calendario::class, ['docente_codice_fiscale' => 'codice_fiscale']);

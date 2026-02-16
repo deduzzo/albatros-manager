@@ -22,8 +22,13 @@ use app\components\base\BaseActiveRecord;
  * @property string $created_at
  * @property string $updated_at
  * @property string|null $deleted_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
  *
+ * @property Modulo $modulo
  * @property Docente $docente
+ * @property PresenzaAllievo[] $presenze
  */
 class Calendario extends BaseActiveRecord
 {
@@ -51,6 +56,7 @@ class Calendario extends BaseActiveRecord
             [['argomento'], 'string', 'max' => 255],
             [['status'], 'in', 'range' => ['programmata', 'completata', 'annullata', 'recupero']],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
+            [['created_by', 'updated_by', 'deleted_by'], 'integer'],
         ];
     }
 
@@ -72,9 +78,19 @@ class Calendario extends BaseActiveRecord
         ];
     }
 
+    public function getModulo()
+    {
+        return $this->hasOne(Modulo::class, ['id' => 'modulo_id']);
+    }
+
     public function getDocente()
     {
         return $this->hasOne(Docente::class, ['codice_fiscale' => 'docente_codice_fiscale']);
+    }
+
+    public function getPresenze()
+    {
+        return $this->hasMany(PresenzaAllievo::class, ['calendario_id' => 'id']);
     }
 
     public static function getStatusLabels()
@@ -90,5 +106,32 @@ class Calendario extends BaseActiveRecord
     public function getStatusLabel()
     {
         return self::getStatusLabels()[$this->status] ?? $this->status;
+    }
+
+    public function getStatusBadgeClass()
+    {
+        return match ($this->status) {
+            self::STATUS_PROGRAMMATA => 'bg-info',
+            self::STATUS_COMPLETATA => 'bg-success',
+            self::STATUS_ANNULLATA => 'bg-danger',
+            self::STATUS_RECUPERO => 'bg-warning',
+            default => 'bg-secondary',
+        };
+    }
+
+    /**
+     * Calcola le ore dalla differenza tra ora_inizio e ora_fine
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->ora_inizio && $this->ora_fine) {
+                $inizio = strtotime($this->ora_inizio);
+                $fine = strtotime($this->ora_fine);
+                $this->ore = round(($fine - $inizio) / 3600, 2);
+            }
+            return true;
+        }
+        return false;
     }
 }

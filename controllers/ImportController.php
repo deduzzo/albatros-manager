@@ -16,6 +16,7 @@ use app\models\Docente;
 use app\models\Istanza;
 use app\models\Assegnazione;
 use app\models\Contratto;
+use app\models\Pagamento;
 use app\models\FonteFinanziamento;
 
 /**
@@ -71,6 +72,9 @@ class ImportController extends Controller
      */
     public function actionUpload()
     {
+        // Forza risposta JSON per evitare HTML su errori
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
         Yii::info('ImportController::actionUpload called', __METHOD__);
 
         $uploadedFile = UploadedFile::getInstanceByName('excel_file');
@@ -107,10 +111,13 @@ class ImportController extends Controller
                 ]);
             }
 
+            // Leggi parametro overwrite
+            $overwrite = Yii::$app->request->post('overwrite') === '1';
+
             // Esegui import in transazione
             $transaction = Yii::$app->db->beginTransaction();
             try {
-                $result = $this->eseguiImport($infoProgetto, $moduli, $docentiEsiti);
+                $result = $this->eseguiImport($infoProgetto, $moduli, $docentiEsiti, false, $overwrite);
 
                 if ($result) {
                     $transaction->commit();
@@ -137,8 +144,9 @@ class ImportController extends Controller
                 throw $e;
             }
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             @unlink($tempPath);
+            Yii::error('Import error: ' . $e->getMessage() . "\n" . $e->getTraceAsString(), __METHOD__);
             return $this->asJson([
                 'success' => false,
                 'error' => 'Errore durante l\'import: ' . $e->getMessage()
@@ -165,9 +173,15 @@ class ImportController extends Controller
             $cells = [];
             foreach ($cellIterator as $cell) {
                 $value = $cell->getValue();
-                // Converti RichText in stringa
+                // Normalizza il valore in stringa
                 if (is_object($value)) {
                     $value = $value->__toString();
+                } elseif (is_array($value)) {
+                    $value = '';  // Array vuoto o da formula -> stringa vuota
+                } elseif ($value === null) {
+                    $value = '';
+                } else {
+                    $value = (string)$value;
                 }
                 $cells[] = $value;
             }
@@ -201,9 +215,15 @@ class ImportController extends Controller
             $cells = [];
             foreach ($cellIterator as $cell) {
                 $value = $cell->getValue();
-                // Converti RichText in stringa
+                // Normalizza il valore in stringa
                 if (is_object($value)) {
                     $value = $value->__toString();
+                } elseif (is_array($value)) {
+                    $value = '';  // Array vuoto o da formula -> stringa vuota
+                } elseif ($value === null) {
+                    $value = '';
+                } else {
+                    $value = (string)$value;
                 }
                 $cells[] = $value;
             }
@@ -248,9 +268,15 @@ class ImportController extends Controller
             $cells = [];
             foreach ($cellIterator as $cell) {
                 $value = $cell->getValue();
-                // Converti RichText in stringa
+                // Normalizza il valore in stringa
                 if (is_object($value)) {
                     $value = $value->__toString();
+                } elseif (is_array($value)) {
+                    $value = '';  // Array vuoto o da formula -> stringa vuota
+                } elseif ($value === null) {
+                    $value = '';
+                } else {
+                    $value = (string)$value;
                 }
                 $cells[] = $value;
             }
@@ -313,8 +339,67 @@ class ImportController extends Controller
     /**
      * Esegui import completo
      */
-    private function eseguiImport($infoProgetto, $moduli, $docentiEsiti)
+    private function eseguiImport($infoProgetto, $moduli, $docentiEsiti, $dryRun = false, $overwrite = false)
     {
+        // 0. Se overwrite è abilitato, elimina il progetto esistente
+        if ($overwrite) {
+            $codiceProgetto = $infoProgetto['CODICE_PROGETTO'];
+            // Cerca anche tra i record soft-deleted per evitare conflitti UNIQUE
+            $progettoEsistente = Progetto::findWithDeleted()->andWhere(['codice_progetto' => $codiceProgetto])->one();
+
+            if ($progettoEsistente) {
+                $this->log[] = "⚠️  Progetto esistente trovato: {$progettoEsistente->titolo} (ID: {$progettoEsistente->id})";
+                $this->log[] = "🗑️  Eliminazione in corso...";
+
+                // Elimina in cascata usando SQL diretto per evitare problemi con soft delete
+                // deleteAll() fa DELETE fisico via SQL, bypassa completamente ActiveRecord/SoftDelete
+                $progettoId = $progettoEsistente->id;
+
+                // Conta record da eliminare (usando findWithDeleted per contare TUTTO)
+                $avvisoIds = Avviso::findWithDeleted()->where(['progetto_id' => $progettoId])->select('id')->column();
+                $moduloIds = !empty($avvisoIds) ? Modulo::findWithDeleted()->where(['avviso_id' => $avvisoIds])->select('id')->column() : [];
+                $istanzaIds = !empty($moduloIds) ? Istanza::findWithDeleted()->where(['modulo_id' => $moduloIds])->select('id')->column() : [];
+                if (empty($istanzaIds)) {
+                    $istanzaIds = !empty($avvisoIds) ? Istanza::findWithDeleted()->where(['avviso_id' => $avvisoIds])->select('id')->column() : [];
+                }
+                $assegnazioneIds = !empty($moduloIds) ? Assegnazione::findWithDeleted()->where(['modulo_id' => $moduloIds])->select('id')->column() : [];
+                $contrattoIds = !empty($assegnazioneIds) ? Contratto::findWithDeleted()->where(['assegnazione_id' => $assegnazioneIds])->select('id')->column() : [];
+
+                $countPagamenti = !empty($contrattoIds) ? Pagamento::findWithDeleted()->where(['contratto_id' => $contrattoIds])->count() : 0;
+                $countContratti = count($contrattoIds);
+                $countAssegnazioni = count($assegnazioneIds);
+                $countIstanze = count($istanzaIds);
+                $countModuli = count($moduloIds);
+
+                $this->log[] = "   - Pagamenti: {$countPagamenti}";
+                $this->log[] = "   - Contratti: {$countContratti}";
+                $this->log[] = "   - Assegnazioni: {$countAssegnazioni}";
+                $this->log[] = "   - Istanze: {$countIstanze}";
+                $this->log[] = "   - Moduli: {$countModuli}";
+                $this->log[] = "   - Avvisi: " . count($avvisoIds);
+
+                // Elimina fisicamente con deleteAll (SQL DELETE diretto, bypassa soft delete)
+                if (!empty($contrattoIds)) {
+                    Pagamento::deleteAll(['contratto_id' => $contrattoIds]);
+                }
+                if (!empty($assegnazioneIds)) {
+                    Contratto::deleteAll(['assegnazione_id' => $assegnazioneIds]);
+                }
+                if (!empty($moduloIds)) {
+                    Assegnazione::deleteAll(['modulo_id' => $moduloIds]);
+                    Istanza::deleteAll(['modulo_id' => $moduloIds]);
+                }
+                if (!empty($avvisoIds)) {
+                    Istanza::deleteAll(['avviso_id' => $avvisoIds]);
+                    Modulo::deleteAll(['avviso_id' => $avvisoIds]);
+                }
+                Avviso::deleteAll(['progetto_id' => $progettoId]);
+                Yii::$app->db->createCommand()->delete('progetto', ['id' => $progettoId])->execute();
+
+                $this->log[] = "✓ Progetto esistente eliminato completamente";
+            }
+        }
+
         // 1. Crea/trova fonte finanziamento
         $fonteCodice = $infoProgetto['FONTE_FINANZIAMENTO'] ?? 'PNRR';
         $fonte = FonteFinanziamento::findOne(['codice' => $fonteCodice]);
@@ -404,7 +489,7 @@ class ImportController extends Controller
             $this->log[] = "  ✓ Modulo: {$modulo->titolo}";
         }
 
-        $this->log[] = "✓ Creati {count($moduli)} moduli";
+        $this->log[] = "✓ Creati " . count($moduli) . " moduli";
 
         // 6. Processa docenti e assegnazioni
         $docentiMap = []; // nome completo => codice_fiscale
@@ -426,9 +511,13 @@ class ImportController extends Controller
             $moduloId = $moduliMap[$codiceModulo];
 
             // Provenienza
-            $provenienza = $riga['PROVENIENZA'] ?? 'TP';
+            $provenienza = !empty($riga['PROVENIENZA']) ? $riga['PROVENIENZA'] : 'TP';
             if ($provenienza === 'P.P.') $provenienza = 'TP';
             if ($provenienza === 'U.R.') $provenienza = 'RU';
+            // Se è ancora vuoto o non valido, usa TP di default
+            if (!in_array($provenienza, ['TP', 'RU'])) {
+                $provenienza = 'TP';
+            }
 
             // ASSEGNATARIO
             if (!empty($riga['ASSEGNATARIO'])) {
@@ -440,7 +529,18 @@ class ImportController extends Controller
                 // Crea istanza assegnato
                 $istanza = $this->creaIstanza($avviso->id, $moduloId, $docenteCF, 'assegnato', $riga);
 
-                if ($istanza && !$hasRinuncia) {
+                if ($istanza && $hasRinuncia) {
+                    // Rinuncia: aggiorna status istanza e registra nello storico
+                    $istanza->status = 'rinuncia';
+                    $istanza->save(false);
+                    $storicoRinuncia = new \app\models\StoricoEsito([
+                        'istanza_id' => $istanza->id,
+                        'esito' => 'rinuncia',
+                        'data_esito' => $riga['DATA_ESITI_CTS'] ?? date('Y-m-d'),
+                        'note' => 'Rinuncia importata da file Excel',
+                    ]);
+                    $storicoRinuncia->save(false);
+                } elseif ($istanza) {
                     // Crea assegnazione
                     $this->creaAssegnazione($moduloId, $docenteCF, $istanza->id, $riga);
                 }
@@ -507,7 +607,6 @@ class ImportController extends Controller
                 'cognome' => $cognome,
                 'nome' => $nome,
                 'provenienza' => $provenienza,
-                'email' => strtolower($nome . '.' . $cognome) . '@albatros-temp.it',
             ]);
 
             if (!$docente->save()) {
@@ -542,6 +641,30 @@ class ImportController extends Controller
     {
         if (!$docenteCF) return null;
 
+        // Verifica se esiste già un'istanza per questo docente/modulo/avviso
+        $istanza = Istanza::findOne([
+            'avviso_id' => $avvisoId,
+            'modulo_id' => $moduloId,
+            'docente_codice_fiscale' => $docenteCF,
+        ]);
+
+        if ($istanza) {
+            // Istanza già esistente - aggiorna solo se l'esito è migliore
+            // Priorità: assegnato > idoneo > non_idoneo
+            $priorita = ['assegnato' => 3, 'idoneo' => 2, 'non_idoneo' => 1];
+            $prioritaCorrente = $priorita[$istanza->esito_cts] ?? 0;
+            $prioritaNuova = $priorita[$esitoCTS] ?? 0;
+
+            if ($prioritaNuova > $prioritaCorrente) {
+                $istanza->esito_cts = $esitoCTS;
+                $istanza->note_valutazione = $motivazione;
+                $istanza->save();
+            }
+
+            return $istanza;
+        }
+
+        // Crea nuova istanza
         $istanza = new Istanza([
             'avviso_id' => $avvisoId,
             'modulo_id' => $moduloId,
@@ -553,9 +676,18 @@ class ImportController extends Controller
         ]);
 
         if (!$istanza->save()) {
-            $this->warnings[] = "Errore creazione istanza per docente $docenteCF";
+            $this->warnings[] = "Errore creazione istanza per docente $docenteCF: " . json_encode($istanza->errors);
             return null;
         }
+
+        // Crea record storico esito
+        $storico = new \app\models\StoricoEsito([
+            'istanza_id' => $istanza->id,
+            'esito' => $esitoCTS,
+            'data_esito' => $riga['DATA_ESITI_CTS'] ?? date('Y-m-d'),
+            'note' => $motivazione,
+        ]);
+        $storico->save(false);
 
         return $istanza;
     }
@@ -565,6 +697,18 @@ class ImportController extends Controller
      */
     private function creaAssegnazione($moduloId, $docenteCF, $istanzaId, $riga)
     {
+        // Verifica se esiste già un'assegnazione per questo docente/modulo
+        $assegnazione = Assegnazione::findOne([
+            'modulo_id' => $moduloId,
+            'docente_codice_fiscale' => $docenteCF,
+        ]);
+
+        if ($assegnazione) {
+            // Assegnazione già esistente - skippa creazione contratto
+            return;
+        }
+
+        // Crea nuova assegnazione
         $assegnazione = new Assegnazione([
             'modulo_id' => $moduloId,
             'docente_codice_fiscale' => $docenteCF,
@@ -573,7 +717,7 @@ class ImportController extends Controller
         ]);
 
         if (!$assegnazione->save()) {
-            $this->warnings[] = "Errore creazione assegnazione";
+            $this->warnings[] = "Errore creazione assegnazione: " . json_encode($assegnazione->errors);
             return;
         }
 

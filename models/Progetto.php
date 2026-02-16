@@ -86,6 +86,11 @@ class Progetto extends BaseActiveRecord
         return $this->hasOne(FonteFinanziamento::class, ['id' => 'fonte_finanziamento_id']);
     }
 
+    public function getContoCorrente()
+    {
+        return $this->hasOne(ContoCorrente::class, ['id' => 'conto_corrente_id']);
+    }
+
     public function getAvvisi()
     {
         return $this->hasMany(Avviso::class, ['progetto_id' => 'id']);
@@ -129,5 +134,102 @@ class Progetto extends BaseActiveRecord
     public function getAvvisiCount()
     {
         return $this->getAvvisi()->count();
+    }
+
+    // --- Metodi di rendicontazione ---
+
+    /**
+     * Restituisce tutti i moduli del progetto, attraversando Avviso → Modulo.
+     * Usa leftJoin per rispettare il soft delete.
+     * @return \yii\db\ActiveQuery
+     */
+    public function getModuli()
+    {
+        return Modulo::find()
+            ->alias('m')
+            ->leftJoin('avviso a', 'a.id = m.avviso_id AND a.deleted_at IS NULL')
+            ->where(['a.progetto_id' => $this->id])
+            ->andWhere(['m.deleted_at' => null]);
+    }
+
+    /**
+     * Totale compensi contrattualizzati di tutti i moduli del progetto.
+     * @return float
+     */
+    public function getTotaleContrattualizzato()
+    {
+        $result = Contratto::find()
+            ->alias('c')
+            ->leftJoin('assegnazione ass', 'ass.id = c.assegnazione_id AND ass.deleted_at IS NULL')
+            ->leftJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
+            ->leftJoin('avviso a', 'a.id = m.avviso_id AND a.deleted_at IS NULL')
+            ->where(['a.progetto_id' => $this->id])
+            ->andWhere(['c.deleted_at' => null])
+            ->sum('c.compenso_totale');
+
+        return (float) ($result ?: 0);
+    }
+
+    /**
+     * Totale pagamenti effettuati (status = 'pagato') per tutti i moduli del progetto.
+     * @return float
+     */
+    public function getTotalePagato()
+    {
+        $result = Pagamento::find()
+            ->alias('p')
+            ->leftJoin('contratto c', 'c.id = p.contratto_id AND c.deleted_at IS NULL')
+            ->leftJoin('assegnazione ass', 'ass.id = c.assegnazione_id AND ass.deleted_at IS NULL')
+            ->leftJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
+            ->leftJoin('avviso a', 'a.id = m.avviso_id AND a.deleted_at IS NULL')
+            ->where(['a.progetto_id' => $this->id])
+            ->andWhere(['p.status' => Pagamento::STATUS_PAGATO])
+            ->andWhere(['p.deleted_at' => null])
+            ->sum('p.importo_netto');
+
+        return (float) ($result ?: 0);
+    }
+
+    /**
+     * Totale pagamenti in attesa o programmati per tutti i moduli del progetto.
+     * @return float
+     */
+    public function getTotaleInAttesa()
+    {
+        $result = Pagamento::find()
+            ->alias('p')
+            ->leftJoin('contratto c', 'c.id = p.contratto_id AND c.deleted_at IS NULL')
+            ->leftJoin('assegnazione ass', 'ass.id = c.assegnazione_id AND ass.deleted_at IS NULL')
+            ->leftJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
+            ->leftJoin('avviso a', 'a.id = m.avviso_id AND a.deleted_at IS NULL')
+            ->where(['a.progetto_id' => $this->id])
+            ->andWhere(['p.status' => [Pagamento::STATUS_IN_ATTESA, Pagamento::STATUS_PROGRAMMATO]])
+            ->andWhere(['p.deleted_at' => null])
+            ->sum('p.importo_netto');
+
+        return (float) ($result ?: 0);
+    }
+
+    /**
+     * Restituisce dati di rendicontazione per ogni modulo del progetto.
+     * @return array Array di array con chiavi: modulo, contrattualizzato, pagato, percentuale
+     */
+    public function getRendicontoModuli()
+    {
+        $moduli = $this->getModuli()->all();
+        $result = [];
+
+        foreach ($moduli as $modulo) {
+            $contrattualizzato = $modulo->getCompensoContrattualizzato();
+            $pagato = $modulo->getTotalePagatoModulo();
+            $result[] = [
+                'modulo' => $modulo,
+                'contrattualizzato' => $contrattualizzato,
+                'pagato' => $pagato,
+                'percentuale' => $modulo->getPercentualePagamento(),
+            ];
+        }
+
+        return $result;
     }
 }

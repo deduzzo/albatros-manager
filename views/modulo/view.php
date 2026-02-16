@@ -97,15 +97,56 @@ $this->params['breadcrumbs'][] = $model->codice;
                 </div>
 
                 <div class="col-lg-4">
+                    <!-- Docente Assegnato -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-user-check me-2"></i>Docente Assegnato</h3>
+                        </div>
+                        <?php
+                            $assegnazione = $model->getAssegnazioni()->one();
+                            $docenteAssegnato = $assegnazione ? $assegnazione->docente : null;
+                        ?>
+                        <?php if ($docenteAssegnato): ?>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="avatar bg-blue-lt me-3"><i class="ti ti-user"></i></span>
+                                <div>
+                                    <strong><?= Html::a(Html::encode($docenteAssegnato->cognome . ' ' . $docenteAssegnato->nome), ['/docente/view', 'id' => $docenteAssegnato->codice_fiscale]) ?></strong>
+                                    <br><small class="text-muted"><?= Html::encode($docenteAssegnato->codice_fiscale) ?></small>
+                                </div>
+                            </div>
+                            <div class="d-flex mb-1">
+                                <span class="me-auto">Provenienza</span>
+                                <span class="badge bg-cyan-lt"><?= $docenteAssegnato->provenienza === 'RU' ? 'Ricercatore Univ.' : 'Professionista' ?></span>
+                            </div>
+                            <?php if ($assegnazione->contratto): ?>
+                            <div class="d-flex mb-1">
+                                <span class="me-auto">Contratto</span>
+                                <?= Html::a('<span class="badge bg-green-lt">' . Html::encode($assegnazione->contratto->numero_contratto ?: 'Visualizza') . '</span>', ['/contratto/view', 'id' => $assegnazione->contratto->id]) ?>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php else: ?>
+                        <div class="card-body text-muted text-center">
+                            <i class="ti ti-user-off mb-2" style="font-size: 2rem;"></i>
+                            <p>Nessun docente assegnato</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+
                     <!-- Statistiche -->
                     <div class="card mb-3">
                         <div class="card-header">
-                            <h3 class="card-title">Statistiche</h3>
+                            <h3 class="card-title"><i class="ti ti-chart-bar me-2"></i>Statistiche</h3>
                         </div>
                         <div class="card-body">
                             <div class="d-flex mb-2">
-                                <span class="me-auto">Iscrizioni ricevute</span>
+                                <span class="me-auto">Candidature ricevute</span>
                                 <span class="badge bg-primary"><?= $model->getIstanzeCount() ?></span>
+                            </div>
+                            <div class="d-flex mb-2">
+                                <span class="me-auto">Assegnazioni</span>
+                                <span class="badge bg-success"><?= count($model->assegnazioni) ?></span>
                             </div>
                         </div>
                     </div>
@@ -114,7 +155,7 @@ $this->params['breadcrumbs'][] = $model->codice;
                     <?php if ($model->avviso): ?>
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Bando di Riferimento</h3>
+                            <h3 class="card-title"><i class="ti ti-speakerphone me-2"></i>Bando di Riferimento</h3>
                         </div>
                         <div class="card-body">
                             <h4><?= Html::a($model->avviso->codice_avviso, ['/avviso/view', 'id' => $model->avviso_id]) ?></h4>
@@ -130,6 +171,250 @@ $this->params['breadcrumbs'][] = $model->codice;
                     <?php endif; ?>
                 </div>
             </div>
+
+            <!-- Tabella Candidature/Istanze -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="ti ti-file-description me-2"></i>Candidature Docenti</h3>
+                </div>
+                <?php $istanze = $model->istanze; ?>
+                <?php if ($istanze): ?>
+                <div class="table-responsive">
+                    <table class="table table-vcenter card-table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Docente</th>
+                                <th>Provenienza</th>
+                                <th>Punteggio</th>
+                                <th>Storico Esiti</th>
+                                <th>Stato Attuale</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($istanze as $istanza): ?>
+                            <tr>
+                                <td>
+                                    <?php if ($istanza->docente): ?>
+                                        <?= Html::a('<i class="ti ti-user me-1"></i>' . Html::encode($istanza->docente->cognome . ' ' . $istanza->docente->nome), ['/docente/view', 'id' => $istanza->docente_codice_fiscale]) ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($istanza->docente): ?>
+                                        <span class="badge bg-cyan-lt"><?= $istanza->docente->provenienza === 'RU' ? 'RU' : 'TP' ?></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= $istanza->punteggio ?? '-' ?></td>
+                                <td>
+                                    <?php foreach ($istanza->storicoEsiti as $esito): ?>
+                                        <span class="badge <?= $esito->getEsitoBadgeClass() ?> me-1" title="<?= $esito->data_esito ? Yii::$app->formatter->asDate($esito->data_esito) : '' ?>">
+                                            <i class="<?= $esito->getEsitoIconClass() ?> me-1"></i><?= $esito->getEsitoLabel() ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                    <?php if (empty($istanza->storicoEsiti)): ?>
+                                        <?= $istanza->getEsitoCtsBadgeHtml() ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td><span class="badge <?= $istanza->getStatusBadgeClass() ?>"><?= $istanza->getStatusLabel() ?></span></td>
+                                <td class="text-end">
+                                    <?= Html::a('<i class="ti ti-eye"></i>', ['/istanza/view', 'id' => $istanza->id], ['class' => 'btn btn-sm btn-outline-primary', 'title' => 'Dettaglio']) ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php else: ?>
+                <div class="card-body text-muted text-center">
+                    <i class="ti ti-file-off mb-2" style="font-size: 2rem;"></i>
+                    <p>Nessuna candidatura ricevuta per questo modulo</p>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Sezione Pagamenti -->
+            <?php
+                $assegnazioneContratto = $model->getAssegnazioni()->one();
+                $contrattoAttivo = $assegnazioneContratto ? $assegnazioneContratto->contratto : null;
+            ?>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="ti ti-cash me-2"></i>Pagamenti</h3>
+                    <?php if ($contrattoAttivo): ?>
+                    <div class="card-actions">
+                        <?= Html::a('<i class="ti ti-plus me-1"></i> Nuovo Pagamento', ['/pagamento/create', 'contratto_id' => $contrattoAttivo->id], [
+                            'class' => 'btn btn-sm btn-success',
+                        ]) ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php if ($contrattoAttivo): ?>
+                <?php
+                    $compensoContrattualizzato = $contrattoAttivo->compenso_totale;
+                    $totalePagatoModulo = $contrattoAttivo->getTotalePagato();
+                    $rimanente = $contrattoAttivo->getSaldoRimanente();
+                    $percPagato = ($compensoContrattualizzato > 0) ? round(($totalePagatoModulo / $compensoContrattualizzato) * 100) : 0;
+                ?>
+                <div class="card-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-4">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <span class="avatar bg-blue-lt me-3"><i class="ti ti-file-invoice"></i></span>
+                                        <div>
+                                            <div class="text-muted small">Contrattualizzato</div>
+                                            <div class="fw-bold"><?= Yii::$app->formatter->asCurrency($compensoContrattualizzato) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <span class="avatar bg-green-lt me-3"><i class="ti ti-cash"></i></span>
+                                        <div>
+                                            <div class="text-muted small">Pagato</div>
+                                            <div class="fw-bold text-success"><?= Yii::$app->formatter->asCurrency($totalePagatoModulo) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <span class="avatar bg-orange-lt me-3"><i class="ti ti-clock-dollar"></i></span>
+                                        <div>
+                                            <div class="text-muted small">Rimanente</div>
+                                            <div class="fw-bold <?= $rimanente > 0 ? 'text-warning' : 'text-success' ?>"><?= Yii::$app->formatter->asCurrency($rimanente) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Avanzamento pagamenti</small>
+                            <small class="fw-bold"><?= $percPagato ?>%</small>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar <?= $percPagato >= 100 ? 'bg-success' : ($percPagato > 0 ? 'bg-warning' : 'bg-secondary') ?>"
+                                 style="width: <?= min($percPagato, 100) ?>%"></div>
+                        </div>
+                    </div>
+
+                    <?php $pagamenti = $contrattoAttivo->pagamenti; ?>
+                    <?php if ($pagamenti): ?>
+                    <div class="table-responsive">
+                        <table class="table table-vcenter table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Tipo</th>
+                                    <th class="text-end">Importo Lordo</th>
+                                    <th class="text-end">Ritenute</th>
+                                    <th class="text-end">Netto</th>
+                                    <th>Stato</th>
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($pagamenti as $pagamento): ?>
+                                <tr>
+                                    <td><?= $pagamento->data_pagamento ? Yii::$app->formatter->asDate($pagamento->data_pagamento) : '-' ?></td>
+                                    <td><span class="badge bg-cyan-lt"><?= $pagamento->getTipoLabel() ?></span></td>
+                                    <td class="text-end"><?= Yii::$app->formatter->asCurrency($pagamento->importo_lordo) ?></td>
+                                    <td class="text-end"><?= $pagamento->ritenute ? Yii::$app->formatter->asCurrency($pagamento->ritenute) : '-' ?></td>
+                                    <td class="text-end"><strong><?= Yii::$app->formatter->asCurrency($pagamento->importo_netto) ?></strong></td>
+                                    <td><span class="badge <?= $pagamento->getStatusBadgeClass() ?>"><?= $pagamento->getStatusLabel() ?></span></td>
+                                    <td><small class="text-muted"><?= Html::encode($pagamento->note) ?></small></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php else: ?>
+                    <div class="text-muted text-center py-3">
+                        <i class="ti ti-receipt-off mb-2" style="font-size: 1.5rem;"></i>
+                        <p class="mb-0">Nessun pagamento registrato</p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php else: ?>
+                <div class="card-body text-muted text-center">
+                    <i class="ti ti-file-off mb-2" style="font-size: 2rem;"></i>
+                    <p>Nessun contratto attivo per questo modulo</p>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Sezione Rendicontazione Ore -->
+            <?php if ($assegnazioneContratto): ?>
+            <?php
+                $oreContrattualizzate = $contrattoAttivo ? $contrattoAttivo->ore_contrattualizzate : 0;
+                $oreApprovate = \app\models\RendicontazioneOre::getTotaleOreApprovate($assegnazioneContratto->id);
+                $oreInserite = \app\models\RendicontazioneOre::getTotaleOreInserite($assegnazioneContratto->id);
+                $percOre = ($oreContrattualizzate > 0) ? round(($oreApprovate / $oreContrattualizzate) * 100) : 0;
+            ?>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="ti ti-clock-hour-4 me-2"></i>Rendicontazione Ore</h3>
+                    <div class="card-actions">
+                        <?= Html::a('<i class="ti ti-list me-1"></i> Dettaglio Ore', ['/rendicontazione-ore/index', 'assegnazione_id' => $assegnazioneContratto->id], [
+                            'class' => 'btn btn-sm btn-primary',
+                        ]) ?>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-4">
+                            <div class="d-flex align-items-center">
+                                <span class="avatar avatar-sm bg-green-lt me-2"><i class="ti ti-circle-check"></i></span>
+                                <div>
+                                    <div class="text-muted small">Approvate</div>
+                                    <div class="fw-bold"><?= number_format($oreApprovate, 1, ',', '.') ?> / <?= $oreContrattualizzate ?> ore</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="d-flex align-items-center">
+                                <span class="avatar avatar-sm bg-yellow-lt me-2"><i class="ti ti-clock"></i></span>
+                                <div>
+                                    <div class="text-muted small">In Attesa</div>
+                                    <div class="fw-bold text-warning"><?= number_format($oreInserite, 1, ',', '.') ?> ore</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="d-flex align-items-center">
+                                <span class="avatar avatar-sm bg-blue-lt me-2"><i class="ti ti-percentage"></i></span>
+                                <div>
+                                    <div class="text-muted small">Completamento</div>
+                                    <div class="fw-bold"><?= $percOre ?>%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar <?= $percOre > 100 ? 'bg-danger' : ($percOre >= 100 ? 'bg-success' : 'bg-primary') ?>"
+                             style="width: <?= min($percOre, 100) ?>%"></div>
+                    </div>
+                    <?php if ($oreApprovate > $oreContrattualizzate && $oreContrattualizzate > 0): ?>
+                    <div class="mt-2">
+                        <span class="badge bg-danger"><i class="ti ti-alert-triangle me-1"></i>Ore Superiori: +<?= number_format($oreApprovate - $oreContrattualizzate, 1, ',', '.') ?></span>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

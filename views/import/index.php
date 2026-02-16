@@ -101,6 +101,18 @@ $this->params['breadcrumbs'][] = $this->title;
                         </small>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-check">
+                            <input type="checkbox" class="form-check-input" name="overwrite" id="overwrite">
+                            <span class="form-check-label text-danger">
+                                <strong>Sovrascrivi progetto esistente</strong> - Elimina tutti i dati del progetto se già presente
+                            </span>
+                        </label>
+                        <small class="text-muted d-block mt-1">
+                            ⚠️ ATTENZIONE: Questa opzione eliminerà completamente il progetto, avvisi, moduli, istanze, assegnazioni e contratti esistenti per poi ricrearli dall'import
+                        </small>
+                    </div>
+
                     <div class="form-footer">
                         <button type="submit" class="btn btn-primary" id="submit-btn">
                             <i class="ti ti-upload me-1"></i>
@@ -209,6 +221,7 @@ $('#import-form').on('submit', function(e) {
     const formData = new FormData();
     formData.append('excel_file', file);
     formData.append('dry_run', isDryRun ? '1' : '0');
+    formData.append('overwrite', $('#overwrite').is(':checked') ? '1' : '0');
 
     fetch('$uploadUrl', {
         method: 'POST',

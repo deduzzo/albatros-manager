@@ -19,9 +19,15 @@ use app\components\base\BaseActiveRecord;
  * @property string $created_at
  * @property string $updated_at
  * @property string|null $deleted_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
  *
+ * @property Modulo $modulo
  * @property Docente $docente
  * @property Istanza $istanza
+ * @property Contratto $contratto
+ * @property RendicontazioneOre[] $rendicontazioniOre
  */
 class Assegnazione extends BaseActiveRecord
 {
@@ -46,6 +52,7 @@ class Assegnazione extends BaseActiveRecord
             [['delibera_cts'], 'string', 'max' => 100],
             [['status'], 'in', 'range' => ['assegnato', 'accettato', 'rifiutato', 'revocato']],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
+            [['created_by', 'updated_by', 'deleted_by'], 'integer'],
         ];
     }
 
@@ -64,6 +71,11 @@ class Assegnazione extends BaseActiveRecord
         ];
     }
 
+    public function getModulo()
+    {
+        return $this->hasOne(Modulo::class, ['id' => 'modulo_id']);
+    }
+
     public function getDocente()
     {
         return $this->hasOne(Docente::class, ['codice_fiscale' => 'docente_codice_fiscale']);
@@ -72,6 +84,11 @@ class Assegnazione extends BaseActiveRecord
     public function getIstanza()
     {
         return $this->hasOne(Istanza::class, ['id' => 'istanza_id']);
+    }
+
+    public function getContratto()
+    {
+        return $this->hasOne(Contratto::class, ['assegnazione_id' => 'id']);
     }
 
     public static function getStatusLabels()
@@ -87,5 +104,53 @@ class Assegnazione extends BaseActiveRecord
     public function getStatusLabel()
     {
         return self::getStatusLabels()[$this->status] ?? $this->status;
+    }
+
+    public function getStatusBadgeClass()
+    {
+        return match ($this->status) {
+            self::STATUS_ASSEGNATO => 'bg-info',
+            self::STATUS_ACCETTATO => 'bg-success',
+            self::STATUS_RIFIUTATO => 'bg-warning',
+            self::STATUS_REVOCATO => 'bg-danger',
+            default => 'bg-secondary',
+        };
+    }
+
+    // --- Rendicontazione ore ---
+
+    public function getRendicontazioniOre()
+    {
+        return $this->hasMany(RendicontazioneOre::class, ['assegnazione_id' => 'id']);
+    }
+
+    /**
+     * Totale ore rendicontate (tutti gli stati, escluse rifiutate)
+     * @return float
+     */
+    public function getTotaleOreRendicontate()
+    {
+        return (float) RendicontazioneOre::find()
+            ->where(['assegnazione_id' => $this->id])
+            ->andWhere(['!=', 'status', RendicontazioneOre::STATUS_RIFIUTATO])
+            ->sum('ore') ?: 0;
+    }
+
+    /**
+     * Totale ore approvate
+     * @return float
+     */
+    public function getTotaleOreApprovate()
+    {
+        return RendicontazioneOre::getTotaleOreApprovate($this->id);
+    }
+
+    /**
+     * Ore contrattualizzate dal contratto associato
+     * @return int|null
+     */
+    public function getOreContrattualizzate()
+    {
+        return $this->contratto->ore_contrattualizzate ?? null;
     }
 }

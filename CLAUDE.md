@@ -518,12 +518,31 @@ mcp__plugin_context7_context7__query-docs: /twbs/bootstrap "query"
 
 Prima di implementare funzionalità, cercare sempre esempi e best practices nella documentazione ufficiale tramite Context7.
 
+## Team di Agenti
+
+**IMPORTANTE**: All'inizio di ogni sessione di sviluppo, caricare SEMPRE la configurazione del team di agenti da `docs/AGENT_TEAM_CONFIG.md` e avviare il team automaticamente per le attivita di sviluppo, verifica e testing.
+
+Configurazione completa: `docs/AGENT_TEAM_CONFIG.md`
+
+Per avviare il team:
+```
+Avvia il team di agenti come da docs/AGENT_TEAM_CONFIG.md
+```
+
+| Agente | Ruolo | Ordine |
+|--------|-------|--------|
+| **model-agent** | Model, DB, migration, conformita schema | 1 (primo) |
+| **controller-agent** | Controller CRUD, logica, routing | 2 |
+| **ui-agent** | Design views, conformita Tabler/CRUD Guidelines | 3 |
+| **tester-agent** | QA via Chrome, verifica errori PHP/JS | 4 (o on-demand) |
+
 ## Link Utili
 
 - Schema ER: `docs/schema-er.html`
 - Guida Import: `import/README.md`
 - Changelog DB: `docs/modifiche-database-feb-2025.md`
 - CRUD Guidelines: `docs/CRUD_GUIDELINES.md`
+- Team Agenti: `docs/AGENT_TEAM_CONFIG.md`
 - phpMyAdmin: http://localhost:8080
 - App: http://localhost:8000
 - Import Dati: http://localhost:8000/import

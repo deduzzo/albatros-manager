@@ -38,13 +38,13 @@ $isActive = function($controllers) use ($currentController) {
                             <a class="dropdown-item <?= $currentController == 'fonte-finanziamento' ? 'active' : '' ?>" href="<?= Url::to(['/fonte-finanziamento/index']) ?>">
                                 <i class="ti ti-credit-card me-2"></i> Fonti di Finanziamento
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'conto-corrente' ? 'active' : '' ?>" href="<?= Url::to(['/conto-corrente/index']) ?>">
                                 <i class="ti ti-building-bank me-2"></i> Conti Correnti
                             </a>
                             <a class="dropdown-item <?= $currentController == 'sede' ? 'active' : '' ?>" href="<?= Url::to(['/sede/index']) ?>">
                                 <i class="ti ti-map-pin me-2"></i> Sedi
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'tipo-documento' ? 'active' : '' ?>" href="<?= Url::to(['/tipo-documento/index']) ?>">
                                 <i class="ti ti-file-text me-2"></i> Tipi Documento
                             </a>
                         </div>
@@ -83,10 +83,10 @@ $isActive = function($controllers) use ($currentController) {
                             <a class="dropdown-item <?= $currentController == 'docente' ? 'active' : '' ?>" href="<?= Url::to(['/docente/index']) ?>">
                                 <i class="ti ti-user me-2"></i> Docenti
                             </a>
-                            <a class="dropdown-item" href="#">
-                                <i class="ti ti-users me-2"></i> Allievi
+                            <a class="dropdown-item <?= $currentController == 'allievo' ? 'active' : '' ?>" href="<?= Url::to(['/allievo/index']) ?>">
+                                <i class="ti ti-school me-2"></i> Allievi
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'documentazione' ? 'active' : '' ?>" href="<?= Url::to(['/documentazione/index']) ?>">
                                 <i class="ti ti-file-plus me-2"></i> Documentazione
                             </a>
                             <div class="dropdown-divider"></div>
@@ -101,7 +101,7 @@ $isActive = function($controllers) use ($currentController) {
                     </li>
 
                     <!-- Gestione -->
-                    <li class="nav-item dropdown <?= $isActive(['istanza', 'assegnazione', 'contratto', 'calendario']) ?>">
+                    <li class="nav-item dropdown <?= $isActive(['istanza', 'assegnazione', 'contratto', 'calendario', 'presenza-allievo', 'iscrizione', 'valutazione-docente', 'rendicontazione-ore']) ?>">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-clipboard"></i>
@@ -112,25 +112,34 @@ $isActive = function($controllers) use ($currentController) {
                             <a class="dropdown-item <?= $currentController == 'istanza' ? 'active' : '' ?>" href="<?= Url::to(['/istanza/index']) ?>">
                                 <i class="ti ti-send me-2"></i> Istanze
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'assegnazione' ? 'active' : '' ?>" href="<?= Url::to(['/assegnazione/index']) ?>">
                                 <i class="ti ti-circle-check me-2"></i> Assegnazioni
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'contratto' ? 'active' : '' ?>" href="<?= Url::to(['/contratto/index']) ?>">
                                 <i class="ti ti-file-text me-2"></i> Contratti
                             </a>
+                            <a class="dropdown-item <?= $currentController == 'rendicontazione-ore' ? 'active' : '' ?>" href="#">
+                                <i class="ti ti-clock-hour-4 me-2"></i> Rendicontazione Ore
+                            </a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'calendario' ? 'active' : '' ?>" href="<?= Url::to(['/calendario/index']) ?>">
                                 <i class="ti ti-calendar me-2"></i> Calendario
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'iscrizione' ? 'active' : '' ?>" href="<?= Url::to(['/iscrizione/index']) ?>">
+                                <i class="ti ti-user-plus me-2"></i> Iscrizioni
+                            </a>
+                            <a class="dropdown-item <?= $currentController == 'presenza-allievo' ? 'active' : '' ?>" href="<?= Url::to(['/presenza-allievo/index']) ?>">
                                 <i class="ti ti-checkbox me-2"></i> Presenze
+                            </a>
+                            <a class="dropdown-item <?= $currentController == 'valutazione-docente' ? 'active' : '' ?>" href="<?= Url::to(['/valutazione-docente/index']) ?>">
+                                <i class="ti ti-star me-2"></i> Valutazioni Docenti
                             </a>
                         </div>
                     </li>
 
                     <!-- Pagamenti -->
                     <li class="nav-item <?= $isActive('pagamento') ?>">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="<?= Url::to(['/pagamento/index']) ?>">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-currency-euro"></i>
                             </span>

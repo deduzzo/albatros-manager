@@ -55,8 +55,19 @@ class AvvisoController extends Controller
     {
         $model = $this->findModel($id);
 
+        // Precalcolo rendicontazione finanziaria
+        $rendiconto = [
+            'compensoPrevisto' => $model->getTotaleCompensoPrevisto(),
+            'contrattualizzato' => $model->getTotaleContrattualizzato(),
+            'pagato' => $model->getTotalePagato(),
+            'inAttesa' => $model->getTotaleInAttesa(),
+            'moduli' => $model->getRendicontoModuli(),
+        ];
+        $rendiconto['daSpendere'] = $rendiconto['contrattualizzato'] - $rendiconto['pagato'] - $rendiconto['inAttesa'];
+
         return $this->render('view', [
             'model' => $model,
+            'rendiconto' => $rendiconto,
         ]);
     }
 

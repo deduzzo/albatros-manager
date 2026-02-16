@@ -6,6 +6,7 @@ use Yii;
 use app\models\Istanza;
 use app\models\IstanzaSearch;
 use app\models\IstanzaTag;
+use app\models\StoricoEsito;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -31,6 +32,7 @@ class IstanzaController extends Controller
                     'delete' => ['POST'],
                     'promuovi-tag' => ['POST'],
                     'promuovi-tutti-tag' => ['POST'],
+                    'aggiungi-esito' => ['POST'],
                 ],
             ],
         ];
@@ -112,6 +114,28 @@ class IstanzaController extends Controller
             Yii::$app->session->setFlash('success', "{$count} tag promossi al profilo docente.");
         } else {
             Yii::$app->session->setFlash('info', 'Nessun tag da promuovere.');
+        }
+
+        return $this->redirect(['view', 'id' => $id]);
+    }
+
+    /**
+     * Aggiunge un nuovo esito storico all'istanza
+     */
+    public function actionAggiungiEsito($id)
+    {
+        $model = $this->findModel($id);
+        $esito = new StoricoEsito();
+
+        if ($esito->load(Yii::$app->request->post()) && $esito->validate()) {
+            $esito->istanza_id = $model->id;
+            if ($esito->save()) {
+                Yii::$app->session->setFlash('success', 'Esito registrato con successo.');
+            } else {
+                Yii::$app->session->setFlash('error', 'Errore durante il salvataggio dell\'esito.');
+            }
+        } else {
+            Yii::$app->session->setFlash('error', 'Dati non validi.');
         }
 
         return $this->redirect(['view', 'id' => $id]);

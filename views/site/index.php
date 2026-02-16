@@ -5,35 +5,22 @@ use yii\helpers\Url;
 use app\components\assets\ApexChartsAsset;
 
 /* @var $this yii\web\View */
+/* @var $stats array */
+/* @var $progettiRecenti app\models\Progetto[] */
+/* @var $distribuzioneFonti array */
+/* @var $etichetteFonti array */
+/* @var $totaleBudgetFonti float */
+/* @var $liquidazioniMensili array */
+/* @var $mesi array */
 
 $this->title = 'Dashboard';
 
 // Registra ApexCharts per i grafici
 ApexChartsAsset::register($this);
 
-// Contatori reali
-$stats = [
-    'fonti' => \app\models\FonteFinanziamento::find()->count(),
-    'sedi' => \app\models\Sede::find()->count(),
-];
-
-// Dati DEMO per presentazione
-$demo = [
-    'budget_totale' => 2850000,
-    'liquidato' => 1245680,
-    'da_liquidare' => 892450,
-    'in_attesa' => 711870,
-    'progetti_attivi' => 12,
-    'progetti_conclusi' => 8,
-    'docenti' => 47,
-    'allievi' => 324,
-    'ore_erogate' => 4580,
-    'ore_pianificate' => 7200,
-];
-
-// Percentuale avanzamento
-$percentuale_liquidato = round(($demo['liquidato'] / $demo['budget_totale']) * 100);
-$percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100);
+// Contatori aggiuntivi
+$fontiCount = \app\models\FonteFinanziamento::find()->count();
+$sediCount = \app\models\Sede::find()->count();
 ?>
 
 <div class="page-body">
@@ -69,15 +56,14 @@ $percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100
                             </span>
                             <div>
                                 <div class="subheader">Totale Liquidato</div>
-                                <div class="h2 mb-0"><?= Yii::$app->formatter->asCurrency($demo['liquidato'], 'EUR') ?></div>
+                                <div class="h2 mb-0"><?= Yii::$app->formatter->asCurrency($stats['liquidato'], 'EUR') ?></div>
                             </div>
                         </div>
                         <div class="progress progress-sm">
-                            <div class="progress-bar bg-success" style="width: <?= $percentuale_liquidato ?>%"></div>
+                            <div class="progress-bar bg-success" style="width: <?= $stats['percentuale_liquidato'] ?>%"></div>
                         </div>
                         <div class="d-flex justify-content-between mt-1">
-                            <small class="text-muted"><?= $percentuale_liquidato ?>% del budget</small>
-                            <small class="text-green">+12.5% questo mese</small>
+                            <small class="text-muted"><?= $stats['percentuale_liquidato'] ?>% del budget totale</small>
                         </div>
                     </div>
                 </div>
@@ -91,11 +77,11 @@ $percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100
                             </span>
                             <div>
                                 <div class="subheader">Da Liquidare</div>
-                                <div class="h2 mb-0"><?= Yii::$app->formatter->asCurrency($demo['da_liquidare'], 'EUR') ?></div>
+                                <div class="h2 mb-0"><?= Yii::$app->formatter->asCurrency($stats['da_liquidare'], 'EUR') ?></div>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-warning me-2">23 pratiche</span>
+                            <span class="badge bg-warning me-2"><?= $stats['pratiche_da_liquidare'] ?> pratiche</span>
                             <small class="text-muted">in attesa di approvazione</small>
                         </div>
                     </div>
@@ -110,11 +96,11 @@ $percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100
                             </span>
                             <div>
                                 <div class="subheader">Budget Totale</div>
-                                <div class="h2 mb-0"><?= Yii::$app->formatter->asCurrency($demo['budget_totale'], 'EUR') ?></div>
+                                <div class="h2 mb-0"><?= Yii::$app->formatter->asCurrency($stats['budget_totale'], 'EUR') ?></div>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-azure me-2"><?= $demo['progetti_attivi'] ?> progetti</span>
+                            <span class="badge bg-azure me-2"><?= $stats['progetti_attivi'] ?> progetti</span>
                             <small class="text-muted">attivi</small>
                         </div>
                     </div>
@@ -129,11 +115,11 @@ $percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100
                             </span>
                             <div>
                                 <div class="subheader">In Attesa Rendiconto</div>
-                                <div class="h2 mb-0"><?= Yii::$app->formatter->asCurrency($demo['in_attesa'], 'EUR') ?></div>
+                                <div class="h2 mb-0"><?= Yii::$app->formatter->asCurrency($stats['in_attesa'], 'EUR') ?></div>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-purple me-2">5 progetti</span>
+                            <span class="badge bg-purple me-2"><?= $stats['progetti_da_rendicontare'] ?> progetti</span>
                             <small class="text-muted">da rendicontare</small>
                         </div>
                     </div>
@@ -146,25 +132,25 @@ $percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100
             <div class="col-6 col-sm-4 col-lg-2">
                 <div class="card">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0 text-primary"><?= $demo['progetti_attivi'] ?></div>
+                        <div class="h1 m-0 text-primary"><?= $stats['progetti_attivi'] ?></div>
                         <div class="text-muted mb-2">Progetti Attivi</div>
-                        <div class="hr-text hr-text-center my-2">su <?= $demo['progetti_attivi'] + $demo['progetti_conclusi'] ?></div>
+                        <div class="hr-text hr-text-center my-2">su <?= $stats['total_progetti'] ?></div>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-sm-4 col-lg-2">
                 <div class="card">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0 text-info"><?= $demo['docenti'] ?></div>
+                        <div class="h1 m-0 text-info"><?= $stats['docenti'] ?></div>
                         <div class="text-muted mb-2">Docenti</div>
-                        <div class="hr-text hr-text-center my-2">+3 questo mese</div>
+                        <div class="hr-text hr-text-center my-2">registrati</div>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-sm-4 col-lg-2">
                 <div class="card">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0 text-success"><?= $demo['allievi'] ?></div>
+                        <div class="h1 m-0 text-success"><?= $stats['allievi'] ?></div>
                         <div class="text-muted mb-2">Allievi</div>
                         <div class="hr-text hr-text-center my-2">iscritti</div>
                     </div>
@@ -173,16 +159,16 @@ $percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100
             <div class="col-6 col-sm-4 col-lg-2">
                 <div class="card">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0 text-warning"><?= number_format($demo['ore_erogate'], 0, ',', '.') ?></div>
+                        <div class="h1 m-0 text-warning"><?= number_format($stats['ore_erogate'], 0, ',', '.') ?></div>
                         <div class="text-muted mb-2">Ore Erogate</div>
-                        <div class="hr-text hr-text-center my-2"><?= $percentuale_ore ?>%</div>
+                        <div class="hr-text hr-text-center my-2"><?= $stats['percentuale_ore'] ?>%</div>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-sm-4 col-lg-2">
                 <div class="card">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0"><?= $stats['fonti'] ?></div>
+                        <div class="h1 m-0"><?= $fontiCount ?></div>
                         <div class="text-muted mb-2">Fonti Finanz.</div>
                         <?= Html::a('Gestisci <i class="ti ti-arrow-right"></i>', ['/fonte-finanziamento/index'], ['class' => 'small']) ?>
                     </div>
@@ -191,7 +177,7 @@ $percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100
             <div class="col-6 col-sm-4 col-lg-2">
                 <div class="card">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0"><?= $stats['sedi'] ?></div>
+                        <div class="h1 m-0"><?= $sediCount ?></div>
                         <div class="text-muted mb-2">Sedi</div>
                         <?= Html::a('Gestisci <i class="ti ti-arrow-right"></i>', ['/sede/index'], ['class' => 'small']) ?>
                     </div>
@@ -305,46 +291,29 @@ $percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100
                         <h3 class="card-title">Progetti Recenti</h3>
                     </div>
                     <div class="list-group list-group-flush">
-                        <div class="list-group-item">
-                            <div class="d-flex align-items-center">
-                                <span class="avatar bg-green-lt me-3">ITS</span>
-                                <div class="flex-fill">
-                                    <div class="fw-medium">ITS Academy 2025</div>
-                                    <small class="text-muted">PNRR - M4C1</small>
-                                </div>
-                                <span class="badge bg-success">Attivo</span>
+                        <?php if (empty($progettiRecenti)): ?>
+                            <div class="list-group-item text-center text-muted py-4">
+                                <i class="ti ti-folder-off mb-2" style="font-size: 2rem;"></i>
+                                <div>Nessun progetto presente</div>
                             </div>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex align-items-center">
-                                <span class="avatar bg-blue-lt me-3">FSE</span>
-                                <div class="flex-fill">
-                                    <div class="fw-medium">Formazione Continua</div>
-                                    <small class="text-muted">FSE+ 2021-2027</small>
+                        <?php else: ?>
+                            <?php foreach ($progettiRecenti as $progetto): ?>
+                                <div class="list-group-item">
+                                    <div class="d-flex align-items-center">
+                                        <span class="avatar bg-<?= $progetto->status === 'attivo' ? 'green' : ($progetto->status === 'concluso' ? 'secondary' : 'blue') ?>-lt me-3">
+                                            <?= strtoupper(substr($progetto->codice_progetto, 0, 3)) ?>
+                                        </span>
+                                        <div class="flex-fill">
+                                            <div class="fw-medium"><?= Html::encode($progetto->titolo) ?></div>
+                                            <small class="text-muted"><?= Html::encode($progetto->fonteFinanziamento->descrizione ?? 'N/D') ?></small>
+                                        </div>
+                                        <span class="badge bg-<?= $progetto->status === 'attivo' ? 'success' : ($progetto->status === 'concluso' ? 'secondary' : 'warning') ?>">
+                                            <?= ucfirst($progetto->status) ?>
+                                        </span>
+                                    </div>
                                 </div>
-                                <span class="badge bg-success">Attivo</span>
-                            </div>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex align-items-center">
-                                <span class="avatar bg-orange-lt me-3">GOL</span>
-                                <div class="flex-fill">
-                                    <div class="fw-medium">GOL Sicilia</div>
-                                    <small class="text-muted">PNRR - M5C1</small>
-                                </div>
-                                <span class="badge bg-warning">In corso</span>
-                            </div>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex align-items-center">
-                                <span class="avatar bg-purple-lt me-3">PON</span>
-                                <div class="flex-fill">
-                                    <div class="fw-medium">Competenze Digitali</div>
-                                    <small class="text-muted">PON 2014-2020</small>
-                                </div>
-                                <span class="badge bg-secondary">Concluso</span>
-                            </div>
-                        </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -413,6 +382,13 @@ $percentuale_ore = round(($demo['ore_erogate'] / $demo['ore_pianificate']) * 100
 </div>
 
 <?php
+// Preparare i dati JSON come stringhe prima del heredoc
+$liquidazioniJson = json_encode(array_values($liquidazioniMensili ?? []));
+$mesiJson = json_encode($mesi ?? ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic']);
+$distribuzioneFontiJson = json_encode(array_values($distribuzioneFonti ?? []));
+$etichetteFontiJson = json_encode(array_values($etichetteFonti ?? []));
+$totaleBudgetFontiVal = $totaleBudgetFonti ?? 0;
+
 // ApexCharts per i grafici
 $this->registerJs(<<<JS
 // Grafico Andamento Liquidazioni
@@ -425,13 +401,10 @@ var optionsLiquidazioni = {
     },
     series: [{
         name: 'Liquidato',
-        data: [85000, 125000, 98000, 156000, 189000, 145000, 167000, 198000, 145000, 178000, 0, 0]
-    }, {
-        name: 'Budget Mensile',
-        data: [150000, 150000, 150000, 150000, 150000, 150000, 150000, 150000, 150000, 150000, 150000, 150000]
+        data: $liquidazioniJson
     }],
     xaxis: {
-        categories: ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic']
+        categories: $mesiJson
     },
     yaxis: {
         labels: {
@@ -479,8 +452,8 @@ var optionsFonti = {
         height: 240,
         fontFamily: 'inherit',
     },
-    series: [1200000, 850000, 500000, 300000],
-    labels: ['PNRR', 'FSE+', 'PON', 'Altri'],
+    series: $distribuzioneFontiJson,
+    labels: $etichetteFontiJson,
     colors: ['#206bc4', '#79a6dc', '#a5c4e6', '#e6e8e9'],
     legend: {
         position: 'bottom',
@@ -496,7 +469,8 @@ var optionsFonti = {
                         show: true,
                         label: 'Totale',
                         formatter: function(w) {
-                            return '€ 2.85M';
+                            const total = $totaleBudgetFontiVal;
+                            return '€ ' + (total / 1000000).toFixed(2) + 'M';
                         }
                     }
                 }

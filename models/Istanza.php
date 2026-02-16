@@ -27,6 +27,7 @@ use app\components\base\BaseActiveRecord;
  * @property Docente $docente
  * @property Avviso $avviso
  * @property Modulo $modulo
+ * @property Assegnazione $assegnazione
  * @property IstanzaTag[] $istanzaTags
  * @property IstanzaDocumento[] $documenti
  * @property IstanzaSnapshot $snapshot
@@ -62,6 +63,7 @@ class Istanza extends BaseActiveRecord
             [['status'], 'in', 'range' => ['presentata', 'in_valutazione', 'valutata', 'accettata', 'rifiutata', 'rinuncia']],
             [['esito_cts'], 'in', 'range' => [self::ESITO_CTS_ASSEGNATO, self::ESITO_CTS_IDONEO, self::ESITO_CTS_NON_IDONEO]],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
+            [['created_by', 'updated_by', 'deleted_by'], 'integer'],
         ];
     }
 
@@ -97,6 +99,21 @@ class Istanza extends BaseActiveRecord
     public function getModulo()
     {
         return $this->hasOne(Modulo::class, ['id' => 'modulo_id']);
+    }
+
+    public function getAssegnazione()
+    {
+        return $this->hasOne(Assegnazione::class, ['istanza_id' => 'id']);
+    }
+
+    public function getStoricoEsiti()
+    {
+        return $this->hasMany(StoricoEsito::class, ['istanza_id' => 'id'])->orderBy(['created_at' => SORT_ASC]);
+    }
+
+    public function getUltimoEsito()
+    {
+        return $this->hasOne(StoricoEsito::class, ['istanza_id' => 'id'])->orderBy(['created_at' => SORT_DESC]);
     }
 
     public function getIstanzaTags()

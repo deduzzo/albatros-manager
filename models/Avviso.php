@@ -163,4 +163,105 @@ class Avviso extends BaseActiveRecord
     {
         return $this->getIstanze()->count();
     }
+
+    // --- Metodi di rendicontazione finanziaria ---
+
+    /**
+     * Totale compenso previsto (ore_totali * compenso_orario) di tutti i moduli dell'avviso.
+     * @return float
+     */
+    public function getTotaleCompensoPrevisto()
+    {
+        $result = Modulo::find()
+            ->alias('m')
+            ->where(['m.avviso_id' => $this->id])
+            ->andWhere(['m.deleted_at' => null])
+            ->sum(new Expression('m.ore_totali * m.compenso_orario'));
+
+        return (float) ($result ?: 0);
+    }
+
+    /**
+     * Totale compensi contrattualizzati di tutti i moduli dell'avviso.
+     * @return float
+     */
+    public function getTotaleContrattualizzato()
+    {
+        $result = Contratto::find()
+            ->alias('c')
+            ->leftJoin('assegnazione ass', 'ass.id = c.assegnazione_id AND ass.deleted_at IS NULL')
+            ->leftJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
+            ->where(['m.avviso_id' => $this->id])
+            ->andWhere(['c.deleted_at' => null])
+            ->sum('c.compenso_totale');
+
+        return (float) ($result ?: 0);
+    }
+
+    /**
+     * Totale pagamenti effettuati (status = 'pagato') per tutti i moduli dell'avviso.
+     * @return float
+     */
+    public function getTotalePagato()
+    {
+        $result = Pagamento::find()
+            ->alias('p')
+            ->leftJoin('contratto c', 'c.id = p.contratto_id AND c.deleted_at IS NULL')
+            ->leftJoin('assegnazione ass', 'ass.id = c.assegnazione_id AND ass.deleted_at IS NULL')
+            ->leftJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
+            ->where(['m.avviso_id' => $this->id])
+            ->andWhere(['p.status' => Pagamento::STATUS_PAGATO])
+            ->andWhere(['p.deleted_at' => null])
+            ->sum('p.importo_netto');
+
+        return (float) ($result ?: 0);
+    }
+
+    /**
+     * Totale pagamenti in attesa o programmati per tutti i moduli dell'avviso.
+     * @return float
+     */
+    public function getTotaleInAttesa()
+    {
+        $result = Pagamento::find()
+            ->alias('p')
+            ->leftJoin('contratto c', 'c.id = p.contratto_id AND c.deleted_at IS NULL')
+            ->leftJoin('assegnazione ass', 'ass.id = c.assegnazione_id AND ass.deleted_at IS NULL')
+            ->leftJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
+            ->where(['m.avviso_id' => $this->id])
+            ->andWhere(['p.status' => [Pagamento::STATUS_IN_ATTESA, Pagamento::STATUS_PROGRAMMATO]])
+            ->andWhere(['p.deleted_at' => null])
+            ->sum('p.importo_netto');
+
+        return (float) ($result ?: 0);
+    }
+
+    /**
+     * Restituisce dati di rendicontazione per ogni modulo dell'avviso.
+     * @return array Array di array con chiavi: modulo, docente, contratto, contrattualizzato, pagato, percentuale
+     */
+    public function getRendicontoModuli()
+    {
+        $moduli = $this->moduli;
+        $result = [];
+
+        foreach ($moduli as $modulo) {
+            $assegnazione = $modulo->getAssegnazioni()->one();
+            $docente = $assegnazione ? $assegnazione->docente : null;
+            $contratto = $modulo->getContrattoAttivo();
+            $contrattualizzato = $modulo->getCompensoContrattualizzato();
+            $pagato = $modulo->getTotalePagatoModulo();
+
+            $result[] = [
+                'modulo' => $modulo,
+                'docente' => $docente,
+                'contratto' => $contratto,
+                'contrattualizzato' => $contrattualizzato,
+                'pagato' => $pagato,
+                'percentuale' => $modulo->getPercentualePagamento(),
+            ];
+        }
+
+        return $result;
+    }
 }

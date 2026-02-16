@@ -5,10 +5,19 @@ use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Avviso */
+/* @var $rendiconto array */
 
 $this->title = 'Avviso: ' . $model->codice_avviso;
 $this->params['breadcrumbs'][] = ['label' => 'Avvisi/Bandi', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->codice_avviso;
+
+$formatter = Yii::$app->formatter;
+$percentualePagatoTotale = $rendiconto['contrattualizzato'] > 0
+    ? round(($rendiconto['pagato'] / $rendiconto['contrattualizzato']) * 100)
+    : 0;
+$percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
+    ? round(($rendiconto['inAttesa'] / $rendiconto['contrattualizzato']) * 100)
+    : 0;
 ?>
 
 <div class="avviso-view">
@@ -115,7 +124,7 @@ $this->params['breadcrumbs'][] = $model->codice_avviso;
                                                 <td><?= $doc->dimensione_max_mb ?> MB</td>
                                                 <td>
                                                     <?php if ($doc->obbligatorio): ?>
-                                                        <span class="badge bg-danger">Sì</span>
+                                                        <span class="badge bg-danger">Si</span>
                                                     <?php else: ?>
                                                         <span class="badge bg-secondary">No</span>
                                                     <?php endif; ?>
@@ -134,38 +143,307 @@ $this->params['breadcrumbs'][] = $model->codice_avviso;
                 </div>
 
                 <div class="col-lg-4">
-                    <!-- Moduli -->
-                    <div class="card">
+                    <!-- Riepilogo -->
+                    <div class="card mb-3">
                         <div class="card-header">
-                            <h3 class="card-title">Moduli/Corsi</h3>
-                            <div class="card-actions">
-                                <?= Html::a('<i class="ti ti-plus"></i>', ['/modulo/create', 'avviso_id' => $model->id], [
-                                    'class' => 'btn btn-sm btn-success',
-                                    'title' => 'Nuovo Modulo',
-                                ]) ?>
-                            </div>
+                            <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>Riepilogo</h3>
                         </div>
-                        <div class="list-group list-group-flush">
-                            <?php if ($model->moduli): ?>
-                                <?php foreach ($model->moduli as $modulo): ?>
-                                    <a href="<?= \yii\helpers\Url::to(['/modulo/view', 'id' => $modulo->id]) ?>" class="list-group-item list-group-item-action">
-                                        <div class="d-flex w-100 justify-content-between">
-                                            <h5 class="mb-1"><?= Html::encode($modulo->codice) ?></h5>
-                                            <span class="badge <?= $modulo->getStatusBadgeClass() ?>"><?= $modulo->getStatusLabel() ?></span>
-                                        </div>
-                                        <p class="mb-1 text-muted small"><?= Html::encode($modulo->titolo) ?></p>
-                                        <small class="text-muted"><?= $modulo->ore_totali ?> ore - <?= Yii::$app->formatter->asCurrency($modulo->compenso_orario) ?>/h</small>
-                                    </a>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="list-group-item text-muted">
-                                    Nessun modulo collegato
+                        <div class="card-body">
+                            <div class="d-flex mb-2">
+                                <span class="me-auto">Moduli</span>
+                                <span class="badge bg-primary"><?= count($model->moduli) ?></span>
+                            </div>
+                            <div class="d-flex mb-2">
+                                <span class="me-auto">Candidature</span>
+                                <span class="badge bg-info"><?= $model->getIstanzeCount() ?></span>
+                            </div>
+                            <?php if ($rendiconto['contrattualizzato'] > 0): ?>
+                                <hr class="my-2">
+                                <div class="d-flex mb-2">
+                                    <span class="me-auto">Contrattualizzato</span>
+                                    <strong><?= $formatter->asCurrency($rendiconto['contrattualizzato']) ?></strong>
+                                </div>
+                                <div class="d-flex mb-2">
+                                    <span class="me-auto">Pagato</span>
+                                    <strong class="text-success"><?= $formatter->asCurrency($rendiconto['pagato']) ?></strong>
                                 </div>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Tabella Moduli -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="ti ti-books me-2"></i>Moduli dell'Avviso</h3>
+                    <div class="card-actions">
+                        <?= Html::a('<i class="ti ti-plus me-1"></i> Nuovo Modulo', ['/modulo/create', 'avviso_id' => $model->id], [
+                            'class' => 'btn btn-sm btn-success',
+                        ]) ?>
+                    </div>
+                </div>
+                <?php if ($model->moduli): ?>
+                <div class="table-responsive">
+                    <table class="table table-vcenter card-table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Codice</th>
+                                <th>Titolo</th>
+                                <th>Ore</th>
+                                <th>Compenso/h</th>
+                                <th>Docente Assegnato</th>
+                                <th>Stato</th>
+                                <th class="text-end">Importo</th>
+                                <th>Pagato</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($model->moduli as $modulo): ?>
+                            <?php
+                                $assegnazione = $modulo->getAssegnazioni()->one();
+                                $docente = $assegnazione ? $assegnazione->docente : null;
+                            ?>
+                            <tr>
+                                <td>
+                                    <?= Html::a('<span class="badge bg-blue-lt">' . Html::encode($modulo->codice) . '</span>', ['/modulo/view', 'id' => $modulo->id]) ?>
+                                </td>
+                                <td><?= Html::a(Html::encode($modulo->titolo), ['/modulo/view', 'id' => $modulo->id]) ?></td>
+                                <td><?= $modulo->ore_totali ?></td>
+                                <td><?= $formatter->asCurrency($modulo->compenso_orario) ?></td>
+                                <td>
+                                    <?php if ($docente): ?>
+                                        <?= Html::a('<i class="ti ti-user me-1"></i>' . Html::encode($docente->cognome . ' ' . $docente->nome), ['/docente/view', 'id' => $docente->codice_fiscale]) ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">Non assegnato</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><span class="badge <?= $modulo->getStatusBadgeClass() ?>"><?= $modulo->getStatusLabel() ?></span></td>
+                                <?php
+                                    $contratto = $assegnazione ? $assegnazione->contratto : null;
+                                    $importoContrattualizzato = $contratto ? $contratto->compenso_totale : null;
+                                    $totalePagato = $contratto ? $contratto->getTotalePagato() : 0;
+                                    $percentualePagato = ($importoContrattualizzato && $importoContrattualizzato > 0) ? round(($totalePagato / $importoContrattualizzato) * 100) : 0;
+                                ?>
+                                <td class="text-end">
+                                    <?php if ($contratto): ?>
+                                        <strong><?= $formatter->asCurrency($importoContrattualizzato) ?></strong>
+                                    <?php elseif ($modulo->getCompensoTotale()): ?>
+                                        <span class="text-muted"><?= $formatter->asCurrency($modulo->getCompensoTotale()) ?></span>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="min-width: 140px;">
+                                    <?php if ($contratto): ?>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 6px;">
+                                                <div class="progress-bar <?= $percentualePagato >= 100 ? 'bg-success' : ($percentualePagato > 0 ? 'bg-warning' : 'bg-secondary') ?>"
+                                                     style="width: <?= min($percentualePagato, 100) ?>%"></div>
+                                            </div>
+                                            <small class="text-nowrap <?= $percentualePagato >= 100 ? 'text-success' : ($percentualePagato > 0 ? 'text-warning' : 'text-muted') ?>">
+                                                <?= $percentualePagato ?>%
+                                            </small>
+                                        </div>
+                                        <small class="text-muted"><?= $formatter->asCurrency($totalePagato) ?></small>
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-end">
+                                    <?= Html::a('<i class="ti ti-eye"></i>', ['/modulo/view', 'id' => $modulo->id], ['class' => 'btn btn-sm btn-outline-primary', 'title' => 'Dettaglio']) ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php else: ?>
+                <div class="card-body text-muted text-center">
+                    <i class="ti ti-books mb-2" style="font-size: 2rem;"></i>
+                    <p>Nessun modulo collegato a questo avviso</p>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Rendicontazione Finanziaria -->
+            <?php if ($rendiconto['contrattualizzato'] > 0 || $rendiconto['compensoPrevisto'] > 0): ?>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="ti ti-report-money me-2"></i>Rendicontazione Finanziaria</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Stat Cards -->
+                    <div class="row mb-3">
+                        <div class="col-sm-6 col-lg-3 mb-2">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <span class="bg-purple text-white avatar me-3">
+                                            <i class="ti ti-file-invoice"></i>
+                                        </span>
+                                        <div>
+                                            <div class="text-muted small">Contrattualizzato</div>
+                                            <div class="fw-bold"><?= $formatter->asCurrency($rendiconto['contrattualizzato']) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3 mb-2">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <span class="bg-success text-white avatar me-3">
+                                            <i class="ti ti-circle-check"></i>
+                                        </span>
+                                        <div>
+                                            <div class="text-muted small">Pagato</div>
+                                            <div class="fw-bold"><?= $formatter->asCurrency($rendiconto['pagato']) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3 mb-2">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <span class="bg-warning text-white avatar me-3">
+                                            <i class="ti ti-clock"></i>
+                                        </span>
+                                        <div>
+                                            <div class="text-muted small">In Attesa</div>
+                                            <div class="fw-bold"><?= $formatter->asCurrency($rendiconto['inAttesa']) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3 mb-2">
+                            <div class="card card-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <span class="bg-orange text-white avatar me-3">
+                                            <i class="ti ti-wallet"></i>
+                                        </span>
+                                        <div>
+                                            <div class="text-muted small">Da Spendere</div>
+                                            <div class="fw-bold"><?= $formatter->asCurrency(max(0, $rendiconto['daSpendere'])) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar Multi-segmento -->
+                    <?php if ($rendiconto['contrattualizzato'] > 0): ?>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Avanzamento pagamenti</small>
+                            <small class="fw-bold"><?= $percentualePagatoTotale ?>%</small>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" style="width: <?= min($percentualePagatoTotale, 100) ?>%" title="Pagato: <?= $formatter->asCurrency($rendiconto['pagato']) ?>"></div>
+                            <div class="progress-bar bg-warning" style="width: <?= min($percentualeInAttesa, 100 - min($percentualePagatoTotale, 100)) ?>%" title="In Attesa: <?= $formatter->asCurrency($rendiconto['inAttesa']) ?>"></div>
+                        </div>
+                        <div class="d-flex gap-3 mt-1">
+                            <small><span class="badge bg-success">&nbsp;</span> Pagato</small>
+                            <small><span class="badge bg-warning">&nbsp;</span> In Attesa</small>
+                            <small><span class="badge bg-light border">&nbsp;</span> Da Spendere</small>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Tabella Dettaglio Moduli -->
+                    <?php if (!empty($rendiconto['moduli'])): ?>
+                    <div class="table-responsive">
+                        <table class="table table-vcenter table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Codice</th>
+                                    <th>Docente</th>
+                                    <th class="text-end">Contrattualizzato</th>
+                                    <th class="text-end">Pagato</th>
+                                    <th style="width: 120px;">%</th>
+                                    <th>Stato</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($rendiconto['moduli'] as $rm): ?>
+                                <?php $m = $rm['modulo']; ?>
+                                <tr>
+                                    <td><?= Html::a('<span class="badge bg-blue-lt">' . Html::encode($m->codice) . '</span>', ['/modulo/view', 'id' => $m->id]) ?></td>
+                                    <td>
+                                        <?php if ($rm['docente']): ?>
+                                            <?= Html::a(Html::encode($rm['docente']->cognome . ' ' . $rm['docente']->nome), ['/docente/view', 'id' => $rm['docente']->codice_fiscale]) ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end">
+                                        <?php if ($rm['contrattualizzato']): ?>
+                                            <?= $formatter->asCurrency($rm['contrattualizzato']) ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end"><?= $formatter->asCurrency($rm['pagato']) ?></td>
+                                    <td>
+                                        <?php if ($rm['percentuale'] !== null): ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="progress flex-grow-1" style="height: 6px;">
+                                                    <div class="progress-bar <?= $rm['percentuale'] >= 100 ? 'bg-success' : ($rm['percentuale'] > 0 ? 'bg-warning' : 'bg-secondary') ?>"
+                                                         style="width: <?= min($rm['percentuale'], 100) ?>%"></div>
+                                                </div>
+                                                <small class="text-nowrap"><?= $rm['percentuale'] ?>%</small>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($rm['contratto']): ?>
+                                            <?php if ($rm['percentuale'] >= 100): ?>
+                                                <span class="badge bg-success">Saldato</span>
+                                            <?php elseif ($rm['pagato'] > 0): ?>
+                                                <span class="badge bg-warning">Parziale</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary">Da pagare</span>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="badge bg-muted">No contratto</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                            <tfoot>
+                                <tr class="fw-bold">
+                                    <td colspan="2">Totale</td>
+                                    <td class="text-end"><?= $formatter->asCurrency($rendiconto['contrattualizzato']) ?></td>
+                                    <td class="text-end"><?= $formatter->asCurrency($rendiconto['pagato']) ?></td>
+                                    <td>
+                                        <?php if ($rendiconto['contrattualizzato'] > 0): ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="progress flex-grow-1" style="height: 6px;">
+                                                    <div class="progress-bar bg-success" style="width: <?= min($percentualePagatoTotale, 100) ?>%"></div>
+                                                </div>
+                                                <small class="text-nowrap"><?= $percentualePagatoTotale ?>%</small>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

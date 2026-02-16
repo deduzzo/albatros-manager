@@ -21,6 +21,7 @@ use yii\db\Expression;
  * @property string|null $requisiti_docente
  * @property int|null $max_allievi
  * @property string $status
+ * @property string|null $filiera
  * @property string|null $note
  * @property string $created_at
  * @property string $updated_at
@@ -32,6 +33,7 @@ use yii\db\Expression;
  * @property Avviso $avviso
  * @property Sede $sede
  * @property Istanza[] $istanze
+ * @property Assegnazione[] $assegnazioni
  */
 class Modulo extends BaseActiveRecord
 {
@@ -52,6 +54,7 @@ class Modulo extends BaseActiveRecord
             [['avviso_id', 'sede_id', 'codice', 'titolo', 'ore_totali'], 'required'],
             [['avviso_id', 'sede_id', 'ore_totali', 'max_allievi'], 'integer'],
             [['descrizione', 'requisiti_docente', 'note'], 'string'],
+            [['filiera'], 'string', 'max' => 100],
             [['compenso_orario'], 'number'],
             [['data_inizio', 'data_fine'], 'date', 'format' => 'php:Y-m-d'],
             [['codice'], 'string', 'max' => 50],
@@ -79,6 +82,7 @@ class Modulo extends BaseActiveRecord
             'requisiti_docente' => 'Requisiti Docente',
             'max_allievi' => 'Max Allievi',
             'status' => 'Stato',
+            'filiera' => 'Filiera',
             'note' => 'Note',
             'created_at' => 'Creato il',
             'updated_at' => 'Aggiornato il',
@@ -98,6 +102,26 @@ class Modulo extends BaseActiveRecord
     public function getIstanze()
     {
         return $this->hasMany(Istanza::class, ['modulo_id' => 'id']);
+    }
+
+    public function getAssegnazioni()
+    {
+        return $this->hasMany(Assegnazione::class, ['modulo_id' => 'id']);
+    }
+
+    public function getCalendari()
+    {
+        return $this->hasMany(Calendario::class, ['modulo_id' => 'id']);
+    }
+
+    public function getIscrizioni()
+    {
+        return $this->hasMany(Iscrizione::class, ['modulo_id' => 'id']);
+    }
+
+    public function getValutazioni()
+    {
+        return $this->hasMany(ValutazioneDocente::class, ['modulo_id' => 'id']);
     }
 
     public static function getStatusLabels()
@@ -172,5 +196,59 @@ class Modulo extends BaseActiveRecord
     public function getIstanzeCount()
     {
         return $this->getIstanze()->count();
+    }
+
+    // --- Metodi di rendicontazione ---
+
+    /**
+     * Restituisce il contratto attivo del modulo, attraversando Assegnazione → Contratto.
+     * Prende la prima assegnazione non annullata che ha un contratto associato.
+     * @return Contratto|null
+     */
+    public function getContrattoAttivo()
+    {
+        $assegnazione = $this->getAssegnazioni()
+            ->andWhere(['not', ['status' => Assegnazione::STATUS_REVOCATO]])
+            ->one();
+
+        if ($assegnazione === null) {
+            return null;
+        }
+
+        return $assegnazione->contratto;
+    }
+
+    /**
+     * Restituisce il compenso contrattualizzato (dal contratto attivo).
+     * @return float|null
+     */
+    public function getCompensoContrattualizzato()
+    {
+        $contratto = $this->getContrattoAttivo();
+        return $contratto ? (float) $contratto->compenso_totale : null;
+    }
+
+    /**
+     * Restituisce il totale pagato per questo modulo.
+     * @return float
+     */
+    public function getTotalePagatoModulo()
+    {
+        $contratto = $this->getContrattoAttivo();
+        return $contratto ? $contratto->getTotalePagato() : 0.0;
+    }
+
+    /**
+     * Calcola la percentuale di pagamento rispetto al contrattualizzato.
+     * @return float|null null se non c'e' contratto
+     */
+    public function getPercentualePagamento()
+    {
+        $contrattualizzato = $this->getCompensoContrattualizzato();
+        if (!$contrattualizzato || $contrattualizzato <= 0) {
+            return null;
+        }
+
+        return ($this->getTotalePagatoModulo() / $contrattualizzato) * 100;
     }
 }

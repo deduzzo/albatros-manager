@@ -58,7 +58,7 @@ class Contratto extends BaseActiveRecord
     public function rules()
     {
         return [
-            [['assegnazione_id', 'data_stipula', 'data_inizio', 'data_fine', 'compenso_orario', 'ore_contrattualizzate', 'compenso_totale'], 'required'],
+            [['assegnazione_id', 'tipo', 'data_stipula', 'data_inizio', 'data_fine', 'compenso_orario', 'ore_contrattualizzate', 'compenso_totale'], 'required'],
             [['assegnazione_id', 'ore_contrattualizzate'], 'integer'],
             [['data_stipula', 'data_inizio', 'data_fine', 'data_inizio_lezioni', 'data_fine_lezioni'], 'date', 'format' => 'php:Y-m-d'],
             [['compenso_orario', 'compenso_totale', 'ritenute', 'netto_docente'], 'number'],
@@ -248,7 +248,7 @@ class Contratto extends BaseActiveRecord
      */
     public function getTotalePagato()
     {
-        return (float) $this->getPagamenti()->sum('importo') ?: 0;
+        return (float) $this->getPagamenti()->andWhere(['status' => Pagamento::STATUS_PAGATO])->sum('importo_netto') ?: 0;
     }
 
     /**
