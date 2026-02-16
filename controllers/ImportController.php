@@ -38,7 +38,24 @@ class ImportController extends Controller
                     ['allow' => true, 'roles' => ['@']],
                 ],
             ],
+            'verbs' => [
+                'class' => \yii\filters\VerbFilter::class,
+                'actions' => [
+                    'upload' => ['POST'],
+                ],
+            ],
         ];
+    }
+
+    /**
+     * Disabilita CSRF per upload (gestito via AJAX)
+     */
+    public function beforeAction($action)
+    {
+        if ($action->id === 'upload') {
+            $this->enableCsrfValidation = false;
+        }
+        return parent::beforeAction($action);
     }
 
     /**
@@ -54,11 +71,16 @@ class ImportController extends Controller
      */
     public function actionUpload()
     {
+        Yii::info('ImportController::actionUpload called', __METHOD__);
+
         $uploadedFile = UploadedFile::getInstanceByName('excel_file');
 
         if (!$uploadedFile) {
+            Yii::error('No file uploaded', __METHOD__);
             return $this->asJson(['success' => false, 'error' => 'Nessun file caricato']);
         }
+
+        Yii::info('File uploaded: ' . $uploadedFile->name, __METHOD__);
 
         // Salva temporaneamente
         $tempPath = Yii::getAlias('@runtime') . '/import_' . time() . '_' . $uploadedFile->name;
