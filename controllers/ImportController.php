@@ -501,7 +501,7 @@ class ImportController extends Controller
     /**
      * Crea istanza
      */
-    private function creaIstanza($avvisoId, $moduloId, $docenteCF, $esitoC TS, $riga, $motivazione = null)
+    private function creaIstanza($avvisoId, $moduloId, $docenteCF, $esitoCTS, $riga, $motivazione = null)
     {
         if (!$docenteCF) return null;
 
@@ -510,7 +510,7 @@ class ImportController extends Controller
             'modulo_id' => $moduloId,
             'docente_codice_fiscale' => $docenteCF,
             'data_presentazione' => $riga['DATA_ESITI_CTS'] ?? date('Y-m-d'),
-            'esito_cts' => $esitoC TS,
+            'esito_cts' => $esitoCTS,
             'status' => 'valutata',
             'note_valutazione' => $motivazione,
         ]);
