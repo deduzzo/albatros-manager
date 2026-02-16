@@ -22,6 +22,7 @@ use yii\db\Expression;
  * @property string|null $email
  * @property string|null $titolo_studio
  * @property string|null $specializzazioni
+ * @property string|null $provenienza
  * @property string|null $partita_iva
  * @property string|null $iban
  * @property string|null $note
@@ -44,6 +45,10 @@ use yii\db\Expression;
  */
 class Docente extends BaseActiveRecord
 {
+    // Costanti per provenienza docente
+    const PROVENIENZA_TP = 'TP'; // Tipo Professionista (mondo del lavoro)
+    const PROVENIENZA_RU = 'RU'; // Ricercatore Universitario
+
     /**
      * @inheritdoc
      */
@@ -78,6 +83,7 @@ class Docente extends BaseActiveRecord
             [['telefono'], 'string', 'max' => 20],
             [['partita_iva'], 'string', 'max' => 11],
             [['iban'], 'string', 'max' => 34],
+            [['provenienza'], 'in', 'range' => [self::PROVENIENZA_TP, self::PROVENIENZA_RU]],
             [['codice_fiscale'], 'unique'],
             [['codice_fiscale'], 'match', 'pattern' => '/^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/i', 'message' => 'Codice fiscale non valido'],
             [['email'], 'email'],
@@ -125,6 +131,7 @@ class Docente extends BaseActiveRecord
             'email' => 'Email',
             'titolo_studio' => 'Titolo di Studio',
             'specializzazioni' => 'Specializzazioni',
+            'provenienza' => 'Provenienza',
             'partita_iva' => 'Partita IVA',
             'iban' => 'IBAN',
             'note' => 'Note',
@@ -383,5 +390,61 @@ class Docente extends BaseActiveRecord
         $html .= ' <span class="text-muted small">(' . number_format($media, 1) . '/5)</span>';
 
         return $html;
+    }
+
+    /**
+     * Restituisce le opzioni per il dropdown provenienza
+     * @return array
+     */
+    public static function getProvenienzaList()
+    {
+        return [
+            self::PROVENIENZA_TP => 'Tipo Professionista (mondo del lavoro)',
+            self::PROVENIENZA_RU => 'Ricercatore Universitario',
+        ];
+    }
+
+    /**
+     * Restituisce la label della provenienza
+     * @return string|null
+     */
+    public function getProvenienzaLabel()
+    {
+        return self::getProvenienzaList()[$this->provenienza] ?? null;
+    }
+
+    /**
+     * Restituisce il badge HTML per la provenienza
+     * @return string
+     */
+    public function getProvenienzaBadge()
+    {
+        if (!$this->provenienza) {
+            return '<span class="badge bg-secondary">Non specificato</span>';
+        }
+
+        $class = $this->provenienza === self::PROVENIENZA_RU ? 'bg-primary' : 'bg-info';
+        $label = $this->provenienza === self::PROVENIENZA_RU ? 'RU' : 'TP';
+        $title = $this->getProvenienzaLabel();
+
+        return '<span class="badge ' . $class . '" title="' . $title . '">' . $label . '</span>';
+    }
+
+    /**
+     * Verifica se il docente è un ricercatore universitario
+     * @return bool
+     */
+    public function isRicercatoreUniversitario()
+    {
+        return $this->provenienza === self::PROVENIENZA_RU;
+    }
+
+    /**
+     * Verifica se il docente è un tipo professionista
+     * @return bool
+     */
+    public function isTipoProfessionista()
+    {
+        return $this->provenienza === self::PROVENIENZA_TP;
     }
 }

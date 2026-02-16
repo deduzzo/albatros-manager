@@ -93,18 +93,35 @@ docker exec -w /app albatros-php php yii migrate/down 1       # Rollback ultima 
 docker exec -w /app albatros-php composer require package     # Installa pacchetto
 ```
 
+## Terminologia
+
+**IMPORTANTE**: Dalla riunione del 16/02/2025 è emersa la terminologia corretta da usare:
+
+| Termine | Significato | Tabella DB | Contesto |
+|---------|-------------|------------|----------|
+| **CORSO** | Percorso formativo completo offerto agli studenti | `progetto` | Vista studente/pubblico |
+| **PROGETTO** | Contenitore finanziato (FSE, PNRR, MIM) | `progetto` | Vista amministrativa |
+| **MATERIA** / **MODULO** | Singola disciplina/insegnamento | `modulo` | Vista docente |
+| **BANDO** / **AVVISO** | Selezione pubblica per docenti | `avviso` | Vista docente |
+
+**Esempio pratico**:
+- Un **PROGETTO** finanziato da PNRR chiamato "Health Food"
+- Genera un **BANDO** (avviso) per la selezione docenti
+- È composto da ~60 **MODULI** (materie come "Chimica degli Alimenti", "Sicurezza Alimentare", ecc.)
+- Dal punto di vista studente è un **CORSO** di formazione con 20 posti disponibili
+
 ## Struttura Database
 
 ### Gerarchia Principale
 ```
 FONTE_FINANZIAMENTO (FSE, PNRR, MIM)
-    └── PROGETTO
-        └── AVVISO (bando pubblicato)
-            └── MODULO (= corso = materia)
-                ├── ISTANZA (domande docenti)
-                ├── ASSEGNAZIONE → CONTRATTO → PAGAMENTO
-                ├── CALENDARIO → PRESENZA_ALLIEVO
-                ├── ISCRIZIONE (allievi)
+    └── PROGETTO (= "corso" per studenti)
+        └── AVVISO (bando selezione docenti)
+            └── MODULO (= materia/insegnamento)
+                ├── ISTANZA (candidature docenti)
+                ├── ASSEGNAZIONE (esiti CTS) → CONTRATTO → PAGAMENTO
+                ├── CALENDARIO (lezioni) → PRESENZA_ALLIEVO
+                ├── ISCRIZIONE (studenti)
                 └── VALUTAZIONE_DOCENTE
 ```
 
@@ -117,15 +134,15 @@ FONTE_FINANZIAMENTO (FSE, PNRR, MIM)
 | sede | id | Sedi operative |
 | utente | id | Utenti sistema (login) |
 | tipo_documento | id | Tipologie documenti |
-| progetto | id | Progetti finanziati |
-| avviso | id | Bandi/avvisi pubblicati |
-| **docente** | **codice_fiscale** | Docenti (PK = CF) |
-| **allievo** | **codice_fiscale** | Allievi (PK = CF) |
-| modulo | id | Corsi/materie |
+| progetto | id | Progetti finanziati ("corsi" per studenti) |
+| avviso | id | Bandi/avvisi selezione docenti |
+| **docente** | **codice_fiscale** | Docenti (PK = CF, campo `provenienza`: TP/RU) |
+| **allievo** | **codice_fiscale** | Allievi/Studenti (PK = CF) |
+| modulo | id | Materie/Insegnamenti del progetto |
 | documentazione | id | Documenti docenti/allievi |
-| istanza | id | Domande presentate |
-| assegnazione | id | Assegnazioni CTS |
-| contratto | id | Contratti (CoCoCo/P.IVA) |
+| istanza | id | Candidature docenti (campo `esito_cts`) |
+| assegnazione | id | Assegnazioni deliberate da CTS |
+| contratto | id | Contratti (CoCoCo/P.IVA, date lezioni) |
 | calendario | id | Lezioni programmate |
 | iscrizione | id | Iscrizioni allievi |
 | presenza_allievo | id | Presenze per lezione |
@@ -192,6 +209,42 @@ AuditLog::getRecordHistory('docente', 'RSSMRA80A01F205X');
 AuditLog::getUserActivity($userId);
 ```
 
+#### Campi Specifici per Gestione Docenti (Feb 2025)
+
+**Tabella `docente`**:
+- `provenienza` ENUM('TP', 'RU'):
+  - **TP** = Tipo Professionista (mondo del lavoro) → Compenso PNRR: €60/ora
+  - **RU** = Ricercatore Universitario → Compenso PNRR: €70/ora
+  - Usato per differenziare automaticamente i compensi in base al tipo di progetto
+
+**Tabella `contratto`**:
+- `data_inizio_lezioni` DATE: Data effettiva inizio lezioni (diversa da `data_inizio` contrattuale)
+- `data_fine_lezioni` DATE: Data effettiva/prevista fine lezioni
+  - Utile per alert automatici di scadenza
+  - Permette di sapere quando un docente termina per riassegnarlo
+  - Necessario per rendicontazione precisa
+
+**Tabella `istanza`** (candidature docenti):
+- `esito_cts` ENUM('assegnato', 'idoneo', 'non_idoneo'):
+  - **assegnato**: Docente selezionato dalla Commissione Tecnico Scientifica per l'incarico
+  - **idoneo**: Valutato positivamente ma non assegnato → entra in **long list** per future chiamate
+  - **non_idoneo**: Valutazione negativa → importante per storicità (tracciare chi è stato bocciato in passato)
+  - Campo separato da `status` che gestisce il workflow della domanda
+
+**Tabella `progetto`**:
+- `numero_studenti` INT: Numero studenti previsti/iscritti (default 20)
+
+**Workflow valutazione CTS** (Commissione Tecnico Scientifica):
+```
+1. Docente presenta ISTANZA per MODULO in un AVVISO
+2. CTS valuta curriculum e titoli → assegna punteggi
+3. CTS delibera esito_cts:
+   - "assegnato" → genera ASSEGNAZIONE → CONTRATTO
+   - "idoneo" → docente in long list per futuri incarichi
+   - "non_idoneo" → candidatura respinta (tracciato in storico)
+4. Sistema pubblica solo gli assegnatari (non gli idonei)
+```
+
 ## Linee Guida CRUD
 
 **IMPORTANTE**: Prima di creare qualsiasi pagina CRUD, leggere `docs/CRUD_GUIDELINES.md`
@@ -250,9 +303,21 @@ albatros-manager-yii2/
 │   └── site/
 │       ├── index.php                 # Dashboard con grafici
 │       └── login.php                 # Pagina login Tabler
+├── controllers/
+│   └── ImportController.php          # Controller import dati da Excel
 ├── docs/
 │   ├── schema-er.html                # Diagramma ER interattivo
-│   └── CRUD_GUIDELINES.md            # Linee guida sviluppo CRUD
+│   ├── CRUD_GUIDELINES.md            # Linee guida sviluppo CRUD
+│   ├── modifiche-database-feb-2025.md # Changelog database
+│   └── seconda riunione.txt          # Verbale riunione 16/02/2025
+├── import/
+│   ├── README.md                     # Guida import dati Excel
+│   ├── TEMPLATE_IMPORT_DATI.xlsx     # Template standardizzato
+│   ├── AGRIFOOD_AVV2_MESSINA_IMPORT.xlsx # Esempio dati reali convertiti
+│   └── ORIGINALE_Agrifood_Avv2_Messina.xlsx # File originale cliente
+├── views/
+│   └── import/
+│       └── index.php                 # Interfaccia web import Excel
 ├── web/
 │   └── assets/tabler/                # Asset Tabler (CSS, JS, fonts)
 ├── docker-compose.yml                # Configurazione Docker
@@ -336,6 +401,103 @@ class Docente extends BaseActiveRecord
 - Lingua UI: Italiano
 - Commenti codice: Italiano
 
+## Import Dati da Excel
+
+Sistema di importazione massiva di progetti, moduli e docenti da file Excel standardizzato.
+
+### File e Cartelle
+
+**Cartella `import/`** - Contiene tutti i file relativi all'import:
+- `TEMPLATE_IMPORT_DATI.xlsx` - Template Excel vuoto da compilare
+- `README.md` - Guida completa all'utilizzo del sistema import
+- File esempio e file originali clienti
+
+**Controller**: `controllers/ImportController.php`
+- `actionIndex()` - Interfaccia web upload
+- `actionUpload()` - Gestione upload e import
+- `actionDownloadTemplate()` - Download template
+
+**View**: `views/import/index.php` - Interfaccia web con:
+- Form upload file Excel
+- Validazione in modalità test (dry-run)
+- Progress bar animata
+- Visualizzazione log, errori, warning
+- Statistiche import
+
+### Template Excel (4 fogli)
+
+1. **📖 ISTRUZIONI** - Guida utente completa
+2. **ℹ️ INFO PROGETTO** - Dati progetto, avviso, sede
+3. **📚 MODULI** - Elenco moduli formativi (codice, titolo, ore, compenso, filiera)
+4. **👥 DOCENTI & ESITI** - Assegnazioni, idonei, non idonei, esiti CTS
+
+### Workflow Import
+
+```bash
+# 1. Utente scarica template via web
+https://localhost:8000/import/download-template
+
+# 2. Compila Excel seguendo istruzioni
+
+# 3. Carica via web e valida (dry-run)
+# Sistema verifica:
+- Campi obbligatori
+- Formati date/numeri
+- Provenienza (TP/RU)
+- Riferimenti modulo
+
+# 4. Conferma e salva
+# Sistema crea in transazione:
+- FonteFinanziamento, Sede, Progetto, Avviso
+- Moduli (con campo filiera opzionale)
+- Docenti (genera CF fittizio se mancante)
+- Istanze con esito_cts (assegnato/idoneo/non_idoneo)
+- Assegnazioni e Contratti (per assegnatari)
+```
+
+### Casi Speciali Supportati
+
+**Rinunce**: Aggiungere `(Rinuncia)` dopo nome assegnatario
+```
+ASSEGNATARIO: Rossi Mario (Rinuncia)
+```
+Sistema crea istanza ma non assegnazione/contratto.
+
+**Compensi variabili**: Specificare importo esatto
+```
+COMPENSO_ORARIO: 65
+```
+Sovrascrive default TP=60€, RU=70€.
+
+**Moduli senza assegnatari**: Lasciare vuoto assegnatario
+```
+ASSEGNATARIO:
+IDONEI: Bianchi Luigi, Verdi Giuseppe
+```
+Crea solo istanze per idonei.
+
+**Più docenti per stesso modulo**: Ripetere CODICE_MODULO
+```
+MOD-001 | Rossi Mario   | | ...
+MOD-001 | | Bianchi Luigi | ...  <- stesso modulo, altro docente
+MOD-001 | | Verdi Anna    | ...  <- stesso modulo, altro docente
+```
+**IMPORTANTE**: Ogni riga deve avere CODICE_MODULO valorizzato (nessuna riga di continuazione con celle vuote).
+
+### Librerie Richieste
+
+```bash
+# PhpSpreadsheet per lettura/scrittura Excel
+composer require phpoffice/phpspreadsheet
+```
+
+### File Utili
+
+- `import/README.md` - Documentazione completa import
+- `docs/modifiche-database-feb-2025.md` - Changelog schema database
+- `/tmp/create_excel_template.py` - Script Python generazione template
+- `/tmp/converti_dati_reali_in_template_v2.py` - Script conversione formati legacy
+
 ## Documentazione
 
 **IMPORTANTE**: Usare sempre Context7 per trovare la documentazione aggiornata dei framework:
@@ -359,7 +521,11 @@ Prima di implementare funzionalità, cercare sempre esempi e best practices nell
 ## Link Utili
 
 - Schema ER: `docs/schema-er.html`
+- Guida Import: `import/README.md`
+- Changelog DB: `docs/modifiche-database-feb-2025.md`
+- CRUD Guidelines: `docs/CRUD_GUIDELINES.md`
 - phpMyAdmin: http://localhost:8080
 - App: http://localhost:8000
+- Import Dati: http://localhost:8000/import
 - Tabler Icons: https://tabler.io/icons
 - Tabler Docs: https://tabler.io/docs

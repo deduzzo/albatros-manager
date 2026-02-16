@@ -12,6 +12,8 @@ use app\models\Docente;
 use app\models\Avviso;
 use app\models\Modulo;
 use app\models\Istanza;
+use app\models\Assegnazione;
+use app\models\Contratto;
 use app\models\IstanzaTag;
 use app\models\IstanzaDocumento;
 use app\models\IstanzaSnapshot;
@@ -42,7 +44,7 @@ class DocenteAreaController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -75,6 +77,21 @@ class DocenteAreaController extends Controller
 
         // Moduli aperti per iscrizione
         $moduliAperti = Modulo::findApertiPerIscrizioni()->count();
+
+        // Contratti attivi
+        $contrattiAttivi = Contratto::find()
+            ->innerJoin('assegnazione a', 'a.id = contratto.assegnazione_id')
+            ->where(['a.docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['contratto.status' => Contratto::STATUS_ATTIVO])
+            ->all();
+
+        // Contratti in scadenza (lezioni che terminano entro 14 giorni)
+        $contrattiInScadenza = [];
+        foreach ($contrattiAttivi as $contratto) {
+            if ($contratto->isLezioniInScadenza(14)) {
+                $contrattiInScadenza[] = $contratto;
+            }
+        }
 
         return $this->render('index', [
             'docente' => $docente,

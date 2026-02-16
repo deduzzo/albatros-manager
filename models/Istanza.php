@@ -17,6 +17,7 @@ use app\components\base\BaseActiveRecord;
  * @property float|null $punteggio_totale
  * @property int|null $posizione_graduatoria
  * @property string $status
+ * @property string|null $esito_cts
  * @property string|null $note_valutazione
  * @property string|null $note
  * @property string $created_at
@@ -39,6 +40,11 @@ class Istanza extends BaseActiveRecord
     const STATUS_RIFIUTATA = 'rifiutata';
     const STATUS_RINUNCIA = 'rinuncia';
 
+    // Costanti esito CTS (Commissione Tecnico Scientifica)
+    const ESITO_CTS_ASSEGNATO = 'assegnato';
+    const ESITO_CTS_IDONEO = 'idoneo';
+    const ESITO_CTS_NON_IDONEO = 'non_idoneo';
+
     public static function tableName()
     {
         return '{{%istanza}}';
@@ -54,6 +60,7 @@ class Istanza extends BaseActiveRecord
             [['note_valutazione', 'note'], 'string'],
             [['docente_codice_fiscale'], 'string', 'max' => 16],
             [['status'], 'in', 'range' => ['presentata', 'in_valutazione', 'valutata', 'accettata', 'rifiutata', 'rinuncia']],
+            [['esito_cts'], 'in', 'range' => [self::ESITO_CTS_ASSEGNATO, self::ESITO_CTS_IDONEO, self::ESITO_CTS_NON_IDONEO]],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
         ];
     }
@@ -71,6 +78,7 @@ class Istanza extends BaseActiveRecord
             'punteggio_totale' => 'Punteggio Totale',
             'posizione_graduatoria' => 'Posizione',
             'status' => 'Stato',
+            'esito_cts' => 'Esito CTS',
             'note_valutazione' => 'Note Valutazione',
             'note' => 'Note',
         ];
@@ -159,5 +167,83 @@ class Istanza extends BaseActiveRecord
             }
         }
         return $count;
+    }
+
+    /**
+     * Restituisce le opzioni per il dropdown esito CTS
+     * @return array
+     */
+    public static function getEsitoCtsLabels()
+    {
+        return [
+            self::ESITO_CTS_ASSEGNATO => 'Assegnato',
+            self::ESITO_CTS_IDONEO => 'Idoneo',
+            self::ESITO_CTS_NON_IDONEO => 'Non Idoneo',
+        ];
+    }
+
+    /**
+     * Restituisce la label dell'esito CTS
+     * @return string|null
+     */
+    public function getEsitoCtsLabel()
+    {
+        return self::getEsitoCtsLabels()[$this->esito_cts] ?? null;
+    }
+
+    /**
+     * Restituisce il badge HTML per l'esito CTS
+     * @return string
+     */
+    public function getEsitoCts BadgeHtml()
+    {
+        if (!$this->esito_cts) {
+            return '<span class="badge bg-secondary">Non valutato</span>';
+        }
+
+        $class = match ($this->esito_cts) {
+            self::ESITO_CTS_ASSEGNATO => 'bg-success',
+            self::ESITO_CTS_IDONEO => 'bg-info',
+            self::ESITO_CTS_NON_IDONEO => 'bg-danger',
+            default => 'bg-secondary',
+        };
+
+        return '<span class="badge ' . $class . '">' . $this->getEsitoCtsLabel() . '</span>';
+    }
+
+    /**
+     * Verifica se il docente è stato assegnato
+     * @return bool
+     */
+    public function isAssegnato()
+    {
+        return $this->esito_cts === self::ESITO_CTS_ASSEGNATO;
+    }
+
+    /**
+     * Verifica se il docente è idoneo (in long list)
+     * @return bool
+     */
+    public function isIdoneo()
+    {
+        return $this->esito_cts === self::ESITO_CTS_IDONEO;
+    }
+
+    /**
+     * Verifica se il docente è non idoneo
+     * @return bool
+     */
+    public function isNonIdoneo()
+    {
+        return $this->esito_cts === self::ESITO_CTS_NON_IDONEO;
+    }
+
+    /**
+     * Verifica se il docente è nella long list (assegnato o idoneo)
+     * @return bool
+     */
+    public function isInLongList()
+    {
+        return in_array($this->esito_cts, [self::ESITO_CTS_ASSEGNATO, self::ESITO_CTS_IDONEO]);
     }
 }

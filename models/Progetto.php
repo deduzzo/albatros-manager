@@ -15,6 +15,7 @@ use yii\db\Expression;
  * @property string $titolo
  * @property string|null $descrizione
  * @property float|null $budget_totale
+ * @property int|null $numero_studenti
  * @property string|null $data_inizio
  * @property string|null $data_fine
  * @property string $status
@@ -45,9 +46,10 @@ class Progetto extends BaseActiveRecord
     {
         return [
             [['fonte_finanziamento_id', 'codice_progetto', 'titolo'], 'required'],
-            [['fonte_finanziamento_id', 'conto_corrente_id'], 'integer'],
+            [['fonte_finanziamento_id', 'conto_corrente_id', 'numero_studenti'], 'integer'],
             [['descrizione', 'note'], 'string'],
             [['budget_totale'], 'number'],
+            [['numero_studenti'], 'integer', 'min' => 1, 'max' => 100],
             [['data_inizio', 'data_fine'], 'date', 'format' => 'php:Y-m-d'],
             [['codice_progetto'], 'string', 'max' => 100],
             [['titolo'], 'string', 'max' => 255],
@@ -69,6 +71,7 @@ class Progetto extends BaseActiveRecord
             'titolo' => 'Titolo',
             'descrizione' => 'Descrizione',
             'budget_totale' => 'Budget Totale',
+            'numero_studenti' => 'Numero Studenti',
             'data_inizio' => 'Data Inizio',
             'data_fine' => 'Data Fine',
             'status' => 'Stato',

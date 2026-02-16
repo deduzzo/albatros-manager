@@ -27,13 +27,29 @@ class DocenteSearch extends Docente
     public $categoria_id;
 
     /**
+     * @var string|null filtro per esito CTS (per long list)
+     */
+    public $esito_cts;
+
+    /**
+     * @var int|null filtro per numero minimo contratti
+     */
+    public $min_contratti;
+
+    /**
+     * @var float|null filtro per valutazione minima
+     */
+    public $min_valutazione;
+
+    /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['codice_fiscale', 'cognome', 'nome', 'email', 'citta', 'provincia', 'titolo_studio', 'ricerca'], 'safe'],
-            [['tag_id', 'categoria_id'], 'integer'],
+            [['codice_fiscale', 'cognome', 'nome', 'email', 'citta', 'provincia', 'titolo_studio', 'ricerca', 'provenienza', 'esito_cts'], 'safe'],
+            [['tag_id', 'categoria_id', 'min_contratti'], 'integer'],
+            [['min_valutazione'], 'number'],
         ];
     }
 
@@ -54,6 +70,9 @@ class DocenteSearch extends Docente
             'ricerca' => 'Ricerca',
             'tag_id' => 'Tag',
             'categoria_id' => 'Categoria',
+            'esito_cts' => 'Esito CTS',
+            'min_contratti' => 'Minimo Contratti',
+            'min_valutazione' => 'Valutazione Minima',
         ]);
     }
 
@@ -96,7 +115,8 @@ class DocenteSearch extends Docente
 
         // Filtri esatti
         $query->andFilterWhere([
-            'provincia' => $this->provincia,
+            'docente.provincia' => $this->provincia,
+            'docente.provenienza' => $this->provenienza,
         ]);
 
         // Filtri con LIKE
@@ -134,6 +154,94 @@ class DocenteSearch extends Docente
                 ->andWhere(['tc.categoria_id' => $this->categoria_id]);
             $query->distinct();
         }
+
+        // Filtro per esito CTS (long list: idoneo o assegnato)
+        if (!empty($this->esito_cts)) {
+            $query->innerJoin('istanza i', 'i.docente_codice_fiscale = docente.codice_fiscale')
+                ->andWhere(['i.esito_cts' => $this->esito_cts]);
+            $query->distinct();
+        }
+
+        // Filtro per numero minimo contratti
+        if ($this->min_contratti !== null && $this->min_contratti > 0) {
+            $query->innerJoin('assegnazione a', 'a.docente_codice_fiscale = docente.codice_fiscale')
+                ->innerJoin('contratto c', 'c.assegnazione_id = a.id')
+                ->groupBy('docente.codice_fiscale')
+                ->having(['>=', new Expression('COUNT(c.id)'), $this->min_contratti]);
+        }
+
+        // Filtro per valutazione minima
+        if ($this->min_valutazione !== null && $this->min_valutazione > 0) {
+            $query->innerJoin('valutazione_docente v', 'v.docente_codice_fiscale = docente.codice_fiscale')
+                ->groupBy('docente.codice_fiscale')
+                ->having(['>=', new Expression('AVG(v.punteggio_globale)'), $this->min_valutazione]);
+        }
+
+        return $dataProvider;
+    }
+
+    /**
+     * Cerca docenti nella long list (idonei o assegnati)
+     * per un determinato tipo di modulo/competenza
+     *
+     * @param array $params Parametri di ricerca
+     * @param int|null $moduloId Filtra per modulo specifico
+     * @return ActiveDataProvider
+     */
+    public function searchLongList($params, $moduloId = null)
+    {
+        $query = Docente::find()
+            ->innerJoin('istanza i', 'i.docente_codice_fiscale = docente.codice_fiscale')
+            ->where(['i.esito_cts' => [Istanza::ESITO_CTS_ASSEGNATO, Istanza::ESITO_CTS_IDONEO]])
+            ->with(['assegnazioni', 'valutazioni']);
+
+        // Filtra per modulo specifico se richiesto
+        if ($moduloId) {
+            $query->andWhere(['i.modulo_id' => $moduloId]);
+        }
+
+        // Aggiungi conteggio contratti come subquery
+        $query->addSelect([
+            'docente.*',
+            'num_contratti' => new Expression('(SELECT COUNT(*) FROM assegnazione a
+                INNER JOIN contratto c ON c.assegnazione_id = a.id
+                WHERE a.docente_codice_fiscale = docente.codice_fiscale)'),
+        ]);
+
+        $query->distinct();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['num_contratti' => SORT_ASC, 'cognome' => SORT_ASC],
+                'attributes' => [
+                    'cognome',
+                    'nome',
+                    'provenienza',
+                    'citta',
+                    'num_contratti' => [
+                        'asc' => ['num_contratti' => SORT_ASC],
+                        'desc' => ['num_contratti' => SORT_DESC],
+                        'label' => 'N. Contratti',
+                    ],
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 50,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        // Applica filtri aggiuntivi
+        $query->andFilterWhere(['docente.provenienza' => $this->provenienza])
+            ->andFilterWhere(['like', 'cognome', $this->cognome])
+            ->andFilterWhere(['like', 'nome', $this->nome])
+            ->andFilterWhere(['like', 'citta', $this->citta]);
 
         return $dataProvider;
     }
