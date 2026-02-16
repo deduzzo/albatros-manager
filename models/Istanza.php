@@ -195,7 +195,7 @@ class Istanza extends BaseActiveRecord
      * Restituisce il badge HTML per l'esito CTS
      * @return string
      */
-    public function getEsitoCts BadgeHtml()
+    public function getEsitoCtsBadgeHtml()
     {
         if (!$this->esito_cts) {
             return '<span class="badge bg-secondary">Non valutato</span>';
