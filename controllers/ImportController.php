@@ -54,7 +54,7 @@ class ImportController extends Controller
      */
     public function actionUpload()
     {
-        $uploadedFile = UploadedFile::getInstanceByName('file');
+        $uploadedFile = UploadedFile::getInstanceByName('excel_file');
 
         if (!$uploadedFile) {
             return $this->asJson(['success' => false, 'error' => 'Nessun file caricato']);
