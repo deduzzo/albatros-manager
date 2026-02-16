@@ -164,7 +164,12 @@ class ImportController extends Controller
 
             $cells = [];
             foreach ($cellIterator as $cell) {
-                $cells[] = $cell->getValue();
+                $value = $cell->getValue();
+                // Converti RichText in stringa
+                if (is_object($value)) {
+                    $value = $value->__toString();
+                }
+                $cells[] = $value;
             }
 
             if (!empty($cells[0])) {
@@ -195,7 +200,12 @@ class ImportController extends Controller
 
             $cells = [];
             foreach ($cellIterator as $cell) {
-                $cells[] = $cell->getValue();
+                $value = $cell->getValue();
+                // Converti RichText in stringa
+                if (is_object($value)) {
+                    $value = $value->__toString();
+                }
+                $cells[] = $value;
             }
 
             if ($rowIndex === 1) {
@@ -237,7 +247,12 @@ class ImportController extends Controller
 
             $cells = [];
             foreach ($cellIterator as $cell) {
-                $cells[] = $cell->getValue();
+                $value = $cell->getValue();
+                // Converti RichText in stringa
+                if (is_object($value)) {
+                    $value = $value->__toString();
+                }
+                $cells[] = $value;
             }
 
             if ($rowIndex === 1) {
