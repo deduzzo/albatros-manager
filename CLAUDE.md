@@ -275,30 +275,40 @@ FONTE_FINANZIAMENTO (FSE, PNRR, MIM)
                 └── VALUTAZIONE_DOCENTE
 ```
 
-### Tabelle (21 totali)
+### Tabelle (31 totali)
 
 | Tabella | PK | Descrizione |
 |---------|-----|-------------|
 | fonte_finanziamento | id | FSE, PNRR, MIM |
 | conto_corrente | id | Conti bancari progetti |
 | sede | id | Sedi operative |
-| utente | id | Utenti sistema (login) |
+| utente | id | Utenti sistema (login admin) |
 | tipo_documento | id | Tipologie documenti |
 | progetto | id | Progetti finanziati ("corsi" per studenti) |
 | avviso | id | Bandi/avvisi selezione docenti |
+| avviso_documento_tipo | id | Tipi documento richiesti per bando |
 | **docente** | **codice_fiscale** | Docenti (PK = CF, campo `provenienza`: TP/RU) |
+| docente_auth | id | Autenticazione area docenti (CF + password) |
+| docente_tag | id | Tag/competenze associate al profilo docente |
 | **allievo** | **codice_fiscale** | Allievi/Studenti (PK = CF) |
 | modulo | id | Materie/Insegnamenti del progetto |
 | documentazione | id | Documenti docenti/allievi |
 | istanza | id | Candidature docenti (campo `esito_cts`) |
+| istanza_documento | id | Documenti caricati nelle candidature |
+| istanza_tag | id | Tag/competenze dichiarate in candidatura |
+| istanza_snapshot | id | Snapshot dati docente al momento dell'assegnazione |
+| storico_esito | id | Storico esiti CTS per istanza |
 | assegnazione | id | Assegnazioni deliberate da CTS |
 | contratto | id | Contratti (CoCoCo/P.IVA, date lezioni) |
 | calendario | id | Lezioni programmate |
 | iscrizione | id | Iscrizioni allievi |
 | presenza_allievo | id | Presenze per lezione |
-| pagamento | id | Pagamenti docenti |
+| pagamento | id | Pagamenti docenti (con ore_extra workflow) |
+| rendicontazione_ore | id | Ore giornaliere rendicontate dai docenti |
 | valutazione_docente | id | Valutazioni anonime |
-| audit_log | id | Log modifiche (sistema) |
+| tag_categoria | id | Categorie per tag competenze |
+| tag_curriculum | id | Tag competenze per curriculum docenti |
+| audit_log | id | Log modifiche (sistema, NON soft delete) |
 | migration | version | Yii2 migration tracking |
 
 ### Funzionalità Trasversali
@@ -435,26 +445,68 @@ albatros-manager-yii2/
 ├── config/
 │   ├── db.php                        # Configurazione database
 │   └── web.php                       # Configurazione app
-├── migrations/                        # 21 migration files
+├── migrations/                        # 40 migration files
 ├── models/
 │   ├── User.php                      # Model utente (autenticazione DB)
 │   ├── LoginForm.php                 # Form login
-│   ├── AuditLog.php                  # Model audit log
+│   ├── DocenteAuth.php               # Model autenticazione docenti
+│   ├── AuditLog.php                  # Model audit log (NON estende BaseActiveRecord)
 │   ├── FonteFinanziamento.php        # Model fonte finanziamento
-│   ├── Sede.php                      # Model sede
+│   ├── Sede.php, ContoCorrente.php   # Model standalone
+│   ├── Progetto.php, Avviso.php, Modulo.php # Gerarchia progetti
+│   ├── Docente.php, Allievo.php      # Persone (PK = codice_fiscale)
+│   ├── Istanza.php                   # Candidature con esito_cts + snapshot + tag
+│   ├── Assegnazione.php, Contratto.php, Pagamento.php # Catena selezione
+│   ├── RendicontazioneOre.php        # Ore docenti con workflow approvazione
+│   ├── TagCategoria.php, TagCurriculum.php # Sistema tag competenze
+│   ├── IstanzaDocumento.php, IstanzaTag.php, IstanzaSnapshot.php # Dati istanza
+│   ├── StoricoEsito.php              # Timeline esiti CTS
 │   └── *Search.php                   # Model di ricerca per GridView
 ├── views/
 │   ├── layouts/
 │   │   ├── main.php                  # Layout principale Tabler
 │   │   ├── login.php                 # Layout pagina login (no menu)
+│   │   ├── docente.php               # Layout area docenti (separato)
+│   │   ├── studenti-demo.php         # Layout demo studenti
 │   │   ├── header.php                # Header con notifiche/profilo
-│   │   ├── menu.php                  # Menu navigazione
+│   │   ├── menu.php                  # Menu navigazione sidebar
 │   │   └── footer.php                # Footer
-│   └── site/
-│       ├── index.php                 # Dashboard con grafici
-│       └── login.php                 # Pagina login Tabler
+│   ├── site/
+│   │   ├── index.php                 # Dashboard con grafici + attivita reali
+│   │   └── login.php                 # Pagina login Tabler
+│   ├── {entita}/                     # CRUD views per ogni entita (index, view, create, update, _form)
+│   ├── docente-area/                 # Views portale docenti
+│   ├── audit-log/                    # Views visualizzazione audit
+│   ├── rendicontazione-ore/          # Views ore: index, view, dashboard, riepilogo
+│   └── report/                       # Views report e statistiche
 ├── controllers/
-│   └── ImportController.php          # Controller import dati da Excel
+│   ├── SiteController.php            # Dashboard (dati reali da audit_log)
+│   ├── ImportController.php          # Import dati da Excel
+│   ├── FonteFinanziamentoController.php # CRUD fonte finanziamento
+│   ├── SedeController.php            # CRUD sedi
+│   ├── ContoCorrenteController.php   # CRUD conti correnti
+│   ├── TipoDocumentoController.php   # CRUD tipi documento
+│   ├── ProgettoController.php        # CRUD progetti + rendicontazione
+│   ├── AvvisoController.php          # CRUD avvisi/bandi + documenti
+│   ├── ModuloController.php          # CRUD moduli + rendicontazione
+│   ├── DocenteController.php         # CRUD docenti + ricerca per tag
+│   ├── AllievoController.php         # CRUD allievi
+│   ├── IstanzaController.php         # CRUD istanze + AJAX moduli + documenti
+│   ├── AssegnazioneController.php    # CRUD assegnazioni
+│   ├── ContrattoController.php       # CRUD contratti
+│   ├── PagamentoController.php       # CRUD pagamenti + liquidazione massiva
+│   ├── CalendarioController.php      # CRUD calendario lezioni
+│   ├── IscrizioneController.php      # CRUD iscrizioni allievi
+│   ├── PresenzaAllievoController.php # CRUD presenze
+│   ├── DocumentazioneController.php  # CRUD documentazione
+│   ├── ValutazioneDocenteController.php # CRUD valutazioni
+│   ├── RendicontazioneOreController.php # Ore docenti + dashboard + approvazione
+│   ├── AuditLogController.php        # Visualizzazione audit log
+│   ├── ReportController.php          # Report e statistiche
+│   ├── TagCategoriaController.php    # CRUD categorie tag
+│   ├── TagCurriculumController.php   # CRUD tag curriculum
+│   ├── DocenteAreaController.php     # Portale riservato docenti
+│   └── DemoStudentiController.php    # Demo area studenti
 ├── docs/
 │   ├── schema-er.html                # Diagramma ER interattivo
 │   ├── CRUD_GUIDELINES.md            # Linee guida sviluppo CRUD
@@ -465,9 +517,6 @@ albatros-manager-yii2/
 │   ├── TEMPLATE_IMPORT_DATI.xlsx     # Template standardizzato
 │   ├── AGRIFOOD_AVV2_MESSINA_IMPORT.xlsx # Esempio dati reali convertiti
 │   └── ORIGINALE_Agrifood_Avv2_Messina.xlsx # File originale cliente
-├── views/
-│   └── import/
-│       └── index.php                 # Interfaccia web import Excel
 ├── web/
 │   └── assets/tabler/                # Asset Tabler (CSS, JS, fonts)
 ├── docker-compose.yml                # Configurazione Docker
@@ -685,6 +734,57 @@ Avvia il team di agenti come da docs/AGENT_TEAM_CONFIG.md
 | **controller-agent** | Controller CRUD, logica, routing | 2 |
 | **ui-agent** | Design views, conformita Tabler/CRUD Guidelines | 3 |
 | **tester-agent** | QA via Chrome, verifica errori PHP/JS | 4 (o on-demand) |
+
+## Liquidazione Massiva Pagamenti
+
+Funzionalita per creare pagamenti in blocco per tutti i contratti con saldo residuo > 0.
+
+**UI**: Pulsante "Liquidazione Massiva" nella toolbar di `views/pagamento/index.php`
+- Modal con tabella contratti caricata via AJAX (`actionContrattiConSaldo`)
+- Checkbox multi-selezione con select/deselect all
+- Riepilogo in tempo reale (numero contratti + totale saldo)
+- Dropdown tipo pagamento (saldo/acconto/rata)
+- Esecuzione via AJAX POST (`actionLiquidaMassiva`)
+- Calcolo automatico ritenute proporzionali per ogni contratto
+
+**Endpoint**:
+- `GET /pagamento/contratti-con-saldo` → JSON lista contratti con saldo > 0
+- `POST /pagamento/liquida-massiva` → Crea pagamenti in transazione DB
+
+## Audit Log (Visualizzazione)
+
+**Controller**: `AuditLogController` con index + view
+**Views**: `views/audit-log/index.php`, `views/audit-log/view.php`
+**Dashboard**: `views/site/index.php` mostra le ultime 8 attivita reali da `audit_log`
+
+**NOTA**: `AuditLog` model NON estende `BaseActiveRecord` (evita loop infinito di log).
+`AuditLogBehavior` salva i nomi tabella puliti (senza `{{%...}}`).
+
+## Report e Statistiche
+
+**Controller**: `ReportController`
+**Views**: `views/report/statistiche.php`, `views/report/export.php`
+
+## Tag Curriculum e Categorie
+
+Sistema di tagging per competenze docenti.
+
+**Tabelle**: `tag_categoria` → `tag_curriculum` → `docente_tag` (profilo) / `istanza_tag` (candidatura)
+**Controller**: `TagCategoriaController`, `TagCurriculumController`
+**Views**: CRUD complete in `views/tag-categoria/` e `views/tag-curriculum/`
+
+**Promozione tag**: I tag dichiarati in una candidatura (`istanza_tag`) possono essere promossi al profilo docente (`docente_tag`) dall'admin tramite `IstanzaController::actionPromuoviTag()`.
+
+## Bug Fix Noti (Feb 2026)
+
+| Bug | Fix | File |
+|-----|-----|------|
+| `AuditLog::getUser()` usava `Utente::class` inesistente | Corretto in `User::class` | `models/AuditLog.php` |
+| Audit log salvava nomi tabella raw `{{%tabella}}` | `preg_replace` per pulire | `components/behaviors/AuditLogBehavior.php` |
+| `IstanzaDocumento` default `avviso_documento_tipo_id = 0` violava FK | Cambiato default a `null` | `models/IstanzaDocumento.php` |
+| `valutazione_docente` mancava colonna `updated_at` | Aggiunta via migration | `migrations/m260217_115011_*` |
+| Dashboard "Attivita Recenti" con dati hardcoded finti | Query reale da `audit_log` | `controllers/SiteController.php`, `views/site/index.php` |
+| `joinWith()` + SoftDeleteTrait causava conflitti alias | Usare `leftJoin` diretto | Pattern documentato in Convenzioni |
 
 ## Link Utili
 
