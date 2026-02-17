@@ -33,8 +33,9 @@ class IstanzaDocumento extends ActiveRecord
     public function rules()
     {
         return [
-            [['istanza_id', 'avviso_documento_tipo_id', 'nome_file_originale', 'nome_file_salvato', 'path', 'mime_type', 'dimensione_bytes'], 'required'],
+            [['istanza_id', 'nome_file_originale', 'nome_file_salvato', 'path', 'mime_type', 'dimensione_bytes'], 'required'],
             [['istanza_id', 'avviso_documento_tipo_id', 'dimensione_bytes', 'created_by'], 'integer'],
+            [['avviso_documento_tipo_id'], 'default', 'value' => null],
             [['nome_file_originale'], 'string', 'max' => 255],
             [['nome_file_salvato', 'mime_type'], 'string', 'max' => 100],
             [['path'], 'string', 'max' => 255],

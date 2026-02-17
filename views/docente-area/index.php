@@ -8,6 +8,9 @@ use yii\helpers\Url;
 /* @var $istanzeCount int */
 /* @var $bandiAperti int */
 /* @var $moduliAperti int */
+/* @var $assegnazioniAttive int */
+/* @var $oreTotaliApprovate float */
+/* @var $oreInAttesa float */
 
 $this->title = 'Dashboard';
 ?>
@@ -18,7 +21,7 @@ $this->title = 'Dashboard';
         <div class="page-header d-print-none mb-4">
             <div class="row align-items-center">
                 <div class="col-auto">
-                    <span class="avatar avatar-lg bg-primary-lt">
+                    <span class="avatar avatar-lg bg-blue-lt">
                         <i class="ti ti-user"></i>
                     </span>
                 </div>
@@ -75,6 +78,37 @@ $this->title = 'Dashboard';
             </div>
         </div>
 
+        <!-- Statistiche Rendicontazione Ore -->
+        <?php if (isset($assegnazioniAttive) && $assegnazioniAttive > 0): ?>
+        <div class="row row-deck row-cards mb-4">
+            <div class="col-sm-6 col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="subheader">Le mie assegnazioni</div>
+                            <div class="ms-auto">
+                                <a href="<?= Url::to(['le-mie-assegnazioni']) ?>" class="text-decoration-none">
+                                    Gestisci <i class="ti ti-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="h1 mb-0"><?= $assegnazioniAttive ?></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="subheader">Ore da validare</div>
+                        </div>
+                        <div class="h1 mb-0 <?= $oreInAttesa > 0 ? 'text-warning' : 'text-muted' ?>"><?= number_format($oreInAttesa ?? 0, 1, ',', '.') ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Azioni rapide -->
         <div class="row row-cards">
             <div class="col-lg-6">
@@ -104,6 +138,18 @@ $this->title = 'Dashboard';
                                 </div>
                                 <i class="ti ti-chevron-right ms-auto"></i>
                             </a>
+                            <?php if (isset($assegnazioniAttive) && $assegnazioniAttive > 0): ?>
+                            <a href="<?= Url::to(['le-mie-assegnazioni']) ?>" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <span class="avatar bg-cyan-lt me-3">
+                                    <i class="ti ti-clock"></i>
+                                </span>
+                                <div>
+                                    <strong>Rendicontazione Ore</strong>
+                                    <div class="text-secondary small">Gestisci le ore delle tue assegnazioni</div>
+                                </div>
+                                <i class="ti ti-chevron-right ms-auto"></i>
+                            </a>
+                            <?php endif; ?>
                             <a href="<?= Url::to(['profilo']) ?>" class="list-group-item list-group-item-action d-flex align-items-center">
                                 <span class="avatar bg-yellow-lt me-3">
                                     <i class="ti ti-user"></i>

@@ -1,15 +1,16 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use app\components\widgets\AppActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Docente */
-/* @var $form yii\widgets\ActiveForm */
+/* @var $form app\components\widgets\AppActiveForm */
 ?>
 
 <div class="docente-form">
-    <?php $form = ActiveForm::begin([
+    <?php $form = AppActiveForm::begin([
         'options' => ['class' => 'card'],
     ]); ?>
 
@@ -43,6 +44,36 @@ use yii\widgets\ActiveForm;
                     'maxlength' => true,
                     'placeholder' => 'Mario',
                 ])->label('Nome <span class="text-danger">*</span>') ?>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <?= Html::activeCheckbox($model, 'codice_fiscale_validato', [
+                            'class' => 'form-check-input',
+                            'label' => false,
+                            'id' => 'cf-validato-switch',
+                        ]) ?>
+                        <label class="form-check-label" for="cf-validato-switch">
+                            CF Validato
+                            <span id="cf-status-badge">
+                            <?php if ($model->codice_fiscale_validato): ?>
+                                <span class="badge bg-green text-green-fg ms-1"><i class="ti ti-check"></i></span>
+                            <?php else: ?>
+                                <span class="badge bg-orange text-orange-fg ms-1"><i class="ti ti-alert-triangle"></i></span>
+                            <?php endif; ?>
+                            </span>
+                        </label>
+                    </div>
+                    <?php if (!$model->isNewRecord): ?>
+                    <button type="button" id="btn-verifica-cf" class="btn btn-sm btn-outline-primary">
+                        <i class="ti ti-shield-check me-1"></i> Verifica CF
+                    </button>
+                    <span id="cf-verifica-result" class="ms-2"></span>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 
@@ -168,5 +199,49 @@ use yii\widgets\ActiveForm;
         <?= Html::submitButton('<i class="ti ti-check me-1"></i> Salva', ['class' => 'btn btn-success']) ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
+    <?php AppActiveForm::end(); ?>
 </div>
+
+<?php if (!$model->isNewRecord): ?>
+<?php
+$verificaUrl = Url::to(['valida-cf', 'id' => $model->codice_fiscale]);
+$js = <<<JS
+// Aggiorna badge stato quando il toggle cambia
+$('#cf-validato-switch').on('change', function() {
+    if ($(this).is(':checked')) {
+        $('#cf-status-badge').html('<span class="badge bg-green text-green-fg ms-1"><i class="ti ti-check"></i></span>');
+    } else {
+        $('#cf-status-badge').html('<span class="badge bg-orange text-orange-fg ms-1"><i class="ti ti-alert-triangle"></i></span>');
+    }
+});
+
+$('#btn-verifica-cf').on('click', function() {
+    var btn = $(this);
+    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Verifica in corso...');
+    $.ajax({
+        url: '{$verificaUrl}',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            if (data.success) {
+                if (data.valido) {
+                    $('#cf-verifica-result').html('<span class="badge bg-green text-green-fg"><i class="ti ti-check me-1"></i>Valido</span>');
+                    $('#cf-validato-switch').prop('checked', true).trigger('change');
+                } else {
+                    $('#cf-verifica-result').html('<span class="badge bg-red text-red-fg"><i class="ti ti-x me-1"></i>Non valido</span>');
+                    $('#cf-validato-switch').prop('checked', false).trigger('change');
+                }
+            }
+        },
+        error: function() {
+            $('#cf-verifica-result').html('<span class="text-danger">Errore nella verifica</span>');
+        },
+        complete: function() {
+            btn.prop('disabled', false).html('<i class="ti ti-shield-check me-1"></i> Verifica CF');
+        }
+    });
+});
+JS;
+$this->registerJs($js);
+?>
+<?php endif; ?>

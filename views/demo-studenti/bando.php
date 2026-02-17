@@ -149,7 +149,7 @@ $this->title = $bando['titolo'];
                     <div class="card-body">
                         <div class="d-flex flex-wrap gap-2">
                             <?php foreach ($bando['certificazioni'] as $cert): ?>
-                                <span class="badge bg-warning-lt fs-5 py-2 px-3">
+                                <span class="badge bg-orange-lt fs-5 py-2 px-3">
                                     <i class="ti ti-award me-1"></i><?= Html::encode($cert) ?>
                                 </span>
                             <?php endforeach; ?>
@@ -175,7 +175,7 @@ $this->title = $bando['titolo'];
                         </div>
                         <div class="mb-3">
                             <div class="text-secondary small">Scadenza Iscrizioni</div>
-                            <span class="badge bg-danger fs-5">
+                            <span class="badge bg-red text-red-fg fs-5">
                                 <i class="ti ti-calendar me-1"></i>
                                 <?= Yii::$app->formatter->asDate($bando['scadenza']) ?>
                             </span>
@@ -207,7 +207,7 @@ $this->title = $bando['titolo'];
                         <?php foreach ($bando['corsi'] as $corso): ?>
                             <?php
                             $percentuale = round(($corso['posti'] - $corso['disponibili']) / $corso['posti'] * 100);
-                            $colorePosti = $corso['disponibili'] > 10 ? 'success' : ($corso['disponibili'] > 5 ? 'warning' : 'danger');
+                            $colorePosti = $corso['disponibili'] > 10 ? 'green' : ($corso['disponibili'] > 5 ? 'orange' : 'red');
                             ?>
                             <div class="list-group-item">
                                 <div class="mb-2">

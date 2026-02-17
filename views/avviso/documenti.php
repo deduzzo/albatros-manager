@@ -63,9 +63,9 @@ $this->params['breadcrumbs'][] = 'Documenti Richiesti';
                                                 <td><?= $doc->dimensione_max_mb ?> MB</td>
                                                 <td>
                                                     <?php if ($doc->obbligatorio): ?>
-                                                        <span class="badge bg-danger">Sì</span>
+                                                        <span class="badge bg-red text-red-fg">Sì</span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-secondary">No</span>
+                                                        <span class="badge bg-default text-default-fg">No</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>

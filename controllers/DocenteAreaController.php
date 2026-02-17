@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use app\models\DocenteAuth;
@@ -14,6 +15,7 @@ use app\models\Modulo;
 use app\models\Istanza;
 use app\models\Assegnazione;
 use app\models\Contratto;
+use app\models\RendicontazioneOre;
 use app\models\IstanzaTag;
 use app\models\IstanzaDocumento;
 use app\models\IstanzaSnapshot;
@@ -31,6 +33,30 @@ class DocenteAreaController extends Controller
 {
     public $layout = 'docente';
 
+    /**
+     * Prima di ogni azione, verifica che il docente loggato abbia un profilo valido.
+     * Se l'account auth non ha un docente associato, forza il logout.
+     */
+    public function beforeAction($action)
+    {
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
+
+        // Solo per azioni protette (non login/registrazione)
+        $guestActions = ['login', 'registrazione', 'verifica-email', 'password-dimenticata', 'reset-password'];
+        if (!in_array($action->id, $guestActions) && !Yii::$app->docenteUser->isGuest) {
+            $auth = Yii::$app->docenteUser->identity;
+            if (!$auth || !$auth->docente) {
+                Yii::$app->docenteUser->logout();
+                Yii::$app->session->setFlash('error', 'Profilo docente non trovato. Accedi con un codice fiscale valido.');
+                return $this->redirect(['login'])->send() ? false : false;
+            }
+        }
+
+        return true;
+    }
+
     public function behaviors()
     {
         return [
@@ -44,7 +70,7 @@ class DocenteAreaController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -53,7 +79,7 @@ class DocenteAreaController extends Controller
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'logout' => ['POST'],
+                    'elimina-ore' => ['POST'],
                 ],
             ],
         ];
@@ -93,11 +119,38 @@ class DocenteAreaController extends Controller
             }
         }
 
+        // Assegnazioni attive del docente
+        $assegnazioniAttive = Assegnazione::find()
+            ->innerJoin('contratto c', 'c.assegnazione_id = assegnazione.id AND c.deleted_at IS NULL')
+            ->where(['assegnazione.docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['c.status' => [Contratto::STATUS_ATTIVO, Contratto::STATUS_FIRMATO]])
+            ->andWhere(['assegnazione.deleted_at' => null])
+            ->count();
+
+        // Ore totali approvate del docente
+        $oreTotaliApprovate = (float) RendicontazioneOre::find()
+            ->innerJoin('assegnazione a', 'a.id = rendicontazione_ore.assegnazione_id AND a.deleted_at IS NULL')
+            ->where(['a.docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['rendicontazione_ore.status' => RendicontazioneOre::STATUS_APPROVATO])
+            ->andWhere(['rendicontazione_ore.deleted_at' => null])
+            ->sum('rendicontazione_ore.ore') ?: 0;
+
+        // Ore in attesa di validazione
+        $oreInAttesa = (float) RendicontazioneOre::find()
+            ->innerJoin('assegnazione a', 'a.id = rendicontazione_ore.assegnazione_id AND a.deleted_at IS NULL')
+            ->where(['a.docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['rendicontazione_ore.status' => RendicontazioneOre::STATUS_INSERITO])
+            ->andWhere(['rendicontazione_ore.deleted_at' => null])
+            ->sum('rendicontazione_ore.ore') ?: 0;
+
         return $this->render('index', [
             'docente' => $docente,
             'istanzeCount' => $istanzeCount,
             'bandiAperti' => $bandiAperti,
             'moduliAperti' => $moduliAperti,
+            'assegnazioniAttive' => $assegnazioniAttive,
+            'oreTotaliApprovate' => $oreTotaliApprovate,
+            'oreInAttesa' => $oreInAttesa,
         ]);
     }
 
@@ -382,5 +435,216 @@ class DocenteAreaController extends Controller
         return $this->render('reset-password', [
             'token' => $token,
         ]);
+    }
+
+    // =========================================================================
+    // Rendicontazione Ore
+    // =========================================================================
+
+    /**
+     * Lista assegnazioni del docente con stato ore
+     */
+    public function actionLeMieAssegnazioni()
+    {
+        $docente = $this->getDocenteLoggato();
+
+        $assegnazioni = Assegnazione::find()
+            ->where(['docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['assegnazione.deleted_at' => null])
+            ->with(['modulo', 'modulo.avviso', 'contratto'])
+            ->orderBy(['data_assegnazione' => SORT_DESC])
+            ->all();
+
+        // Calcola totali per le stat cards
+        $totaleOreContrattualizzate = 0;
+        $totaleOreApprovate = 0;
+        $totaleOreDaValidare = 0;
+        foreach ($assegnazioni as $assegnazione) {
+            $totaleOreContrattualizzate += $assegnazione->getOreContrattualizzate() ?: 0;
+            $totaleOreApprovate += RendicontazioneOre::getTotaleOreApprovate($assegnazione->id);
+            $totaleOreDaValidare += RendicontazioneOre::getTotaleOreInserite($assegnazione->id);
+        }
+
+        return $this->render('le-mie-assegnazioni', [
+            'assegnazioni' => $assegnazioni,
+            'totaleAssegnazioni' => count($assegnazioni),
+            'totaleOreContrattualizzate' => $totaleOreContrattualizzate,
+            'totaleOreApprovate' => $totaleOreApprovate,
+            'totaleOreDaValidare' => $totaleOreDaValidare,
+        ]);
+    }
+
+    /**
+     * Inserimento ore giornaliere per un'assegnazione
+     */
+    public function actionInserisciOre($assegnazione_id)
+    {
+        $docente = $this->getDocenteLoggato();
+        $assegnazione = $this->findAssegnazioneDocente($assegnazione_id, $docente);
+
+        $model = new RendicontazioneOre();
+        $model->assegnazione_id = $assegnazione->id;
+        $model->status = RendicontazioneOre::STATUS_INSERITO;
+        $model->firma_digitale = 0;
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Ore inserite con successo. In attesa di validazione.');
+            return $this->redirect(['le-mie-ore', 'assegnazione_id' => $assegnazione->id]);
+        }
+
+        // Dati per la vista
+        $oreApprovate = RendicontazioneOre::getTotaleOreApprovate($assegnazione->id);
+        $oreInAttesa = RendicontazioneOre::getTotaleOreInserite($assegnazione->id);
+
+        return $this->render('inserisci-ore', [
+            'model' => $model,
+            'assegnazione' => $assegnazione,
+            'oreApprovate' => $oreApprovate,
+            'oreInAttesa' => $oreInAttesa,
+            'isModifica' => false,
+        ]);
+    }
+
+    /**
+     * Lista ore inserite per un'assegnazione
+     */
+    public function actionLeMieOre($assegnazione_id)
+    {
+        $docente = $this->getDocenteLoggato();
+        $assegnazione = $this->findAssegnazioneDocente($assegnazione_id, $docente);
+
+        $rendicontazioni = RendicontazioneOre::find()
+            ->where(['assegnazione_id' => $assegnazione->id])
+            ->orderBy(['data' => SORT_DESC])
+            ->all();
+
+        $oreApprovate = RendicontazioneOre::getTotaleOreApprovate($assegnazione->id);
+        $oreInAttesa = RendicontazioneOre::getTotaleOreInserite($assegnazione->id);
+        $oreRifiutate = (float) RendicontazioneOre::find()
+            ->where([
+                'assegnazione_id' => $assegnazione->id,
+                'status' => RendicontazioneOre::STATUS_RIFIUTATO,
+            ])
+            ->sum('ore') ?: 0;
+
+        return $this->render('le-mie-ore', [
+            'rendicontazioni' => $rendicontazioni,
+            'assegnazione' => $assegnazione,
+            'oreApprovate' => $oreApprovate,
+            'oreInAttesa' => $oreInAttesa,
+            'oreRifiutate' => $oreRifiutate,
+        ]);
+    }
+
+    /**
+     * Modifica ore (solo se status=inserito)
+     */
+    public function actionModificaOre($id)
+    {
+        $docente = $this->getDocenteLoggato();
+        $model = $this->findRendicontazioneOreDocente($id, $docente);
+
+        if ($model->status !== RendicontazioneOre::STATUS_INSERITO) {
+            throw new ForbiddenHttpException('Non puoi modificare ore gia\' approvate o rifiutate.');
+        }
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Ore modificate con successo.');
+            return $this->redirect(['le-mie-ore', 'assegnazione_id' => $model->assegnazione_id]);
+        }
+
+        $assegnazione = $model->assegnazione;
+        $oreApprovate = RendicontazioneOre::getTotaleOreApprovate($assegnazione->id);
+        $oreInAttesa = RendicontazioneOre::getTotaleOreInserite($assegnazione->id);
+
+        return $this->render('modifica-ore', [
+            'model' => $model,
+            'assegnazione' => $assegnazione,
+            'oreApprovate' => $oreApprovate,
+            'oreInAttesa' => $oreInAttesa,
+            'isModifica' => true,
+        ]);
+    }
+
+    /**
+     * Elimina ore (solo se status=inserito, solo POST)
+     */
+    public function actionEliminaOre($id)
+    {
+        $docente = $this->getDocenteLoggato();
+        $model = $this->findRendicontazioneOreDocente($id, $docente);
+
+        if ($model->status !== RendicontazioneOre::STATUS_INSERITO) {
+            throw new ForbiddenHttpException('Non puoi eliminare ore gia\' approvate o rifiutate.');
+        }
+
+        $assegnazioneId = $model->assegnazione_id;
+        $model->delete();
+
+        Yii::$app->session->setFlash('success', 'Registrazione ore eliminata.');
+        return $this->redirect(['le-mie-ore', 'assegnazione_id' => $assegnazioneId]);
+    }
+
+    // =========================================================================
+    // Metodi helper privati
+    // =========================================================================
+
+    /**
+     * Restituisce il docente attualmente loggato
+     * @return Docente
+     */
+    private function getDocenteLoggato()
+    {
+        $auth = Yii::$app->docenteUser->identity;
+        $docente = $auth ? $auth->docente : null;
+        if (!$docente) {
+            throw new NotFoundHttpException('Profilo docente non trovato per questo account.');
+        }
+        return $docente;
+    }
+
+    /**
+     * Trova un'assegnazione verificando che appartenga al docente
+     * @param int $id
+     * @param Docente $docente
+     * @return Assegnazione
+     * @throws NotFoundHttpException|ForbiddenHttpException
+     */
+    private function findAssegnazioneDocente($id, $docente)
+    {
+        $assegnazione = Assegnazione::findOne($id);
+
+        if (!$assegnazione) {
+            throw new NotFoundHttpException('Assegnazione non trovata.');
+        }
+
+        if ($assegnazione->docente_codice_fiscale !== $docente->codice_fiscale) {
+            throw new ForbiddenHttpException('Non hai accesso a questa assegnazione.');
+        }
+
+        return $assegnazione;
+    }
+
+    /**
+     * Trova una rendicontazione ore verificando che appartenga al docente
+     * @param int $id
+     * @param Docente $docente
+     * @return RendicontazioneOre
+     * @throws NotFoundHttpException|ForbiddenHttpException
+     */
+    private function findRendicontazioneOreDocente($id, $docente)
+    {
+        $model = RendicontazioneOre::findOne($id);
+
+        if (!$model) {
+            throw new NotFoundHttpException('Registrazione ore non trovata.');
+        }
+
+        $assegnazione = $model->assegnazione;
+        if (!$assegnazione || $assegnazione->docente_codice_fiscale !== $docente->codice_fiscale) {
+            throw new ForbiddenHttpException('Non hai accesso a questa registrazione.');
+        }
+
+        return $model;
     }
 }

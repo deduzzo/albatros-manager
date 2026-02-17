@@ -2,6 +2,13 @@
 
 Sistema di gestione per docenti e corsi finanziati da FSE (Fondo Sociale Europeo), PNRR e MIM.
 
+> **REGOLA FONDAMENTALE - LEGGERE PRIMA DI QUALSIASI AZIONE**:
+> - Questo e' l'UNICO file CLAUDE.md del progetto.
+> - **NON CREARE MAI** altri file CLAUDE.md in NESSUNA sottocartella del progetto (controllers/, views/, models/, import/, docs/, components/, web/, ecc.).
+> - **NON CREARE MAI** file .md di documentazione nelle sottocartelle (niente README.md locali, niente NOTE.md, ecc.).
+> - Tutta la documentazione di progetto va scritta ESCLUSIVAMENTE in questo file.
+> - Se trovi altri CLAUDE.md nelle sottocartelle, **ELIMINALI IMMEDIATAMENTE** senza chiedere conferma.
+
 ## Stack Tecnologico
 
 - **Framework**: Yii2 Basic Template
@@ -22,6 +29,52 @@ Asset Bundle: `app\components\assets\TablerAsset`
 
 Icone: usare `<i class="ti ti-{nome}"></i>` (es: `ti ti-home`, `ti ti-settings`)
 Documentazione icone: https://tabler.io/icons
+
+### Badge Tabler v1.4.0
+
+**IMPORTANTE**: NON usare classi Bootstrap (`bg-success`, `bg-warning`, ecc.). Usare SOLO classi Tabler native.
+
+**Tre formati disponibili:**
+
+| Tipo | Classi | Esempio |
+|------|--------|---------|
+| **Solid** | `badge bg-{colore} text-{colore}-fg` | `<span class="badge bg-green text-green-fg">Attivo</span>` |
+| **Light** | `badge bg-{colore}-lt` | `<span class="badge bg-green-lt">Attivo</span>` |
+| **Outline** | `badge badge-outline text-{colore}` | `<span class="badge badge-outline text-green">Attivo</span>` |
+
+**Colori Tabler disponibili**: `blue`, `azure`, `indigo`, `purple`, `pink`, `red`, `orange`, `yellow`, `lime`, `green`, `teal`, `cyan`, `default`, `muted`
+
+**Mapping Bootstrap → Tabler:**
+
+| Bootstrap (NON usare) | Tabler (usare questo) |
+|------------------------|-----------------------|
+| `bg-success` | `bg-green text-green-fg` |
+| `bg-warning` | `bg-orange text-orange-fg` |
+| `bg-danger` | `bg-red text-red-fg` |
+| `bg-primary` | `bg-blue text-blue-fg` |
+| `bg-info` | `bg-azure text-azure-fg` |
+| `bg-secondary` | `bg-default text-default-fg` |
+| `bg-muted` | `bg-default text-default-fg` |
+
+**Nei Model** (metodi `getStatusBadgeClass()`, `getEsitoBadgeClass()`, ecc.):
+```php
+// CORRETTO
+public function getStatusBadgeClass()
+{
+    return match($this->status) {
+        'attivo' => 'bg-green text-green-fg',
+        'in_attesa' => 'bg-orange text-orange-fg',
+        'rifiutato' => 'bg-red text-red-fg',
+        default => 'bg-default text-default-fg',
+    };
+}
+```
+
+**Nelle View** con colore inline (es. badge categoria):
+```php
+// CORRETTO - aggiungere sempre color: #fff per sfondo colorato inline
+'<span class="badge" style="background-color: ' . Html::encode($colore) . '; color: #fff;">' . $testo . '</span>'
+```
 
 ## Autenticazione
 
@@ -67,6 +120,103 @@ public function behaviors()
         ],
     ];
 }
+```
+
+## Area Docenti (Portale Riservato)
+
+Area self-service per i docenti, separata dall'area amministrativa. Ha autenticazione propria, layout dedicato e funzionalita specifiche.
+
+### Accesso
+
+| Campo | Valore |
+|-------|--------|
+| **URL Login** | http://localhost:8000/area-docenti/login |
+| **URL Registrazione** | http://localhost:8000/area-docenti/registrazione |
+| **Autenticazione** | Codice Fiscale + Password (tabella `docente_auth`) |
+| **Layout** | `views/layouts/docente.php` (separato dal layout admin) |
+| **Controller** | `controllers/DocenteAreaController.php` |
+
+### Login Test (solo DEBUG mode)
+
+In modalita sviluppo (`YII_DEBUG=true`), i docenti possono accedere inserendo solo il codice fiscale e lasciando la password vuota. Se non esiste un record `docente_auth`, viene creato automaticamente al primo login.
+
+### Autenticazione Docente
+
+L'area docenti usa un sistema di autenticazione separato dagli utenti admin:
+- **Component Yii**: `Yii::$app->docenteUser` (NON `Yii::$app->user`)
+- **Identity**: `app\models\DocenteAuth` (tabella `docente_auth`)
+- **Docente**: `Yii::$app->docenteUser->identity->docente` (relazione con tabella `docente`)
+- **Codice Fiscale**: `Yii::$app->docenteUser->identity->docente_codice_fiscale`
+
+```php
+// Nel controller area docente
+$auth = Yii::$app->docenteUser->identity;
+$docente = $auth->docente;
+$cf = $auth->docente_codice_fiscale;
+
+// Verificare ownership di un record
+if ($assegnazione->docente_codice_fiscale !== $cf) {
+    throw new ForbiddenHttpException('Non hai accesso.');
+}
+```
+
+### Funzionalita Disponibili
+
+| Sezione | URL | Descrizione |
+|---------|-----|-------------|
+| Dashboard | `/area-docenti` | Statistiche personali, azioni rapide |
+| Bandi Aperti | `/area-docenti/bandi` | Lista bandi disponibili per iscrizione |
+| Dettaglio Bando | `/area-docenti/bandi/{id}` | Moduli del bando con pulsante iscrizione |
+| Iscrizione Modulo | `/area-docenti/iscrizione/{moduloId}` | Wizard iscrizione con tag e documenti |
+| Le Mie Iscrizioni | `/area-docenti/le-mie-iscrizioni` | Storico candidature presentate |
+| Le Mie Assegnazioni | `/area-docenti/le-mie-assegnazioni` | Moduli assegnati con stato ore |
+| Inserisci Ore | `/area-docenti/inserisci-ore/{assegnazione_id}` | Form inserimento ore giornaliere |
+| Le Mie Ore | `/area-docenti/le-mie-ore/{assegnazione_id}` | Lista ore con stato validazione |
+| Modifica Ore | `/area-docenti/modifica-ore/{id}` | Modifica ore (solo se da validare) |
+| Profilo | `/area-docenti/profilo` | Modifica dati anagrafici |
+| Password Dimenticata | `/area-docenti/password-dimenticata` | Reset password via email |
+
+### Rendicontazione Ore Docente
+
+Workflow di inserimento e validazione ore:
+
+```
+1. Docente accede a "Le Mie Assegnazioni" → vede i moduli assegnati con ore contrattualizzate
+2. Clicca "Inserisci Ore" → compila: data, ore, ora inizio/fine, note, firma digitale
+3. Ore salvate con status = "inserito" (da validare)
+4. Docente puo modificare/eliminare ore solo se status = "inserito"
+5. Amministratore valida le ore (singolarmente o in blocco) → status = "approvato" / "rifiutato"
+6. Se ore approvate superano le ore contrattualizzate → workflow ore extra su Pagamento
+```
+
+**Stati rendicontazione ore:**
+- `inserito` (giallo) = Da validare - inserite dal docente, in attesa di approvazione
+- `approvato` (verde) = Validate dall'amministrazione
+- `rifiutato` (rosso) = Rifiutate con motivazione obbligatoria
+
+**Validazione lato admin** (RendicontazioneOreController):
+- `/rendicontazione-ore/index?assegnazione_id={id}` - Lista ore per assegnazione
+- Azione "Approva" singola / "Approva Tutto" in blocco
+- Azione "Rifiuta" con motivo obbligatorio
+- Riepilogo mensile ore
+
+### Route Area Docenti (config/web.php)
+
+```php
+'area-docenti' => 'docente-area/index',
+'area-docenti/login' => 'docente-area/login',
+'area-docenti/registrazione' => 'docente-area/registrazione',
+'area-docenti/logout' => 'docente-area/logout',
+'area-docenti/profilo' => 'docente-area/profilo',
+'area-docenti/bandi' => 'docente-area/bandi',
+'area-docenti/bandi/<id:\d+>' => 'docente-area/bando',
+'area-docenti/iscrizione/<moduloId:\d+>' => 'docente-area/iscrizione',
+'area-docenti/le-mie-iscrizioni' => 'docente-area/le-mie-iscrizioni',
+'area-docenti/le-mie-assegnazioni' => 'docente-area/le-mie-assegnazioni',
+'area-docenti/inserisci-ore/<assegnazione_id:\d+>' => 'docente-area/inserisci-ore',
+'area-docenti/le-mie-ore/<assegnazione_id:\d+>' => 'docente-area/le-mie-ore',
+'area-docenti/modifica-ore/<id:\d+>' => 'docente-area/modifica-ore',
+'area-docenti/elimina-ore/<id:\d+>' => 'docente-area/elimina-ore',
 ```
 
 ## Ambiente Docker
@@ -539,12 +689,12 @@ Avvia il team di agenti come da docs/AGENT_TEAM_CONFIG.md
 ## Link Utili
 
 - Schema ER: `docs/schema-er.html`
-- Guida Import: `import/README.md`
 - Changelog DB: `docs/modifiche-database-feb-2025.md`
 - CRUD Guidelines: `docs/CRUD_GUIDELINES.md`
 - Team Agenti: `docs/AGENT_TEAM_CONFIG.md`
 - phpMyAdmin: http://localhost:8080
-- App: http://localhost:8000
+- App (Admin): http://localhost:8000
+- Area Docenti: http://localhost:8000/area-docenti/login
 - Import Dati: http://localhost:8000/import
 - Tabler Icons: https://tabler.io/icons
 - Tabler Docs: https://tabler.io/docs

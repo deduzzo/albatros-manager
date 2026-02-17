@@ -76,7 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     </td>
                                     <td class="text-center">
                                         <?php if ($istanza->posizione_graduatoria): ?>
-                                            <span class="badge bg-primary">#<?= $istanza->posizione_graduatoria ?></span>
+                                            <span class="badge bg-blue text-blue-fg">#<?= $istanza->posizione_graduatoria ?></span>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
                                         <?php endif; ?>

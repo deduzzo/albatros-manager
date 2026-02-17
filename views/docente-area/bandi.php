@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php foreach ($bandi as $avviso): ?>
                     <div class="col-md-6 col-lg-4">
                         <div class="card">
-                            <div class="card-status-start bg-success"></div>
+                            <div class="card-status-start bg-green"></div>
                             <div class="card-body">
                                 <div class="d-flex align-items-center mb-3">
                                     <span class="badge bg-blue-lt"><?= Html::encode($avviso->codice_avviso) ?></span>

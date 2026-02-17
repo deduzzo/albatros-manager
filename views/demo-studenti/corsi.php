@@ -28,7 +28,7 @@ $this->title = 'Corsi Disponibili';
             <?php foreach ($corsi as $corso): ?>
                 <?php
                 $percentualeOccupazione = round(($corso['posti_totali'] - $corso['posti_disponibili']) / $corso['posti_totali'] * 100);
-                $disponibilitaClass = $corso['posti_disponibili'] > 10 ? 'bg-success' : ($corso['posti_disponibili'] > 5 ? 'bg-warning' : 'bg-danger');
+                $disponibilitaClass = $corso['posti_disponibili'] > 10 ? 'bg-green' : ($corso['posti_disponibili'] > 5 ? 'bg-orange' : 'bg-red');
                 ?>
                 <div class="col-md-6 col-lg-4">
                     <div class="card">

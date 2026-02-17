@@ -257,11 +257,11 @@ class DocenteAuth extends BaseActiveRecord implements IdentityInterface
     public function getStatusBadgeClass()
     {
         $classes = [
-            self::STATUS_PENDING => 'bg-warning',
-            self::STATUS_ACTIVE => 'bg-success',
-            self::STATUS_SUSPENDED => 'bg-danger',
+            self::STATUS_PENDING => 'bg-orange text-orange-fg',
+            self::STATUS_ACTIVE => 'bg-green text-green-fg',
+            self::STATUS_SUSPENDED => 'bg-red text-red-fg',
         ];
-        return $classes[$this->status] ?? 'bg-secondary';
+        return $classes[$this->status] ?? 'bg-default text-default-fg';
     }
 
     /**

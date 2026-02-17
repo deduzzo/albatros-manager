@@ -120,12 +120,12 @@ class StoricoEsito extends ActiveRecord
     public function getEsitoBadgeClass()
     {
         return match ($this->esito) {
-            self::ESITO_ASSEGNATO => 'bg-success',
-            self::ESITO_IDONEO => 'bg-info',
-            self::ESITO_NON_IDONEO => 'bg-danger',
-            self::ESITO_RINUNCIA => 'bg-secondary',
-            self::ESITO_SUBENTRO => 'bg-warning',
-            default => 'bg-secondary',
+            self::ESITO_ASSEGNATO => 'bg-green text-green-fg',
+            self::ESITO_IDONEO => 'bg-azure text-azure-fg',
+            self::ESITO_NON_IDONEO => 'bg-red text-red-fg',
+            self::ESITO_RINUNCIA => 'bg-default text-default-fg',
+            self::ESITO_SUBENTRO => 'bg-orange text-orange-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 

@@ -110,7 +110,7 @@ $oreExtra = max(0, $oreApprovate - $oreContrattualizzate);
                         <small class="fw-bold"><?= $percApprovate ?>%</small>
                     </div>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar <?= $percApprovate > 100 ? 'bg-danger' : ($percApprovate >= 100 ? 'bg-success' : 'bg-primary') ?>"
+                        <div class="progress-bar <?= $percApprovate > 100 ? 'bg-red' : ($percApprovate >= 100 ? 'bg-green' : 'bg-blue') ?>"
                              style="width: <?= min($percApprovate, 100) ?>%"></div>
                     </div>
                 </div>
@@ -127,7 +127,7 @@ $oreExtra = max(0, $oreApprovate - $oreContrattualizzate);
                         <div class="text-muted">
                             Le ore approvate (<strong><?= number_format($oreApprovate, 1, ',', '.') ?></strong>) superano
                             le ore contrattualizzate (<strong><?= $oreContrattualizzate ?></strong>) di
-                            <span class="badge bg-danger"><?= number_format($oreExtra, 1, ',', '.') ?> ore extra</span>.
+                            <span class="badge bg-red text-red-fg"><?= number_format($oreExtra, 1, ',', '.') ?> ore extra</span>.
                         </div>
                     </div>
                 </div>

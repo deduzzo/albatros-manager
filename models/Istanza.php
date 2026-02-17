@@ -131,6 +131,31 @@ class Istanza extends BaseActiveRecord
         return $this->hasOne(IstanzaSnapshot::class, ['istanza_id' => 'id']);
     }
 
+    /**
+     * Dopo il salvataggio, crea snapshot se esito_cts cambia a 'assegnato'
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        // Se esito_cts e' cambiato a 'assegnato' e non esiste gia uno snapshot
+        if (isset($changedAttributes['esito_cts'])
+            && $this->esito_cts === self::ESITO_CTS_ASSEGNATO
+            && !IstanzaSnapshot::findOne(['istanza_id' => $this->id])
+        ) {
+            // Raccogli tag iscrizione
+            $tagsIscrizione = [];
+            foreach ($this->istanzaTags as $it) {
+                $tagsIscrizione[] = [
+                    'tag_id' => $it->tag_id,
+                    'nome' => $it->tag->nome ?? null,
+                    'livello' => $it->livello,
+                ];
+            }
+            IstanzaSnapshot::creaSnapshot($this, $tagsIscrizione);
+        }
+    }
+
     public static function getStatusLabels()
     {
         return [
@@ -151,13 +176,13 @@ class Istanza extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         return match ($this->status) {
-            self::STATUS_PRESENTATA => 'bg-info',
-            self::STATUS_IN_VALUTAZIONE => 'bg-warning',
-            self::STATUS_VALUTATA => 'bg-primary',
-            self::STATUS_ACCETTATA => 'bg-success',
-            self::STATUS_RIFIUTATA => 'bg-danger',
-            self::STATUS_RINUNCIA => 'bg-secondary',
-            default => 'bg-secondary',
+            self::STATUS_PRESENTATA => 'bg-azure text-azure-fg',
+            self::STATUS_IN_VALUTAZIONE => 'bg-orange text-orange-fg',
+            self::STATUS_VALUTATA => 'bg-blue text-blue-fg',
+            self::STATUS_ACCETTATA => 'bg-green text-green-fg',
+            self::STATUS_RIFIUTATA => 'bg-red text-red-fg',
+            self::STATUS_RINUNCIA => 'bg-default text-default-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 
@@ -215,14 +240,14 @@ class Istanza extends BaseActiveRecord
     public function getEsitoCtsBadgeHtml()
     {
         if (!$this->esito_cts) {
-            return '<span class="badge bg-secondary">Non valutato</span>';
+            return '<span class="badge bg-default text-default-fg">Non valutato</span>';
         }
 
         $class = match ($this->esito_cts) {
-            self::ESITO_CTS_ASSEGNATO => 'bg-success',
-            self::ESITO_CTS_IDONEO => 'bg-info',
-            self::ESITO_CTS_NON_IDONEO => 'bg-danger',
-            default => 'bg-secondary',
+            self::ESITO_CTS_ASSEGNATO => 'bg-green text-green-fg',
+            self::ESITO_CTS_IDONEO => 'bg-azure text-azure-fg',
+            self::ESITO_CTS_NON_IDONEO => 'bg-red text-red-fg',
+            default => 'bg-default text-default-fg',
         };
 
         return '<span class="badge ' . $class . '">' . $this->getEsitoCtsLabel() . '</span>';

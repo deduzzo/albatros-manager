@@ -167,7 +167,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 }
                                 $count = $model->getDocenteTags()->count();
                                 if ($count > 3) {
-                                    $html .= '<span class="badge bg-secondary">+' . ($count - 3) . '</span>';
+                                    $html .= '<span class="badge bg-default text-default-fg">+' . ($count - 3) . '</span>';
                                 }
                                 return $html;
                             },

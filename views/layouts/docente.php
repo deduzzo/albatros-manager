@@ -12,7 +12,7 @@ use app\components\widgets\Alert;
 TablerAsset::register($this);
 
 $docenteUser = Yii::$app->docenteUser;
-$docente = $docenteUser->isGuest ? null : $docenteUser->identity->docente;
+$docente = ($docenteUser->isGuest || !$docenteUser->identity) ? null : $docenteUser->identity->docente;
 $currentAction = Yii::$app->controller->action->id;
 
 ?>
@@ -33,10 +33,6 @@ $currentAction = Yii::$app->controller->action->id;
     <style>
         :root {
             --tblr-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
-            --tblr-primary: #206bc4;
-        }
-        body {
-            font-feature-settings: "cv03", "cv04", "cv11";
         }
     </style>
 </head>
@@ -60,7 +56,7 @@ $currentAction = Yii::$app->controller->action->id;
                 <?php if (!$docenteUser->isGuest): ?>
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown">
-                            <span class="avatar avatar-sm bg-primary-lt">
+                            <span class="avatar avatar-sm bg-blue-lt">
                                 <i class="ti ti-user"></i>
                             </span>
                             <div class="d-none d-xl-block ps-2">
@@ -75,8 +71,11 @@ $currentAction = Yii::$app->controller->action->id;
                             <a href="<?= Url::to(['/docente-area/le-mie-iscrizioni']) ?>" class="dropdown-item">
                                 <i class="ti ti-list me-2"></i> Le mie iscrizioni
                             </a>
+                            <a href="<?= Url::to(['/docente-area/le-mie-assegnazioni']) ?>" class="dropdown-item">
+                                <i class="ti ti-clock me-2"></i> Le mie ore
+                            </a>
                             <div class="dropdown-divider"></div>
-                            <a href="<?= Url::to(['/docente-area/logout']) ?>" class="dropdown-item text-danger" data-method="post">
+                            <a href="<?= Url::to(['/docente-area/logout']) ?>" class="dropdown-item text-danger">
                                 <i class="ti ti-logout me-2"></i> Esci
                             </a>
                         </div>
@@ -102,6 +101,12 @@ $currentAction = Yii::$app->controller->action->id;
                             <a class="nav-link" href="<?= Url::to(['/docente-area/le-mie-iscrizioni']) ?>">
                                 <span class="nav-link-icon"><i class="ti ti-list-check"></i></span>
                                 <span class="nav-link-title">Le Mie Iscrizioni</span>
+                            </a>
+                        </li>
+                        <li class="nav-item <?= in_array($currentAction, ['le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore']) ? 'active' : '' ?>">
+                            <a class="nav-link" href="<?= Url::to(['/docente-area/le-mie-assegnazioni']) ?>">
+                                <span class="nav-link-icon"><i class="ti ti-clock"></i></span>
+                                <span class="nav-link-title">Le Mie Ore</span>
                             </a>
                         </li>
                         <li class="nav-item <?= $currentAction == 'profilo' ? 'active' : '' ?>">

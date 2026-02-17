@@ -113,12 +113,12 @@ class Avviso extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         $classes = [
-            self::STATUS_BOZZA => 'bg-warning',
-            self::STATUS_PUBBLICATO => 'bg-success',
-            self::STATUS_CHIUSO => 'bg-secondary',
-            self::STATUS_ANNULLATO => 'bg-danger',
+            self::STATUS_BOZZA => 'bg-orange text-orange-fg',
+            self::STATUS_PUBBLICATO => 'bg-green text-green-fg',
+            self::STATUS_CHIUSO => 'bg-default text-default-fg',
+            self::STATUS_ANNULLATO => 'bg-red text-red-fg',
         ];
-        return $classes[$this->status] ?? 'bg-secondary';
+        return $classes[$this->status] ?? 'bg-default text-default-fg';
     }
 
     /**
@@ -252,13 +252,21 @@ class Avviso extends BaseActiveRecord
             $contrattualizzato = $modulo->getCompensoContrattualizzato();
             $pagato = $modulo->getTotalePagatoModulo();
 
+            // Ore rendicontate
+            $oreContrattualizzate = $contratto ? (int) $contratto->ore_contrattualizzate : 0;
+            $oreApprovate = $assegnazione ? RendicontazioneOre::getTotaleOreApprovate($assegnazione->id) : 0;
+
             $result[] = [
                 'modulo' => $modulo,
                 'docente' => $docente,
+                'assegnazione' => $assegnazione,
                 'contratto' => $contratto,
                 'contrattualizzato' => $contrattualizzato,
                 'pagato' => $pagato,
                 'percentuale' => $modulo->getPercentualePagamento(),
+                'ore_contrattualizzate' => $oreContrattualizzate,
+                'ore_approvate' => $oreApprovate,
+                'saldo_rimanente' => $contratto ? $contratto->getSaldoRimanente() : 0,
             ];
         }
 

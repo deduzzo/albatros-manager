@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
@@ -29,7 +30,7 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                         <?= Html::encode($this->title) ?>
                     </h2>
                     <?php if ($model->isAperto()): ?>
-                        <span class="badge bg-success">Aperto per iscrizioni</span>
+                        <span class="badge bg-green text-green-fg">Aperto per iscrizioni</span>
                     <?php endif; ?>
                 </div>
                 <div class="col-auto ms-auto">
@@ -124,9 +125,9 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                                                 <td><?= $doc->dimensione_max_mb ?> MB</td>
                                                 <td>
                                                     <?php if ($doc->obbligatorio): ?>
-                                                        <span class="badge bg-danger">Si</span>
+                                                        <span class="badge bg-red text-red-fg">Si</span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-secondary">No</span>
+                                                        <span class="badge bg-default text-default-fg">No</span>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>
@@ -151,11 +152,11 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                         <div class="card-body">
                             <div class="d-flex mb-2">
                                 <span class="me-auto">Moduli</span>
-                                <span class="badge bg-primary"><?= count($model->moduli) ?></span>
+                                <span class="badge bg-blue text-blue-fg"><?= count($model->moduli) ?></span>
                             </div>
                             <div class="d-flex mb-2">
                                 <span class="me-auto">Candidature</span>
-                                <span class="badge bg-info"><?= $model->getIstanzeCount() ?></span>
+                                <span class="badge bg-azure text-azure-fg"><?= $model->getIstanzeCount() ?></span>
                             </div>
                             <?php if ($rendiconto['contrattualizzato'] > 0): ?>
                                 <hr class="my-2">
@@ -239,7 +240,7 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                                     <?php if ($contratto): ?>
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="progress flex-grow-1" style="height: 6px;">
-                                                <div class="progress-bar <?= $percentualePagato >= 100 ? 'bg-success' : ($percentualePagato > 0 ? 'bg-warning' : 'bg-secondary') ?>"
+                                                <div class="progress-bar <?= $percentualePagato >= 100 ? 'bg-green' : ($percentualePagato > 0 ? 'bg-orange' : 'bg-default') ?>"
                                                      style="width: <?= min($percentualePagato, 100) ?>%"></div>
                                             </div>
                                             <small class="text-nowrap <?= $percentualePagato >= 100 ? 'text-success' : ($percentualePagato > 0 ? 'text-warning' : 'text-muted') ?>">
@@ -280,7 +281,7 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                             <div class="card card-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
-                                        <span class="bg-purple text-white avatar me-3">
+                                        <span class="bg-purple text-purple-fg avatar me-3">
                                             <i class="ti ti-file-invoice"></i>
                                         </span>
                                         <div>
@@ -295,7 +296,7 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                             <div class="card card-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
-                                        <span class="bg-success text-white avatar me-3">
+                                        <span class="bg-green text-green-fg avatar me-3">
                                             <i class="ti ti-circle-check"></i>
                                         </span>
                                         <div>
@@ -310,7 +311,7 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                             <div class="card card-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
-                                        <span class="bg-warning text-white avatar me-3">
+                                        <span class="bg-orange text-orange-fg avatar me-3">
                                             <i class="ti ti-clock"></i>
                                         </span>
                                         <div>
@@ -325,7 +326,7 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                             <div class="card card-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center">
-                                        <span class="bg-orange text-white avatar me-3">
+                                        <span class="bg-orange text-orange-fg avatar me-3">
                                             <i class="ti ti-wallet"></i>
                                         </span>
                                         <div>
@@ -346,12 +347,12 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                             <small class="fw-bold"><?= $percentualePagatoTotale ?>%</small>
                         </div>
                         <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-success" style="width: <?= min($percentualePagatoTotale, 100) ?>%" title="Pagato: <?= $formatter->asCurrency($rendiconto['pagato']) ?>"></div>
-                            <div class="progress-bar bg-warning" style="width: <?= min($percentualeInAttesa, 100 - min($percentualePagatoTotale, 100)) ?>%" title="In Attesa: <?= $formatter->asCurrency($rendiconto['inAttesa']) ?>"></div>
+                            <div class="progress-bar bg-green" style="width: <?= min($percentualePagatoTotale, 100) ?>%" title="Pagato: <?= $formatter->asCurrency($rendiconto['pagato']) ?>"></div>
+                            <div class="progress-bar bg-orange" style="width: <?= min($percentualeInAttesa, 100 - min($percentualePagatoTotale, 100)) ?>%" title="In Attesa: <?= $formatter->asCurrency($rendiconto['inAttesa']) ?>"></div>
                         </div>
                         <div class="d-flex gap-3 mt-1">
-                            <small><span class="badge bg-success">&nbsp;</span> Pagato</small>
-                            <small><span class="badge bg-warning">&nbsp;</span> In Attesa</small>
+                            <small><span class="badge bg-green text-green-fg">&nbsp;</span> Pagato</small>
+                            <small><span class="badge bg-orange text-orange-fg">&nbsp;</span> In Attesa</small>
                             <small><span class="badge bg-light border">&nbsp;</span> Da Spendere</small>
                         </div>
                     </div>
@@ -359,22 +360,47 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
 
                     <!-- Tabella Dettaglio Moduli -->
                     <?php if (!empty($rendiconto['moduli'])): ?>
+
+                    <!-- Toolbar Liquidazione Massiva -->
+                    <div id="bulk-toolbar" class="alert alert-info mb-3" style="display: none;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span>
+                                <strong id="bulk-count">0</strong> moduli selezionati -
+                                Totale: <strong id="bulk-totale">&euro; 0,00</strong>
+                            </span>
+                            <button type="button" class="btn btn-green btn-sm" data-bs-toggle="modal" data-bs-target="#modal-liquidazione">
+                                <i class="ti ti-cash me-1"></i> Liquida selezionati
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-vcenter table-hover">
                             <thead>
                                 <tr>
+                                    <th><input type="checkbox" id="select-all-moduli" title="Seleziona tutti"></th>
                                     <th>Codice</th>
                                     <th>Docente</th>
                                     <th class="text-end">Contrattualizzato</th>
                                     <th class="text-end">Pagato</th>
+                                    <th>Ore Rend.</th>
                                     <th style="width: 120px;">%</th>
                                     <th>Stato</th>
+                                    <th class="text-end">Azioni</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($rendiconto['moduli'] as $rm): ?>
                                 <?php $m = $rm['modulo']; ?>
                                 <tr>
+                                    <td>
+                                        <?php if ($rm['contratto'] && ($rm['saldo_rimanente'] ?? 0) > 0.01): ?>
+                                            <input type="checkbox" class="modulo-checkbox" value="<?= $rm['contratto']->id ?>"
+                                                   data-saldo="<?= $rm['saldo_rimanente'] ?>"
+                                                   data-docente="<?= Html::encode($rm['docente'] ? $rm['docente']->cognome . ' ' . $rm['docente']->nome : '-') ?>"
+                                                   data-modulo="<?= Html::encode($m->codice) ?>">
+                                        <?php endif; ?>
+                                    </td>
                                     <td><?= Html::a('<span class="badge bg-blue-lt">' . Html::encode($m->codice) . '</span>', ['/modulo/view', 'id' => $m->id]) ?></td>
                                     <td>
                                         <?php if ($rm['docente']): ?>
@@ -392,10 +418,24 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                                     </td>
                                     <td class="text-end"><?= $formatter->asCurrency($rm['pagato']) ?></td>
                                     <td>
+                                        <?php if (($rm['ore_contrattualizzate'] ?? 0) > 0): ?>
+                                            <?php $percOreM = round(($rm['ore_approvate'] / $rm['ore_contrattualizzate']) * 100); ?>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <div class="progress flex-grow-1" style="height: 4px; width: 50px;">
+                                                    <div class="progress-bar <?= $percOreM >= 100 ? 'bg-green' : ($percOreM > 0 ? 'bg-orange' : '') ?>"
+                                                         style="width: <?= min($percOreM, 100) ?>%"></div>
+                                                </div>
+                                                <small class="text-nowrap"><?= $rm['ore_approvate'] ?>/<?= $rm['ore_contrattualizzate'] ?></small>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
                                         <?php if ($rm['percentuale'] !== null): ?>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="progress flex-grow-1" style="height: 6px;">
-                                                    <div class="progress-bar <?= $rm['percentuale'] >= 100 ? 'bg-success' : ($rm['percentuale'] > 0 ? 'bg-warning' : 'bg-secondary') ?>"
+                                                    <div class="progress-bar <?= $rm['percentuale'] >= 100 ? 'bg-green' : ($rm['percentuale'] > 0 ? 'bg-orange' : 'bg-default') ?>"
                                                          style="width: <?= min($rm['percentuale'], 100) ?>%"></div>
                                                 </div>
                                                 <small class="text-nowrap"><?= $rm['percentuale'] ?>%</small>
@@ -407,34 +447,43 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                                     <td>
                                         <?php if ($rm['contratto']): ?>
                                             <?php if ($rm['percentuale'] >= 100): ?>
-                                                <span class="badge bg-success">Saldato</span>
+                                                <span class="badge bg-green text-green-fg">Saldato</span>
                                             <?php elseif ($rm['pagato'] > 0): ?>
-                                                <span class="badge bg-warning">Parziale</span>
+                                                <span class="badge bg-orange text-orange-fg">Parziale</span>
                                             <?php else: ?>
-                                                <span class="badge bg-secondary">Da pagare</span>
+                                                <span class="badge bg-default text-default-fg">Da pagare</span>
                                             <?php endif; ?>
                                         <?php else: ?>
-                                            <span class="badge bg-muted">No contratto</span>
+                                            <span class="badge bg-default text-default-fg">No contratto</span>
                                         <?php endif; ?>
+                                    </td>
+                                    <td class="text-end">
+                                        <?php if ($rm['contratto'] && ($rm['saldo_rimanente'] ?? 0) > 0.01): ?>
+                                            <?= Html::a('<i class="ti ti-cash"></i>', ['/pagamento/create', 'contratto_id' => $rm['contratto']->id], ['class' => 'btn btn-sm btn-outline-green', 'title' => 'Nuovo pagamento']) ?>
+                                        <?php endif; ?>
+                                        <?= Html::a('<i class="ti ti-eye"></i>', ['/modulo/view', 'id' => $m->id], ['class' => 'btn btn-sm btn-outline-primary', 'title' => 'Dettaglio']) ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
                             <tfoot>
                                 <tr class="fw-bold">
+                                    <td></td>
                                     <td colspan="2">Totale</td>
                                     <td class="text-end"><?= $formatter->asCurrency($rendiconto['contrattualizzato']) ?></td>
                                     <td class="text-end"><?= $formatter->asCurrency($rendiconto['pagato']) ?></td>
+                                    <td></td>
                                     <td>
                                         <?php if ($rendiconto['contrattualizzato'] > 0): ?>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="progress flex-grow-1" style="height: 6px;">
-                                                    <div class="progress-bar bg-success" style="width: <?= min($percentualePagatoTotale, 100) ?>%"></div>
+                                                    <div class="progress-bar bg-green" style="width: <?= min($percentualePagatoTotale, 100) ?>%"></div>
                                                 </div>
                                                 <small class="text-nowrap"><?= $percentualePagatoTotale ?>%</small>
                                             </div>
                                         <?php endif; ?>
                                     </td>
+                                    <td></td>
                                     <td></td>
                                 </tr>
                             </tfoot>
@@ -444,6 +493,114 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                 </div>
             </div>
             <?php endif; ?>
+
+            <!-- Modale Conferma Liquidazione Massiva -->
+            <div class="modal modal-blur fade" id="modal-liquidazione" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="ti ti-cash me-2"></i>Conferma Liquidazione Massiva</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="modal-lista-docenti"></div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label required">Tipo Pagamento</label>
+                                    <select id="bulk-tipo" class="form-select" required>
+                                        <option value="">-- Seleziona --</option>
+                                        <option value="acconto">Acconto</option>
+                                        <option value="saldo">Saldo</option>
+                                        <option value="rata">Rata</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Stato</label>
+                                    <select id="bulk-status" class="form-select">
+                                        <option value="programmato">Programmato</option>
+                                        <option value="in_attesa">In Attesa</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                            <button type="button" id="btn-conferma-liquidazione" class="btn btn-green">
+                                <i class="ti ti-check me-1"></i> Conferma Liquidazione
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<?php
+$liquidaMassivaUrl = Url::to(['/pagamento/liquida-massiva']);
+$this->registerJs(<<<JS
+    // Checkbox select all
+    $('#select-all-moduli').on('change', function() {
+        $('.modulo-checkbox').prop('checked', $(this).is(':checked'));
+        updateBulkToolbar();
+    });
+
+    $('.modulo-checkbox').on('change', updateBulkToolbar);
+
+    function updateBulkToolbar() {
+        var checked = $('.modulo-checkbox:checked');
+        if (checked.length > 0) {
+            var totale = 0;
+            checked.each(function() { totale += parseFloat($(this).data('saldo')); });
+            $('#bulk-count').text(checked.length);
+            $('#bulk-totale').text(new Intl.NumberFormat('it-IT', {style:'currency',currency:'EUR'}).format(totale));
+            $('#bulk-toolbar').slideDown(200);
+        } else {
+            $('#bulk-toolbar').slideUp(200);
+        }
+    }
+
+    // Popola modale
+    $('#modal-liquidazione').on('show.bs.modal', function() {
+        var html = '<table class="table table-sm"><thead><tr><th>Docente</th><th>Modulo</th><th class="text-end">Importo</th></tr></thead><tbody>';
+        var totale = 0;
+        $('.modulo-checkbox:checked').each(function() {
+            var saldo = parseFloat($(this).data('saldo'));
+            totale += saldo;
+            html += '<tr><td>' + $(this).data('docente') + '</td><td>' + $(this).data('modulo') + '</td><td class="text-end">' +
+                new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(saldo) + '</td></tr>';
+        });
+        html += '</tbody><tfoot><tr class="fw-bold"><td colspan="2">Totale</td><td class="text-end">' +
+            new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(totale) + '</td></tr></tfoot></table>';
+        $('#modal-lista-docenti').html(html);
+    });
+
+    // Conferma liquidazione
+    $('#btn-conferma-liquidazione').on('click', function() {
+        var tipo = $('#bulk-tipo').val();
+        if (!tipo) { alert('Seleziona il tipo di pagamento.'); return; }
+
+        var ids = [];
+        $('.modulo-checkbox:checked').each(function() { ids.push(parseInt($(this).val())); });
+
+        var btn = $(this);
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Elaborazione...');
+
+        $.post('{$liquidaMassivaUrl}', {
+            contratti_ids: ids,
+            tipo: tipo,
+            status: $('#bulk-status').val(),
+            _csrf: yii.getCsrfToken()
+        }, function(data) {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Errore: ' + (data.message || 'Errore sconosciuto'));
+                btn.prop('disabled', false).html('<i class="ti ti-check me-1"></i> Conferma Liquidazione');
+            }
+        }, 'json');
+    });
+JS
+);
+?>

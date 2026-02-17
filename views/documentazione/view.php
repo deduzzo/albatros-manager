@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div class="subheader">Scadenza</div>
                             <div class="h1 mt-2"><?= $model->data_scadenza ? Yii::$app->formatter->asDate($model->data_scadenza) : '-' ?></div>
                             <?php if ($model->isScaduto()): ?>
-                                <span class="badge bg-danger">Scaduto</span>
+                                <span class="badge bg-red text-red-fg">Scaduto</span>
                             <?php endif; ?>
                         </div>
                     </div>

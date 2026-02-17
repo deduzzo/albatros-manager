@@ -86,11 +86,11 @@ $this->params['breadcrumbs'][] = $model->codice_progetto;
                         <div class="card-body">
                             <div class="d-flex mb-2">
                                 <span class="me-auto">Avvisi/Bandi</span>
-                                <span class="badge bg-primary"><?= count($model->avvisi) ?></span>
+                                <span class="badge bg-blue text-blue-fg"><?= count($model->avvisi) ?></span>
                             </div>
                             <div class="d-flex mb-2">
                                 <span class="me-auto">Studenti previsti</span>
-                                <span class="badge bg-info"><?= $model->numero_studenti ?? '-' ?></span>
+                                <span class="badge bg-azure text-azure-fg"><?= $model->numero_studenti ?? '-' ?></span>
                             </div>
                         </div>
                     </div>
@@ -260,11 +260,11 @@ $this->params['breadcrumbs'][] = $model->codice_progetto;
                             <small class="fw-bold"><?= $percBudget ?>% pagato</small>
                         </div>
                         <div class="progress progress-separated" style="height: 8px;">
-                            <div class="progress-bar bg-success" style="width: <?= min($percBudget, 100) ?>%" title="Pagato"></div>
+                            <div class="progress-bar bg-green" style="width: <?= min($percBudget, 100) ?>%" title="Pagato"></div>
                             <div class="progress-bar bg-purple-lt" style="width: <?= min(max($percContrattualizzato - $percBudget, 0), 100 - min($percBudget, 100)) ?>%" title="Contrattualizzato non ancora pagato"></div>
                         </div>
                         <div class="d-flex gap-3 mt-1">
-                            <small><span class="badge bg-success">&nbsp;</span> Pagato</small>
+                            <small><span class="badge bg-green text-green-fg">&nbsp;</span> Pagato</small>
                             <small><span class="badge bg-purple-lt">&nbsp;</span> Contrattualizzato</small>
                             <small><span class="badge bg-light border">&nbsp;</span> Disponibile</small>
                         </div>
@@ -316,7 +316,7 @@ $this->params['breadcrumbs'][] = $model->codice_progetto;
                                         <?php if ($item['contratto']): ?>
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="progress flex-grow-1" style="height: 6px;">
-                                                <div class="progress-bar <?= $item['percentuale'] >= 100 ? 'bg-success' : ($item['percentuale'] > 0 ? 'bg-warning' : 'bg-secondary') ?>"
+                                                <div class="progress-bar <?= $item['percentuale'] >= 100 ? 'bg-green' : ($item['percentuale'] > 0 ? 'bg-orange' : 'bg-default') ?>"
                                                      style="width: <?= min($item['percentuale'], 100) ?>%"></div>
                                             </div>
                                             <small class="text-nowrap"><?= $item['percentuale'] ?>%</small>
@@ -340,7 +340,7 @@ $this->params['breadcrumbs'][] = $model->codice_progetto;
                                         <?php $percTotale = ($totaleContrattualizzato > 0) ? round(($totalePagatoProgetto / $totaleContrattualizzato) * 100) : 0; ?>
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="progress flex-grow-1" style="height: 6px;">
-                                                <div class="progress-bar <?= $percTotale >= 100 ? 'bg-success' : ($percTotale > 0 ? 'bg-warning' : 'bg-secondary') ?>"
+                                                <div class="progress-bar <?= $percTotale >= 100 ? 'bg-green' : ($percTotale > 0 ? 'bg-orange' : 'bg-default') ?>"
                                                      style="width: <?= min($percTotale, 100) ?>%"></div>
                                             </div>
                                             <small class="text-nowrap"><?= $percTotale ?>%</small>

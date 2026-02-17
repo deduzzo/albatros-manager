@@ -143,13 +143,13 @@ class Modulo extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         $classes = [
-            self::STATUS_BOZZA => 'bg-warning',
-            self::STATUS_APERTO => 'bg-success',
-            self::STATUS_IN_CORSO => 'bg-primary',
-            self::STATUS_CONCLUSO => 'bg-info',
-            self::STATUS_ANNULLATO => 'bg-danger',
+            self::STATUS_BOZZA => 'bg-orange text-orange-fg',
+            self::STATUS_APERTO => 'bg-green text-green-fg',
+            self::STATUS_IN_CORSO => 'bg-blue text-blue-fg',
+            self::STATUS_CONCLUSO => 'bg-azure text-azure-fg',
+            self::STATUS_ANNULLATO => 'bg-red text-red-fg',
         ];
-        return $classes[$this->status] ?? 'bg-secondary';
+        return $classes[$this->status] ?? 'bg-default text-default-fg';
     }
 
     /**

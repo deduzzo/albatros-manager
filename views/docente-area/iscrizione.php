@@ -156,7 +156,7 @@ $this->params['breadcrumbs'][] = 'Iscrizione';
                                         <li>
                                             <strong><?= Html::encode($docTipo->nome) ?></strong>
                                             <?php if ($docTipo->obbligatorio): ?>
-                                                <span class="badge bg-red">Obbligatorio</span>
+                                                <span class="badge bg-red text-red-fg">Obbligatorio</span>
                                             <?php endif; ?>
                                             <small class="text-muted">
                                                 (<?= Html::encode($docTipo->formati_ammessi) ?>, max <?= $docTipo->dimensione_max_mb ?>MB)

@@ -140,11 +140,11 @@ class Pagamento extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         return match ($this->status) {
-            self::STATUS_PROGRAMMATO => 'bg-secondary',
-            self::STATUS_IN_ATTESA => 'bg-warning',
-            self::STATUS_PAGATO => 'bg-success',
-            self::STATUS_ANNULLATO => 'bg-danger',
-            default => 'bg-secondary',
+            self::STATUS_PROGRAMMATO => 'bg-default text-default-fg',
+            self::STATUS_IN_ATTESA => 'bg-orange text-orange-fg',
+            self::STATUS_PAGATO => 'bg-green text-green-fg',
+            self::STATUS_ANNULLATO => 'bg-red text-red-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 
@@ -155,11 +155,11 @@ class Pagamento extends BaseActiveRecord
     public function getTipoBadgeClass()
     {
         return match ($this->tipo) {
-            self::TIPO_ACCONTO => 'bg-info',
-            self::TIPO_SALDO => 'bg-primary',
-            self::TIPO_RATA => 'bg-cyan',
-            self::TIPO_RIMBORSO => 'bg-warning',
-            default => 'bg-secondary',
+            self::TIPO_ACCONTO => 'bg-azure text-azure-fg',
+            self::TIPO_SALDO => 'bg-blue text-blue-fg',
+            self::TIPO_RATA => 'bg-cyan text-cyan-fg',
+            self::TIPO_RIMBORSO => 'bg-orange text-orange-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 
@@ -208,10 +208,10 @@ class Pagamento extends BaseActiveRecord
     public function getOreExtraStatusBadgeClass()
     {
         return match ($this->ore_extra_status) {
-            self::ORE_EXTRA_PENDENTE => 'bg-warning',
-            self::ORE_EXTRA_APPROVATO => 'bg-success',
-            self::ORE_EXTRA_RIFIUTATO => 'bg-danger',
-            default => 'bg-secondary',
+            self::ORE_EXTRA_PENDENTE => 'bg-orange text-orange-fg',
+            self::ORE_EXTRA_APPROVATO => 'bg-green text-green-fg',
+            self::ORE_EXTRA_RIFIUTATO => 'bg-red text-red-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 }

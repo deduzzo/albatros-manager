@@ -27,9 +27,6 @@ TablerAsset::register($this);
         :root {
             --tblr-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
         }
-        body {
-            font-feature-settings: "cv03", "cv04", "cv11";
-        }
     </style>
 </head>
 <body class="d-flex flex-column bg-white">

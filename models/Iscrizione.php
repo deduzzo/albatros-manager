@@ -112,12 +112,12 @@ class Iscrizione extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         return match ($this->status) {
-            self::STATUS_ISCRITTO => 'bg-info',
-            self::STATUS_FREQUENTANTE => 'bg-primary',
-            self::STATUS_RITIRATO => 'bg-warning',
-            self::STATUS_COMPLETATO => 'bg-success',
-            self::STATUS_NON_AMMESSO => 'bg-danger',
-            default => 'bg-secondary',
+            self::STATUS_ISCRITTO => 'bg-azure text-azure-fg',
+            self::STATUS_FREQUENTANTE => 'bg-blue text-blue-fg',
+            self::STATUS_RITIRATO => 'bg-orange text-orange-fg',
+            self::STATUS_COMPLETATO => 'bg-green text-green-fg',
+            self::STATUS_NON_AMMESSO => 'bg-red text-red-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 

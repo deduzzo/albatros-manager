@@ -114,12 +114,12 @@ class Progetto extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         $classes = [
-            self::STATUS_BOZZA => 'bg-warning',
-            self::STATUS_ATTIVO => 'bg-success',
-            self::STATUS_SOSPESO => 'bg-secondary',
-            self::STATUS_CONCLUSO => 'bg-info',
+            self::STATUS_BOZZA => 'bg-orange text-orange-fg',
+            self::STATUS_ATTIVO => 'bg-green text-green-fg',
+            self::STATUS_SOSPESO => 'bg-default text-default-fg',
+            self::STATUS_CONCLUSO => 'bg-azure text-azure-fg',
         ];
-        return $classes[$this->status] ?? 'bg-secondary';
+        return $classes[$this->status] ?? 'bg-default text-default-fg';
     }
 
     public static function getList()

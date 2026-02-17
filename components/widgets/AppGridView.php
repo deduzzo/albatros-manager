@@ -352,18 +352,18 @@ HTML;
     public static function statusBadge($status, $statusMap = [])
     {
         $defaultMap = [
-            'attivo' => ['class' => 'bg-success', 'label' => 'Attivo'],
-            'bozza' => ['class' => 'bg-warning', 'label' => 'Bozza'],
-            'inattivo' => ['class' => 'bg-secondary', 'label' => 'Inattivo'],
-            'concluso' => ['class' => 'bg-info', 'label' => 'Concluso'],
-            'annullato' => ['class' => 'bg-danger', 'label' => 'Annullato'],
-            'pubblicato' => ['class' => 'bg-success', 'label' => 'Pubblicato'],
-            'chiuso' => ['class' => 'bg-secondary', 'label' => 'Chiuso'],
-            'sospeso' => ['class' => 'bg-warning', 'label' => 'Sospeso'],
+            'attivo' => ['class' => 'bg-green text-green-fg', 'label' => 'Attivo'],
+            'bozza' => ['class' => 'bg-orange text-orange-fg', 'label' => 'Bozza'],
+            'inattivo' => ['class' => 'bg-default text-default-fg', 'label' => 'Inattivo'],
+            'concluso' => ['class' => 'bg-azure text-azure-fg', 'label' => 'Concluso'],
+            'annullato' => ['class' => 'bg-red text-red-fg', 'label' => 'Annullato'],
+            'pubblicato' => ['class' => 'bg-green text-green-fg', 'label' => 'Pubblicato'],
+            'chiuso' => ['class' => 'bg-default text-default-fg', 'label' => 'Chiuso'],
+            'sospeso' => ['class' => 'bg-orange text-orange-fg', 'label' => 'Sospeso'],
         ];
 
         $map = array_merge($defaultMap, $statusMap);
-        $config = $map[$status] ?? ['class' => 'bg-secondary', 'label' => $status];
+        $config = $map[$status] ?? ['class' => 'bg-default text-default-fg', 'label' => $status];
 
         return Html::tag('span', $config['label'], ['class' => 'badge ' . $config['class']]);
     }

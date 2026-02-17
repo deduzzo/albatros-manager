@@ -91,10 +91,10 @@ $isActive = function($controllers) use ($currentController) {
                             </a>
                             <div class="dropdown-divider"></div>
                             <span class="dropdown-header">Tag Curriculum</span>
-                            <a class="dropdown-item <?= $currentController == 'tag-categoria' ? 'active' : '' ?>" href="#">
+                            <a class="dropdown-item <?= $currentController == 'tag-categoria' ? 'active' : '' ?>" href="<?= Url::to(['/tag-categoria/index']) ?>">
                                 <i class="ti ti-category me-2"></i> Categorie Tag
                             </a>
-                            <a class="dropdown-item <?= $currentController == 'tag-curriculum' ? 'active' : '' ?>" href="#">
+                            <a class="dropdown-item <?= $currentController == 'tag-curriculum' ? 'active' : '' ?>" href="<?= Url::to(['/tag-curriculum/index']) ?>">
                                 <i class="ti ti-tags me-2"></i> Gestione Tag
                             </a>
                         </div>
@@ -118,7 +118,7 @@ $isActive = function($controllers) use ($currentController) {
                             <a class="dropdown-item <?= $currentController == 'contratto' ? 'active' : '' ?>" href="<?= Url::to(['/contratto/index']) ?>">
                                 <i class="ti ti-file-text me-2"></i> Contratti
                             </a>
-                            <a class="dropdown-item <?= $currentController == 'rendicontazione-ore' ? 'active' : '' ?>" href="#">
+                            <a class="dropdown-item <?= $currentController == 'rendicontazione-ore' ? 'active' : '' ?>" href="<?= Url::to(['/rendicontazione-ore/dashboard']) ?>">
                                 <i class="ti ti-clock-hour-4 me-2"></i> Rendicontazione Ore
                             </a>
                             <div class="dropdown-divider"></div>
@@ -148,7 +148,7 @@ $isActive = function($controllers) use ($currentController) {
                     </li>
 
                     <!-- Report -->
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown <?= $isActive(['report', 'audit-log']) ?>">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-chart-bar"></i>
@@ -156,13 +156,13 @@ $isActive = function($controllers) use ($currentController) {
                             <span class="nav-link-title">Report</span>
                         </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'report' && $currentAction == 'statistiche' ? 'active' : '' ?>" href="<?= Url::to(['/report/statistiche']) ?>">
                                 <i class="ti ti-chart-pie me-2"></i> Statistiche
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'report' && $currentAction == 'export' ? 'active' : '' ?>" href="<?= Url::to(['/report/export']) ?>">
                                 <i class="ti ti-download me-2"></i> Export
                             </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item <?= $currentController == 'audit-log' ? 'active' : '' ?>" href="<?= Url::to(['/audit-log/index']) ?>">
                                 <i class="ti ti-activity me-2"></i> Audit Log
                             </a>
                         </div>

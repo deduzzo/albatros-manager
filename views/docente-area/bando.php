@@ -17,13 +17,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="container-xl">
         <!-- Header Bando -->
         <div class="card mb-4">
-            <div class="card-status-top bg-success"></div>
+            <div class="card-status-top bg-green"></div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-blue-lt me-2"><?= Html::encode($avviso->codice_avviso) ?></span>
-                            <span class="badge bg-success">Aperto</span>
+                            <span class="badge bg-green text-green-fg">Aperto</span>
                         </div>
                         <h2><?= Html::encode($avviso->titolo) ?></h2>
                         <?php if ($avviso->descrizione): ?>
@@ -86,9 +86,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                         <td><?= $doc->dimensione_max_mb ?> MB</td>
                                         <td>
                                             <?php if ($doc->obbligatorio): ?>
-                                                <span class="badge bg-red">Obbligatorio</span>
+                                                <span class="badge bg-red text-red-fg">Obbligatorio</span>
                                             <?php else: ?>
-                                                <span class="badge bg-secondary">Facoltativo</span>
+                                                <span class="badge bg-default text-default-fg">Facoltativo</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -125,7 +125,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             <strong><?= Html::encode($modulo->titolo) ?></strong>
                                         </div>
                                         <?php if ($giaIscritto): ?>
-                                            <span class="badge bg-success"><i class="ti ti-check me-1"></i> Iscrizione inviata</span>
+                                            <span class="badge bg-green text-green-fg"><i class="ti ti-check me-1"></i> Iscrizione inviata</span>
                                         <?php endif; ?>
                                     </div>
                                     <div class="text-secondary mt-1">

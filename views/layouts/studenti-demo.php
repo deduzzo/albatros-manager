@@ -28,9 +28,6 @@ TablerAsset::register($this);
         :root {
             --tblr-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
         }
-        body {
-            font-feature-settings: "cv03", "cv04", "cv11";
-        }
         .demo-badge {
             position: fixed;
             top: 10px;
@@ -44,7 +41,7 @@ TablerAsset::register($this);
 
 <!-- Badge DEMO -->
 <div class="demo-badge">
-    <span class="badge bg-warning text-dark fs-6">
+    <span class="badge bg-orange text-orange-fg fs-6">
         <i class="ti ti-flask me-1"></i> DEMO - Nessun dato salvato
     </span>
 </div>

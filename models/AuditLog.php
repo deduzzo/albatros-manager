@@ -31,7 +31,7 @@ use yii\helpers\Json;
  * @property string|null $session_id
  * @property string $created_at
  *
- * @property Utente $user
+ * @property User $user
  */
 class AuditLog extends ActiveRecord
 {
@@ -100,7 +100,7 @@ class AuditLog extends ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(Utente::class, ['id' => 'user_id']);
+        return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
     /**
@@ -169,11 +169,11 @@ class AuditLog extends ActiveRecord
     public function getActionBadge()
     {
         $badges = [
-            'INSERT' => '<span class="badge badge-success">Creato</span>',
-            'UPDATE' => '<span class="badge badge-info">Modificato</span>',
-            'DELETE' => '<span class="badge badge-danger">Eliminato</span>',
-            'SOFT_DELETE' => '<span class="badge badge-warning">Archiviato</span>',
-            'RESTORE' => '<span class="badge badge-primary">Ripristinato</span>',
+            'INSERT' => '<span class="badge bg-green text-green-fg">Creato</span>',
+            'UPDATE' => '<span class="badge bg-azure text-azure-fg">Modificato</span>',
+            'DELETE' => '<span class="badge bg-red text-red-fg">Eliminato</span>',
+            'SOFT_DELETE' => '<span class="badge bg-orange text-orange-fg">Archiviato</span>',
+            'RESTORE' => '<span class="badge bg-blue text-blue-fg">Ripristinato</span>',
         ];
 
         return $badges[$this->action] ?? $this->action;

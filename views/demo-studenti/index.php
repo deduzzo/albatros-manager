@@ -31,7 +31,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="bg-primary text-white avatar"><i class="ti ti-file-text"></i></span>
+                                <span class="bg-blue text-blue-fg avatar"><i class="ti ti-file-text"></i></span>
                             </div>
                             <div class="col">
                                 <div class="fw-bold fs-3"><?= count($bandi) ?></div>
@@ -46,7 +46,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="bg-success text-white avatar"><i class="ti ti-book"></i></span>
+                                <span class="bg-green text-green-fg avatar"><i class="ti ti-book"></i></span>
                             </div>
                             <div class="col">
                                 <?php
@@ -65,7 +65,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="bg-warning text-white avatar"><i class="ti ti-users"></i></span>
+                                <span class="bg-orange text-orange-fg avatar"><i class="ti ti-users"></i></span>
                             </div>
                             <div class="col">
                                 <?php
@@ -86,7 +86,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-auto">
-                                <span class="bg-info text-white avatar"><i class="ti ti-certificate"></i></span>
+                                <span class="bg-azure text-azure-fg avatar"><i class="ti ti-certificate"></i></span>
                             </div>
                             <div class="col">
                                 <div class="fw-bold fs-3">100%</div>
@@ -113,7 +113,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                             <!-- Header Bando -->
                             <div class="d-flex align-items-start mb-3">
                                 <div>
-                                    <span class="badge mb-2" style="background-color: <?= $bando['colore'] ?>;">
+                                    <span class="badge mb-2" style="background-color: <?= $bando['colore'] ?>; color: #fff;">
                                         <?= Html::encode($bando['codice']) ?>
                                     </span>
                                     <h2 class="card-title mb-1"><?= Html::encode($bando['titolo']) ?></h2>
@@ -131,7 +131,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                                     <?php foreach ($bando['obiettivi'] as $i => $obiettivo): ?>
                                         <div class="col-md-6 mb-2">
                                             <div class="d-flex align-items-start">
-                                                <span class="badge bg-success-lt me-2"><?= $i + 1 ?></span>
+                                                <span class="badge bg-green-lt me-2"><?= $i + 1 ?></span>
                                                 <span><?= Html::encode($obiettivo) ?></span>
                                             </div>
                                         </div>
@@ -144,7 +144,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                                 <h4 class="mb-2"><i class="ti ti-rocket me-2" style="color: <?= $bando['colore'] ?>;"></i>Prospettive Professionali</h4>
                                 <div class="d-flex flex-wrap gap-2">
                                     <?php foreach ($bando['prospettive'] as $prospettiva): ?>
-                                        <span class="badge bg-primary-lt">
+                                        <span class="badge bg-blue-lt">
                                             <i class="ti ti-arrow-right me-1"></i><?= Html::encode($prospettiva) ?>
                                         </span>
                                     <?php endforeach; ?>
@@ -181,7 +181,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                                 <h4 class="mb-2"><i class="ti ti-certificate me-2" style="color: <?= $bando['colore'] ?>;"></i>Certificazioni Rilasciate</h4>
                                 <div class="d-flex flex-wrap gap-2">
                                     <?php foreach ($bando['certificazioni'] as $cert): ?>
-                                        <span class="badge bg-warning-lt">
+                                        <span class="badge bg-orange-lt">
                                             <i class="ti ti-award me-1"></i><?= Html::encode($cert) ?>
                                         </span>
                                     <?php endforeach; ?>
@@ -201,7 +201,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                                 </div>
                                 <div class="mb-3">
                                     <span class="text-secondary d-block mb-1">Scadenza Iscrizioni</span>
-                                    <span class="badge bg-danger fs-5">
+                                    <span class="badge bg-red text-red-fg fs-5">
                                         <i class="ti ti-calendar me-1"></i>
                                         <?= Yii::$app->formatter->asDate($bando['scadenza']) ?>
                                     </span>
@@ -218,7 +218,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                                 <?php foreach ($bando['corsi'] as $corso): ?>
                                     <?php
                                     $percentuale = round(($corso['posti'] - $corso['disponibili']) / $corso['posti'] * 100);
-                                    $colorePosti = $corso['disponibili'] > 10 ? 'success' : ($corso['disponibili'] > 5 ? 'warning' : 'danger');
+                                    $colorePosti = $corso['disponibili'] > 10 ? 'green' : ($corso['disponibili'] > 5 ? 'orange' : 'red');
                                     ?>
                                     <div class="list-group-item">
                                         <div class="d-flex justify-content-between align-items-start mb-2">

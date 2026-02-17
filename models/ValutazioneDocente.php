@@ -42,7 +42,7 @@ class ValutazioneDocente extends BaseActiveRecord
             [['commento'], 'string'],
             [['data_valutazione'], 'date', 'format' => 'php:Y-m-d'],
             [['docente_codice_fiscale'], 'string', 'max' => 16],
-            [['created_at', 'deleted_at'], 'safe'],
+            [['created_at', 'updated_at', 'deleted_at'], 'safe'],
             [['created_by', 'updated_by', 'deleted_by'], 'integer'],
         ];
     }

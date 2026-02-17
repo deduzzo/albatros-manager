@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <strong>Compila tutti i fogli</strong> seguendo le istruzioni nel foglio "📖 ISTRUZIONI"
                         </li>
                         <li class="mb-2">
-                            <strong>Campi obbligatori</strong> sono evidenziati in <span class="badge bg-primary">BLU</span>
+                            <strong>Campi obbligatori</strong> sono evidenziati in <span class="badge bg-blue text-blue-fg">BLU</span>
                         </li>
                         <li class="mb-2">
                             <strong>Salva il file Excel</strong> senza modificare i nomi dei fogli
@@ -305,7 +305,7 @@ function handleResponse(data, isDryRun) {
                     '<div class="card-body">' +
                     '<div class="row align-items-center">' +
                     '<div class="col-auto">' +
-                    '<span class="bg-primary text-white avatar">' + data.stats[key] + '</span>' +
+                    '<span class="bg-blue text-blue-fg avatar">' + data.stats[key] + '</span>' +
                     '</div>' +
                     '<div class="col">' +
                     '<div class="font-weight-medium">' + key + '</div>' +

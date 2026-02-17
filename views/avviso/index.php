@@ -83,7 +83,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'label' => 'Moduli',
                             'headerOptions' => ['style' => 'width: 70px;'],
                             'content' => function($model) {
-                                return '<span class="badge bg-secondary">' . $model->getModuliCount() . '</span>';
+                                return '<span class="badge bg-default text-default-fg">' . $model->getModuliCount() . '</span>';
                             },
                         ],
                         ['class' => 'yii\grid\ActionColumn'],

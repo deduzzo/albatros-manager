@@ -136,10 +136,10 @@ class RendicontazioneOre extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         return match ($this->status) {
-            self::STATUS_INSERITO => 'bg-warning',
-            self::STATUS_APPROVATO => 'bg-success',
-            self::STATUS_RIFIUTATO => 'bg-danger',
-            default => 'bg-secondary',
+            self::STATUS_INSERITO => 'bg-orange text-orange-fg',
+            self::STATUS_APPROVATO => 'bg-green text-green-fg',
+            self::STATUS_RIFIUTATO => 'bg-red text-red-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 

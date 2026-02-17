@@ -33,7 +33,7 @@ $this->title = 'Accesso Area Docenti';
             ]) ?>
 
             <?= $form->field($model, 'password')->passwordInput([
-                'placeholder' => 'La tua password',
+                'placeholder' => YII_DEBUG ? 'Lascia vuoto per test' : 'La tua password',
             ]) ?>
 
             <div class="mb-2">

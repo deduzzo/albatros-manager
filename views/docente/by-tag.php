@@ -31,7 +31,7 @@ $colore = $tag->categoria ? $tag->categoria->colore : '#206bc4';
                 <div class="col">
                     <h2 class="page-title">
                         Docenti con competenza:
-                        <span class="badge ms-2" style="background-color: <?= Html::encode($colore) ?>; font-size: 1rem;">
+                        <span class="badge ms-2" style="background-color: <?= Html::encode($colore) ?>; color: #fff; font-size: 1rem;">
                             <?= Html::encode($tag->nome) ?>
                         </span>
                     </h2>

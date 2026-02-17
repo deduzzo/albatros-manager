@@ -84,6 +84,11 @@ $config = [
                 'area-docenti/bandi/<id:\d+>' => 'docente-area/bando',
                 'area-docenti/iscrizione/<moduloId:\d+>' => 'docente-area/iscrizione',
                 'area-docenti/le-mie-iscrizioni' => 'docente-area/le-mie-iscrizioni',
+                'area-docenti/le-mie-assegnazioni' => 'docente-area/le-mie-assegnazioni',
+                'area-docenti/inserisci-ore/<assegnazione_id:\d+>' => 'docente-area/inserisci-ore',
+                'area-docenti/le-mie-ore/<assegnazione_id:\d+>' => 'docente-area/le-mie-ore',
+                'area-docenti/modifica-ore/<id:\d+>' => 'docente-area/modifica-ore',
+                'area-docenti/elimina-ore/<id:\d+>' => 'docente-area/elimina-ore',
 
                 // CRUD standard per ogni entità
                 '<controller:[\w-]+>' => '<controller>/index',

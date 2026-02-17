@@ -12,7 +12,7 @@ $this->title = 'Iscrizione Confermata';
     <div class="container-xl">
         <div class="empty py-5">
             <div class="empty-img">
-                <span class="avatar avatar-2xl bg-success-lt">
+                <span class="avatar avatar-2xl bg-green-lt">
                     <i class="ti ti-circle-check" style="font-size: 4rem;"></i>
                 </span>
             </div>
@@ -27,21 +27,21 @@ $this->title = 'Iscrizione Confermata';
                     <h4 class="mb-3">Prossimi passi:</h4>
                     <div class="list-group list-group-flush">
                         <div class="list-group-item d-flex">
-                            <span class="avatar avatar-sm bg-primary-lt me-3">1</span>
+                            <span class="avatar avatar-sm bg-blue-lt me-3">1</span>
                             <div>
                                 <strong>Verifica email</strong>
                                 <div class="text-secondary small">Controlla la tua casella email e conferma l'indirizzo</div>
                             </div>
                         </div>
                         <div class="list-group-item d-flex">
-                            <span class="avatar avatar-sm bg-primary-lt me-3">2</span>
+                            <span class="avatar avatar-sm bg-blue-lt me-3">2</span>
                             <div>
                                 <strong>Valutazione documenti</strong>
                                 <div class="text-secondary small">I nostri operatori verificheranno i documenti caricati</div>
                             </div>
                         </div>
                         <div class="list-group-item d-flex">
-                            <span class="avatar avatar-sm bg-primary-lt me-3">3</span>
+                            <span class="avatar avatar-sm bg-blue-lt me-3">3</span>
                             <div>
                                 <strong>Conferma iscrizione</strong>
                                 <div class="text-secondary small">Riceverai conferma definitiva entro 5 giorni lavorativi</div>

@@ -42,11 +42,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <div class="datagrid-item">
                             <div class="datagrid-title">Richiede Scadenza</div>
-                            <div class="datagrid-content"><?= $model->richiede_scadenza ? '<span class="badge bg-warning">Si</span>' : '<span class="badge bg-secondary">No</span>' ?></div>
+                            <div class="datagrid-content"><?= $model->richiede_scadenza ? '<span class="badge bg-orange text-orange-fg">Si</span>' : '<span class="badge bg-default text-default-fg">No</span>' ?></div>
                         </div>
                         <div class="datagrid-item">
                             <div class="datagrid-title">Attivo</div>
-                            <div class="datagrid-content"><?= $model->attivo ? '<span class="badge bg-success">Attivo</span>' : '<span class="badge bg-danger">Disattivo</span>' ?></div>
+                            <div class="datagrid-content"><?= $model->attivo ? '<span class="badge bg-green text-green-fg">Attivo</span>' : '<span class="badge bg-red text-red-fg">Disattivo</span>' ?></div>
                         </div>
                         <div class="datagrid-item">
                             <div class="datagrid-title">Creato il</div>

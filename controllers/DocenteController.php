@@ -10,6 +10,7 @@ use app\models\TagCurriculum;
 use app\models\TagCategoria;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
@@ -39,6 +40,7 @@ class DocenteController extends Controller
                     'delete' => ['POST'],
                     'add-tag' => ['POST'],
                     'remove-tag' => ['POST'],
+                    'gestisci-tag' => ['POST'],
                 ],
             ],
         ];
@@ -218,6 +220,56 @@ class DocenteController extends Controller
             'tag' => $tag,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    /**
+     * Verifica il codice fiscale di un docente via AJAX.
+     * @param string $id Codice fiscale
+     * @return array
+     */
+    public function actionValidaCf($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $model = $this->findModel($id);
+        $valido = Docente::verificaCodiceFiscale($model->codice_fiscale);
+        $model->codice_fiscale_validato = $valido;
+        $model->save(false);
+        return ['success' => true, 'valido' => $valido];
+    }
+
+    /**
+     * Gestisce i tag di un docente via AJAX (bulk update).
+     * @param string $id Codice fiscale
+     * @return array
+     */
+    public function actionGestisciTag($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $model = $this->findModel($id);
+
+        $tags = Yii::$app->request->post('tags', []);
+
+        // Elimina vecchi tag
+        DocenteTag::deleteAll(['docente_codice_fiscale' => $model->codice_fiscale]);
+
+        // Crea nuovi tag
+        $count = 0;
+        foreach ($tags as $tagData) {
+            $tagId = $tagData['tag_id'] ?? null;
+            $livello = $tagData['livello'] ?? null;
+            if ($tagId) {
+                $docenteTag = new DocenteTag();
+                $docenteTag->docente_codice_fiscale = $model->codice_fiscale;
+                $docenteTag->tag_id = $tagId;
+                $docenteTag->livello = $livello ?: null;
+                $docenteTag->created_by = Yii::$app->user->id;
+                if ($docenteTag->save()) {
+                    $count++;
+                }
+            }
+        }
+
+        return ['success' => true, 'count' => $count];
     }
 
     /**

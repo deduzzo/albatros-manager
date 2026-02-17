@@ -145,7 +145,7 @@ class AuditLogBehavior extends Behavior
                 : null;
 
             $data = [
-                'table_name' => $owner->tableName(),
+                'table_name' => preg_replace('/\{\{%?|}}/', '', $owner->tableName()),
                 'record_id' => $this->getRecordId(),
                 'action' => $action,
                 'old_values' => $oldValues ? Json::encode($oldValues) : null,

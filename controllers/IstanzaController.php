@@ -6,9 +6,13 @@ use Yii;
 use app\models\Istanza;
 use app\models\IstanzaSearch;
 use app\models\IstanzaTag;
+use app\models\IstanzaDocumento;
+use app\models\IstanzaSnapshot;
 use app\models\StoricoEsito;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
+use yii\web\UploadedFile;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
@@ -33,6 +37,8 @@ class IstanzaController extends Controller
                     'promuovi-tag' => ['POST'],
                     'promuovi-tutti-tag' => ['POST'],
                     'aggiungi-esito' => ['POST'],
+                    'upload-documento' => ['POST'],
+                    'delete-documento' => ['POST'],
                 ],
             ],
         ];
@@ -54,6 +60,46 @@ class IstanzaController extends Controller
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
+    }
+
+    /**
+     * Crea una nuova istanza/candidatura.
+     * @return string|\yii\web\Response
+     */
+    public function actionCreate()
+    {
+        $model = new Istanza();
+        $model->data_presentazione = date('Y-m-d');
+        $model->status = Istanza::STATUS_PRESENTATA;
+
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            Yii::$app->session->setFlash('success', 'Istanza creata con successo.');
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Restituisce i moduli per un avviso (AJAX per dropdown dipendente).
+     * @param int $avviso_id
+     * @return array
+     */
+    public function actionModuliPerAvviso($avviso_id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $moduli = \app\models\Modulo::find()
+            ->where(['avviso_id' => $avviso_id])
+            ->orderBy(['codice' => SORT_ASC])
+            ->all();
+
+        $result = [];
+        foreach ($moduli as $modulo) {
+            $result[] = ['id' => $modulo->id, 'text' => $modulo->codice . ' - ' . $modulo->titolo];
+        }
+        return $result;
     }
 
     public function actionUpdate($id)
@@ -156,6 +202,109 @@ class IstanzaController extends Controller
         return $this->render('snapshot', [
             'model' => $model,
         ]);
+    }
+
+    /**
+     * Carica un documento per l'istanza
+     */
+    public function actionUploadDocumento($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $istanza = $this->findModel($id);
+
+        $file = UploadedFile::getInstanceByName('file');
+        if (!$file) {
+            return ['success' => false, 'error' => 'Nessun file selezionato'];
+        }
+
+        // Validazione tipo
+        $allowedTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'image/jpeg',
+            'image/png',
+        ];
+        if (!in_array($file->type, $allowedTypes)) {
+            return ['success' => false, 'error' => 'Tipo file non consentito. Ammessi: PDF, DOC, DOCX, JPG, PNG'];
+        }
+
+        // Validazione dimensione (max 10MB)
+        if ($file->size > 10 * 1024 * 1024) {
+            return ['success' => false, 'error' => 'Il file supera la dimensione massima di 10MB'];
+        }
+
+        // Salva file
+        $uploadDir = Yii::getAlias('@webroot/uploads/istanze/' . $istanza->id);
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $savedName = uniqid() . '_' . $file->name;
+        $file->saveAs($uploadDir . '/' . $savedName);
+
+        // Crea record
+        $doc = new IstanzaDocumento();
+        $doc->istanza_id = $istanza->id;
+        $doc->avviso_documento_tipo_id = Yii::$app->request->post('tipo_id', 0);
+        $doc->nome_file_originale = $file->name;
+        $doc->nome_file_salvato = $savedName;
+        $doc->path = 'istanze/' . $istanza->id . '/' . $savedName;
+        $doc->mime_type = $file->type;
+        $doc->dimensione_bytes = $file->size;
+
+        if ($doc->save()) {
+            return ['success' => true, 'documento' => [
+                'id' => $doc->id,
+                'nome' => $doc->nome_file_originale,
+                'dimensione' => $doc->getDimensioneFormattata(),
+                'tipo' => $doc->mime_type,
+                'data' => Yii::$app->formatter->asDatetime($doc->created_at),
+            ]];
+        }
+        return ['success' => false, 'errors' => $doc->errors];
+    }
+
+    /**
+     * Scarica un documento dell'istanza
+     */
+    public function actionDownloadDocumento($docId)
+    {
+        $doc = IstanzaDocumento::findOne($docId);
+        if (!$doc) {
+            throw new NotFoundHttpException('Documento non trovato.');
+        }
+
+        $filePath = $doc->getFullPath();
+        if (!file_exists($filePath)) {
+            throw new NotFoundHttpException('Il file non esiste sul server.');
+        }
+
+        return Yii::$app->response->sendFile($filePath, $doc->nome_file_originale);
+    }
+
+    /**
+     * Elimina un documento dell'istanza
+     */
+    public function actionDeleteDocumento($docId)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $doc = IstanzaDocumento::findOne($docId);
+        if (!$doc) {
+            return ['success' => false, 'error' => 'Documento non trovato.'];
+        }
+
+        // Elimina file fisico
+        $filePath = $doc->getFullPath();
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        // Elimina record DB
+        if ($doc->delete()) {
+            return ['success' => true];
+        }
+        return ['success' => false, 'error' => 'Errore durante l\'eliminazione del documento.'];
     }
 
     protected function findModel($id)

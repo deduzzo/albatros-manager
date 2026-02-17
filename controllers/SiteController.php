@@ -16,6 +16,7 @@ use app\models\Modulo;
 use app\models\Contratto;
 use app\models\Pagamento;
 use app\models\FonteFinanziamento;
+use app\models\AuditLog;
 
 class SiteController extends Controller
 {
@@ -154,7 +155,14 @@ class SiteController extends Controller
             ->where(['status' => 'concluso'])
             ->count();
 
+        // Attività recenti dall'audit log
+        $attivitaRecenti = AuditLog::find()
+            ->orderBy(['created_at' => SORT_DESC])
+            ->limit(8)
+            ->all();
+
         return $this->render('index', [
+            'attivitaRecenti' => $attivitaRecenti,
             'stats' => [
                 'progetti_attivi' => $progettiAttivi,
                 'progetti_conclusi' => $progettiConclusi,

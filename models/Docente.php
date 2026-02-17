@@ -429,10 +429,10 @@ class Docente extends BaseActiveRecord
     public function getProvenienzaBadge()
     {
         if (!$this->provenienza) {
-            return '<span class="badge bg-secondary">Non specificato</span>';
+            return '<span class="badge bg-default text-default-fg">Non specificato</span>';
         }
 
-        $class = $this->provenienza === self::PROVENIENZA_RU ? 'bg-primary' : 'bg-info';
+        $class = $this->provenienza === self::PROVENIENZA_RU ? 'bg-blue text-blue-fg' : 'bg-azure text-azure-fg';
         $label = $this->provenienza === self::PROVENIENZA_RU ? 'RU' : 'TP';
         $title = $this->getProvenienzaLabel();
 
@@ -455,5 +455,61 @@ class Docente extends BaseActiveRecord
     public function isTipoProfessionista()
     {
         return $this->provenienza === self::PROVENIENZA_TP;
+    }
+
+    /**
+     * Verifica il check digit del codice fiscale italiano.
+     * Algoritmo: peso pari/dispari, modulo 26.
+     * @param string $cf Codice fiscale da verificare
+     * @return bool true se il codice fiscale e' formalmente valido
+     */
+    public static function verificaCodiceFiscale($cf)
+    {
+        $cf = strtoupper(trim($cf));
+
+        if (strlen($cf) !== 16) {
+            return false;
+        }
+
+        if (!preg_match('/^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/', $cf)) {
+            return false;
+        }
+
+        // Tabella conversione posizioni pari (0-indexed: 1,3,5,...,13 => indici 1-based pari)
+        $pari = [
+            '0' => 0, '1' => 1, '2' => 2, '3' => 3, '4' => 4,
+            '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9,
+            'A' => 0, 'B' => 1, 'C' => 2, 'D' => 3, 'E' => 4,
+            'F' => 5, 'G' => 6, 'H' => 7, 'I' => 8, 'J' => 9,
+            'K' => 10, 'L' => 11, 'M' => 12, 'N' => 13, 'O' => 14,
+            'P' => 15, 'Q' => 16, 'R' => 17, 'S' => 18, 'T' => 19,
+            'U' => 20, 'V' => 21, 'W' => 22, 'X' => 23, 'Y' => 24, 'Z' => 25,
+        ];
+
+        // Tabella conversione posizioni dispari (0-indexed: 0,2,4,...,14 => indici 1-based dispari)
+        $dispari = [
+            '0' => 1, '1' => 0, '2' => 5, '3' => 7, '4' => 9,
+            '5' => 13, '6' => 15, '7' => 17, '8' => 19, '9' => 21,
+            'A' => 1, 'B' => 0, 'C' => 5, 'D' => 7, 'E' => 9,
+            'F' => 13, 'G' => 15, 'H' => 17, 'I' => 19, 'J' => 21,
+            'K' => 2, 'L' => 4, 'M' => 18, 'N' => 20, 'O' => 11,
+            'P' => 3, 'Q' => 6, 'R' => 8, 'S' => 12, 'T' => 14,
+            'U' => 16, 'V' => 10, 'W' => 22, 'X' => 25, 'Y' => 24, 'Z' => 23,
+        ];
+
+        $somma = 0;
+        for ($i = 0; $i < 15; $i++) {
+            $c = $cf[$i];
+            // Posizioni 1-based: dispari = indice 0-based pari (0,2,4,...), pari = indice 0-based dispari (1,3,5,...)
+            if ($i % 2 === 0) {
+                $somma += $dispari[$c];
+            } else {
+                $somma += $pari[$c];
+            }
+        }
+
+        $checkChar = chr(($somma % 26) + ord('A'));
+
+        return $cf[15] === $checkChar;
     }
 }

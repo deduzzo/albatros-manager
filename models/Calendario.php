@@ -111,11 +111,11 @@ class Calendario extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         return match ($this->status) {
-            self::STATUS_PROGRAMMATA => 'bg-info',
-            self::STATUS_COMPLETATA => 'bg-success',
-            self::STATUS_ANNULLATA => 'bg-danger',
-            self::STATUS_RECUPERO => 'bg-warning',
-            default => 'bg-secondary',
+            self::STATUS_PROGRAMMATA => 'bg-azure text-azure-fg',
+            self::STATUS_COMPLETATA => 'bg-green text-green-fg',
+            self::STATUS_ANNULLATA => 'bg-red text-red-fg',
+            self::STATUS_RECUPERO => 'bg-orange text-orange-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 

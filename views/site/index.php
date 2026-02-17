@@ -30,7 +30,7 @@ $sediCount = \app\models\Sede::find()->count();
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-auto">
-                        <span class="avatar avatar-lg bg-primary-lt">
+                        <span class="avatar avatar-lg bg-blue-lt">
                             <img src="<?= Yii::$app->request->baseUrl ?>/images/logo-badge-small.png" alt="Albatros">
                         </span>
                     </div>
@@ -48,7 +48,7 @@ $sediCount = \app\models\Sede::find()->count();
         <!-- Financial Stats -->
         <div class="row row-deck row-cards mb-4">
             <div class="col-sm-6 col-lg-3">
-                <div class="card">
+                <a href="<?= Url::to(['/pagamento/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <span class="avatar bg-green-lt me-3">
@@ -60,16 +60,16 @@ $sediCount = \app\models\Sede::find()->count();
                             </div>
                         </div>
                         <div class="progress progress-sm">
-                            <div class="progress-bar bg-success" style="width: <?= $stats['percentuale_liquidato'] ?>%"></div>
+                            <div class="progress-bar bg-green" style="width: <?= $stats['percentuale_liquidato'] ?>%"></div>
                         </div>
                         <div class="d-flex justify-content-between mt-1">
                             <small class="text-muted"><?= $stats['percentuale_liquidato'] ?>% del budget totale</small>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-sm-6 col-lg-3">
-                <div class="card">
+                <a href="<?= Url::to(['/pagamento/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <span class="avatar bg-yellow-lt me-3">
@@ -81,14 +81,14 @@ $sediCount = \app\models\Sede::find()->count();
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-warning me-2"><?= $stats['pratiche_da_liquidare'] ?> pratiche</span>
+                            <span class="badge bg-orange text-orange-fg me-2"><?= $stats['pratiche_da_liquidare'] ?> pratiche</span>
                             <small class="text-muted">in attesa di approvazione</small>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-sm-6 col-lg-3">
-                <div class="card">
+                <a href="<?= Url::to(['/progetto/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <span class="avatar bg-azure-lt me-3">
@@ -100,14 +100,14 @@ $sediCount = \app\models\Sede::find()->count();
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-azure me-2"><?= $stats['progetti_attivi'] ?> progetti</span>
+                            <span class="badge bg-azure text-azure-fg me-2"><?= $stats['progetti_attivi'] ?> progetti</span>
                             <small class="text-muted">attivi</small>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-sm-6 col-lg-3">
-                <div class="card">
+                <a href="<?= Url::to(['/progetto/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <span class="avatar bg-purple-lt me-3">
@@ -119,69 +119,69 @@ $sediCount = \app\models\Sede::find()->count();
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
-                            <span class="badge bg-purple me-2"><?= $stats['progetti_da_rendicontare'] ?> progetti</span>
+                            <span class="badge bg-purple text-purple-fg me-2"><?= $stats['progetti_da_rendicontare'] ?> progetti</span>
                             <small class="text-muted">da rendicontare</small>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
         <!-- Counters Row -->
         <div class="row row-deck row-cards mb-4">
             <div class="col-6 col-sm-4 col-lg-2">
-                <div class="card">
+                <a href="<?= Url::to(['/progetto/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0 text-primary"><?= $stats['progetti_attivi'] ?></div>
+                        <div class="h1 m-0 text-blue"><?= $stats['progetti_attivi'] ?></div>
                         <div class="text-muted mb-2">Progetti Attivi</div>
                         <div class="hr-text hr-text-center my-2">su <?= $stats['total_progetti'] ?></div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-6 col-sm-4 col-lg-2">
-                <div class="card">
+                <a href="<?= Url::to(['/docente/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0 text-info"><?= $stats['docenti'] ?></div>
+                        <div class="h1 m-0 text-azure"><?= $stats['docenti'] ?></div>
                         <div class="text-muted mb-2">Docenti</div>
                         <div class="hr-text hr-text-center my-2">registrati</div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-6 col-sm-4 col-lg-2">
-                <div class="card">
+                <a href="<?= Url::to(['/allievo/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0 text-success"><?= $stats['allievi'] ?></div>
+                        <div class="h1 m-0 text-green"><?= $stats['allievi'] ?></div>
                         <div class="text-muted mb-2">Allievi</div>
                         <div class="hr-text hr-text-center my-2">iscritti</div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-6 col-sm-4 col-lg-2">
-                <div class="card">
+                <a href="<?= Url::to(['/rendicontazione-ore/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body text-center py-4">
-                        <div class="h1 m-0 text-warning"><?= number_format($stats['ore_erogate'], 0, ',', '.') ?></div>
+                        <div class="h1 m-0 text-orange"><?= number_format($stats['ore_erogate'], 0, ',', '.') ?></div>
                         <div class="text-muted mb-2">Ore Erogate</div>
                         <div class="hr-text hr-text-center my-2"><?= $stats['percentuale_ore'] ?>%</div>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-6 col-sm-4 col-lg-2">
-                <div class="card">
+                <a href="<?= Url::to(['/fonte-finanziamento/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body text-center py-4">
                         <div class="h1 m-0"><?= $fontiCount ?></div>
                         <div class="text-muted mb-2">Fonti Finanz.</div>
-                        <?= Html::a('Gestisci <i class="ti ti-arrow-right"></i>', ['/fonte-finanziamento/index'], ['class' => 'small']) ?>
+                        <small>Gestisci <i class="ti ti-arrow-right"></i></small>
                     </div>
-                </div>
+                </a>
             </div>
             <div class="col-6 col-sm-4 col-lg-2">
-                <div class="card">
+                <a href="<?= Url::to(['/sede/index']) ?>" class="card card-link card-link-pop">
                     <div class="card-body text-center py-4">
                         <div class="h1 m-0"><?= $sediCount ?></div>
                         <div class="text-muted mb-2">Sedi</div>
-                        <?= Html::a('Gestisci <i class="ti ti-arrow-right"></i>', ['/sede/index'], ['class' => 'small']) ?>
+                        <small>Gestisci <i class="ti ti-arrow-right"></i></small>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -254,30 +254,34 @@ $sediCount = \app\models\Sede::find()->count();
                                 ', ['/sede/create'], ['class' => 'text-reset']) ?>
                             </div>
                             <div class="col-6">
-                                <div class="card card-sm bg-muted-lt">
-                                    <div class="card-body d-flex align-items-center">
-                                        <span class="avatar bg-secondary-lt me-3">
-                                            <i class="ti ti-folder"></i>
-                                        </span>
-                                        <div>
-                                            <div class="fw-medium text-muted">Nuovo Progetto</div>
-                                            <div class="text-muted small">Prossimamente</div>
+                                <?= Html::a('
+                                    <div class="card card-sm card-link card-link-pop">
+                                        <div class="card-body d-flex align-items-center">
+                                            <span class="avatar bg-purple-lt me-3">
+                                                <i class="ti ti-folder-plus"></i>
+                                            </span>
+                                            <div>
+                                                <div class="fw-medium">Nuovo Progetto</div>
+                                                <div class="text-muted small">Crea progetto</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ', ['/progetto/create'], ['class' => 'text-reset']) ?>
                             </div>
                             <div class="col-6">
-                                <div class="card card-sm bg-muted-lt">
-                                    <div class="card-body d-flex align-items-center">
-                                        <span class="avatar bg-secondary-lt me-3">
-                                            <i class="ti ti-user"></i>
-                                        </span>
-                                        <div>
-                                            <div class="fw-medium text-muted">Nuovo Docente</div>
-                                            <div class="text-muted small">Prossimamente</div>
+                                <?= Html::a('
+                                    <div class="card card-sm card-link card-link-pop">
+                                        <div class="card-body d-flex align-items-center">
+                                            <span class="avatar bg-orange-lt me-3">
+                                                <i class="ti ti-user-plus"></i>
+                                            </span>
+                                            <div>
+                                                <div class="fw-medium">Nuovo Docente</div>
+                                                <div class="text-muted small">Registra docente</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ', ['/docente/create'], ['class' => 'text-reset']) ?>
                             </div>
                         </div>
                     </div>
@@ -298,7 +302,7 @@ $sediCount = \app\models\Sede::find()->count();
                             </div>
                         <?php else: ?>
                             <?php foreach ($progettiRecenti as $progetto): ?>
-                                <div class="list-group-item">
+                                <a href="<?= Url::to(['/progetto/view', 'id' => $progetto->id]) ?>" class="list-group-item list-group-item-action">
                                     <div class="d-flex align-items-center">
                                         <span class="avatar bg-<?= $progetto->status === 'attivo' ? 'green' : ($progetto->status === 'concluso' ? 'secondary' : 'blue') ?>-lt me-3">
                                             <?= strtoupper(substr($progetto->codice_progetto, 0, 3)) ?>
@@ -307,11 +311,11 @@ $sediCount = \app\models\Sede::find()->count();
                                             <div class="fw-medium"><?= Html::encode($progetto->titolo) ?></div>
                                             <small class="text-muted"><?= Html::encode($progetto->fonteFinanziamento->descrizione ?? 'N/D') ?></small>
                                         </div>
-                                        <span class="badge bg-<?= $progetto->status === 'attivo' ? 'success' : ($progetto->status === 'concluso' ? 'secondary' : 'warning') ?>">
+                                        <span class="badge bg-<?= $progetto->status === 'attivo' ? 'green text-green-fg' : ($progetto->status === 'concluso' ? 'default text-default-fg' : 'orange text-orange-fg') ?>">
                                             <?= ucfirst($progetto->status) ?>
                                         </span>
                                     </div>
-                                </div>
+                                </a>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
@@ -325,54 +329,48 @@ $sediCount = \app\models\Sede::find()->count();
                         <h3 class="card-title">Attività Recenti</h3>
                     </div>
                     <div class="list-group list-group-flush list-group-timeline">
-                        <div class="list-group-item">
-                            <div class="d-flex">
-                                <span class="avatar avatar-sm bg-green-lt me-3">
-                                    <i class="ti ti-check"></i>
-                                </span>
-                                <div>
-                                    <div class="fw-medium">Liquidazione approvata</div>
-                                    <small class="text-muted">€ 12.450 - Prof. Rossi M.</small>
-                                    <div class="text-muted small">2 ore fa</div>
-                                </div>
+                        <?php if (empty($attivitaRecenti)): ?>
+                            <div class="list-group-item text-center text-muted py-4">
+                                <i class="ti ti-activity-heartbeat mb-2" style="font-size: 2rem;"></i>
+                                <div>Nessuna attività recente</div>
                             </div>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex">
-                                <span class="avatar avatar-sm bg-blue-lt me-3">
-                                    <i class="ti ti-user-plus"></i>
-                                </span>
-                                <div>
-                                    <div class="fw-medium">Nuovo docente registrato</div>
-                                    <small class="text-muted">Dott. Bianchi G.</small>
-                                    <div class="text-muted small">5 ore fa</div>
+                        <?php else: ?>
+                            <?php foreach ($attivitaRecenti as $log): ?>
+                                <?php
+                                    $iconMap = [
+                                        'INSERT' => ['icon' => 'ti-plus', 'color' => 'green'],
+                                        'UPDATE' => ['icon' => 'ti-edit', 'color' => 'blue'],
+                                        'SOFT_DELETE' => ['icon' => 'ti-trash', 'color' => 'red'],
+                                        'DELETE' => ['icon' => 'ti-trash', 'color' => 'red'],
+                                        'RESTORE' => ['icon' => 'ti-arrow-back-up', 'color' => 'yellow'],
+                                    ];
+                                    $iconInfo = $iconMap[$log->action] ?? ['icon' => 'ti-activity', 'color' => 'default'];
+                                    $tableName = preg_replace('/\{\{%?|}}/', '', $log->table_name);
+                                    $tableName = ucwords(str_replace('_', ' ', $tableName));
+                                    $azioneLabel = match($log->action) {
+                                        'INSERT' => 'Creato',
+                                        'UPDATE' => 'Modificato',
+                                        'SOFT_DELETE' => 'Eliminato',
+                                        'DELETE' => 'Eliminato',
+                                        'RESTORE' => 'Ripristinato',
+                                        default => $log->action,
+                                    };
+                                    $username = $log->username ?: 'Sistema';
+                                ?>
+                                <div class="list-group-item">
+                                    <div class="d-flex">
+                                        <span class="avatar avatar-sm bg-<?= $iconInfo['color'] ?>-lt me-3">
+                                            <i class="ti <?= $iconInfo['icon'] ?>"></i>
+                                        </span>
+                                        <div>
+                                            <div class="fw-medium"><?= Html::encode($azioneLabel . ' ' . $tableName) ?></div>
+                                            <small class="text-muted"><?= Html::encode($username) ?> &middot; ID: <?= Html::encode($log->record_id) ?></small>
+                                            <div class="text-muted small"><?= Yii::$app->formatter->asRelativeTime($log->created_at) ?></div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex">
-                                <span class="avatar avatar-sm bg-yellow-lt me-3">
-                                    <i class="ti ti-file-invoice"></i>
-                                </span>
-                                <div>
-                                    <div class="fw-medium">Rendiconto inviato</div>
-                                    <small class="text-muted">ITS Academy - Q3 2025</small>
-                                    <div class="text-muted small">Ieri</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex">
-                                <span class="avatar avatar-sm bg-purple-lt me-3">
-                                    <i class="ti ti-certificate"></i>
-                                </span>
-                                <div>
-                                    <div class="fw-medium">Contratto firmato</div>
-                                    <small class="text-muted">Prof.ssa Verdi L.</small>
-                                    <div class="text-muted small">2 giorni fa</div>
-                                </div>
-                            </div>
-                        </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

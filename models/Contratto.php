@@ -149,13 +149,13 @@ class Contratto extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         return match ($this->status) {
-            self::STATUS_BOZZA => 'bg-secondary',
-            self::STATUS_FIRMATO => 'bg-info',
-            self::STATUS_ATTIVO => 'bg-success',
-            self::STATUS_SOSPESO => 'bg-warning',
-            self::STATUS_CONCLUSO => 'bg-primary',
-            self::STATUS_ANNULLATO => 'bg-danger',
-            default => 'bg-secondary',
+            self::STATUS_BOZZA => 'bg-default text-default-fg',
+            self::STATUS_FIRMATO => 'bg-azure text-azure-fg',
+            self::STATUS_ATTIVO => 'bg-green text-green-fg',
+            self::STATUS_SOSPESO => 'bg-orange text-orange-fg',
+            self::STATUS_CONCLUSO => 'bg-blue text-blue-fg',
+            self::STATUS_ANNULLATO => 'bg-red text-red-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 
@@ -206,22 +206,22 @@ class Contratto extends BaseActiveRecord
         $giorni = $this->getGiorniRimanentiLezioni();
 
         if ($giorni === null) {
-            return '<span class="badge bg-secondary">N/D</span>';
+            return '<span class="badge bg-default text-default-fg">N/D</span>';
         }
 
         if ($giorni == 0) {
-            return '<span class="badge bg-danger">Concluso</span>';
+            return '<span class="badge bg-red text-red-fg">Concluso</span>';
         }
 
         if ($giorni <= 7) {
-            return '<span class="badge bg-danger">' . $giorni . ' giorni</span>';
+            return '<span class="badge bg-red text-red-fg">' . $giorni . ' giorni</span>';
         }
 
         if ($giorni <= 14) {
-            return '<span class="badge bg-warning">' . $giorni . ' giorni</span>';
+            return '<span class="badge bg-orange text-orange-fg">' . $giorni . ' giorni</span>';
         }
 
-        return '<span class="badge bg-success">' . $giorni . ' giorni</span>';
+        return '<span class="badge bg-green text-green-fg">' . $giorni . ' giorni</span>';
     }
 
     /**

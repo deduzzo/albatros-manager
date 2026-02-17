@@ -109,11 +109,11 @@ class Assegnazione extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         return match ($this->status) {
-            self::STATUS_ASSEGNATO => 'bg-info',
-            self::STATUS_ACCETTATO => 'bg-success',
-            self::STATUS_RIFIUTATO => 'bg-warning',
-            self::STATUS_REVOCATO => 'bg-danger',
-            default => 'bg-secondary',
+            self::STATUS_ASSEGNATO => 'bg-azure text-azure-fg',
+            self::STATUS_ACCETTATO => 'bg-green text-green-fg',
+            self::STATUS_RIFIUTATO => 'bg-orange text-orange-fg',
+            self::STATUS_REVOCATO => 'bg-red text-red-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 

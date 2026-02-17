@@ -39,8 +39,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             'headerOptions' => ['style' => 'width: 140px;'],
                             'filter' => [0 => 'No', 1 => 'Si'],
                             'content' => fn($model) => $model->richiede_scadenza
-                                ? '<span class="badge bg-warning">Si</span>'
-                                : '<span class="badge bg-secondary">No</span>',
+                                ? '<span class="badge bg-orange text-orange-fg">Si</span>'
+                                : '<span class="badge bg-default text-default-fg">No</span>',
                         ],
                         [
                             'attribute' => 'attivo',
@@ -48,8 +48,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             'headerOptions' => ['style' => 'width: 100px;'],
                             'filter' => [0 => 'No', 1 => 'Si'],
                             'content' => fn($model) => $model->attivo
-                                ? '<span class="badge bg-success">Attivo</span>'
-                                : '<span class="badge bg-danger">Disattivo</span>',
+                                ? '<span class="badge bg-green text-green-fg">Attivo</span>'
+                                : '<span class="badge bg-red text-red-fg">Disattivo</span>',
                         ],
                         ['class' => 'yii\grid\ActionColumn'],
                     ],

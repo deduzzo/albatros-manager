@@ -177,7 +177,7 @@ $this->title = 'Iscrizione al Corso';
                                     <label class="form-label <?= $doc['obbligatorio'] ? 'required' : '' ?>">
                                         <?= Html::encode($doc['nome']) ?>
                                         <?php if (!$doc['obbligatorio']): ?>
-                                            <span class="badge bg-secondary ms-1">Facoltativo</span>
+                                            <span class="badge bg-default text-default-fg ms-1">Facoltativo</span>
                                         <?php endif; ?>
                                     </label>
                                     <input type="file" class="form-control" name="documenti[<?= $index ?>]" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" <?= $doc['obbligatorio'] ? 'required' : '' ?>>
@@ -262,7 +262,7 @@ $this->title = 'Iscrizione al Corso';
 
                                 <dt class="col-5">Posti:</dt>
                                 <dd class="col-7">
-                                    <span class="badge bg-success"><?= $corso['posti_disponibili'] ?> disponibili</span>
+                                    <span class="badge bg-green text-green-fg"><?= $corso['posti_disponibili'] ?> disponibili</span>
                                 </dd>
 
                                 <dt class="col-5">Costo:</dt>

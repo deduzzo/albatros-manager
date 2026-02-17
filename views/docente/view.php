@@ -31,9 +31,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     <div class="text-muted mt-1">
                         <code><?= Html::encode($model->codice_fiscale) ?></code>
                         <?php if ($model->codice_fiscale_validato): ?>
-                            <span class="badge bg-success ms-2"><i class="ti ti-check me-1"></i>CF Validato</span>
+                            <span class="badge bg-green text-green-fg ms-2"><i class="ti ti-check me-1"></i>CF Validato</span>
                         <?php else: ?>
-                            <span class="badge bg-warning ms-2"><i class="ti ti-alert-triangle me-1"></i>CF Non Validato</span>
+                            <span class="badge bg-orange text-orange-fg ms-2"><i class="ti ti-alert-triangle me-1"></i>CF Non Validato</span>
                         <?php endif; ?>
                         <?php if ($model->email): ?>
                             <span class="mx-2">|</span>
@@ -142,9 +142,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <div class="datagrid-content">
                                         <code><?= Html::encode($model->codice_fiscale) ?></code>
                                         <?php if ($model->codice_fiscale_validato): ?>
-                                            <span class="badge bg-success ms-1"><i class="ti ti-check"></i></span>
+                                            <span class="badge bg-green text-green-fg ms-1"><i class="ti ti-check"></i></span>
                                         <?php else: ?>
-                                            <span class="badge bg-warning ms-1" title="Non validato"><i class="ti ti-alert-triangle"></i></span>
+                                            <span class="badge bg-orange text-orange-fg ms-1" title="Non validato"><i class="ti ti-alert-triangle"></i></span>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -294,7 +294,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                                         <?php foreach ($data['tags'] as $docenteTag): ?>
                                                             <div class="d-inline-flex align-items-center">
                                                                 <?= Html::a(
-                                                                    '<span class="badge" style="background-color: ' . Html::encode($data['categoria']->colore) . ';">' .
+                                                                    '<span class="badge" style="background-color: ' . Html::encode($data['categoria']->colore) . '; color: #fff;">' .
                                                                     Html::encode($docenteTag->tag->nome) .
                                                                     '</span>',
                                                                     ['by-tag', 'tagId' => $docenteTag->tag_id],

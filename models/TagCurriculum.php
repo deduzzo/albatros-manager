@@ -184,7 +184,7 @@ class TagCurriculum extends BaseActiveRecord
     {
         $colore = $this->categoria ? $this->categoria->colore : '#206bc4';
         return sprintf(
-            '<span class="badge" style="background-color: %s;">%s</span>',
+            '<span class="badge" style="background-color: %s; color: #fff;">%s</span>',
             htmlspecialchars($colore),
             htmlspecialchars($this->nome)
         );

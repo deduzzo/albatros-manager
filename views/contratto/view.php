@@ -193,7 +193,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <div class="datagrid-content">
                                         <?= Yii::$app->formatter->asCurrency($model->getTotalePagato(), 'EUR') ?>
                                         <?php if ($model->isSaldato()): ?>
-                                            <span class="badge bg-success ms-1">Saldato</span>
+                                            <span class="badge bg-green text-green-fg ms-1">Saldato</span>
                                         <?php endif; ?>
                                     </div>
                                 </div>

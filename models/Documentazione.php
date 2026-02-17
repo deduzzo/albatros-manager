@@ -119,10 +119,10 @@ class Documentazione extends BaseActiveRecord
     public function getStatusBadgeClass()
     {
         return match ($this->status) {
-            self::STATUS_ATTIVO => 'bg-success',
-            self::STATUS_ARCHIVIATO => 'bg-secondary',
-            self::STATUS_SCADUTO => 'bg-danger',
-            default => 'bg-secondary',
+            self::STATUS_ATTIVO => 'bg-green text-green-fg',
+            self::STATUS_ARCHIVIATO => 'bg-default text-default-fg',
+            self::STATUS_SCADUTO => 'bg-red text-red-fg',
+            default => 'bg-default text-default-fg',
         };
     }
 

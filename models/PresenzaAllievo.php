@@ -76,12 +76,12 @@ class PresenzaAllievo extends BaseActiveRecord
     public function getPresenzaBadgeClass()
     {
         if ($this->presente) {
-            return 'bg-success';
+            return 'bg-green text-green-fg';
         }
         if ($this->giustificato) {
-            return 'bg-warning';
+            return 'bg-orange text-orange-fg';
         }
-        return 'bg-danger';
+        return 'bg-red text-red-fg';
     }
 
     public function getPresenzaLabel()

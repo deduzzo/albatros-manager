@@ -129,7 +129,7 @@ $mesiItaliani = [
                         <small class="fw-bold"><?= $percApprovate ?>%</small>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar <?= $percApprovate > 100 ? 'bg-danger' : ($percApprovate >= 100 ? 'bg-success' : 'bg-primary') ?>"
+                        <div class="progress-bar <?= $percApprovate > 100 ? 'bg-red' : ($percApprovate >= 100 ? 'bg-green' : 'bg-blue') ?>"
                              style="width: <?= min($percApprovate, 100) ?>%"></div>
                     </div>
                 </div>

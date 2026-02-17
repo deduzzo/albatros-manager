@@ -66,6 +66,18 @@ class RendicontazioneOreController extends Controller
     }
 
     /**
+     * Visualizza il dettaglio di una singola rendicontazione ore.
+     * @param int $id
+     * @return string
+     */
+    public function actionView($id)
+    {
+        return $this->render('view', [
+            'model' => $this->findModel($id),
+        ]);
+    }
+
+    /**
      * Crea una nuova rendicontazione ore.
      * @param int $assegnazione_id
      * @return string|\yii\web\Response
@@ -228,6 +240,72 @@ class RendicontazioneOreController extends Controller
         }
 
         return $this->redirect(['index', 'assegnazione_id' => $assegnazione_id]);
+    }
+
+    /**
+     * Dashboard admin: panoramica di tutte le assegnazioni con ore pendenti.
+     * @return string
+     */
+    public function actionDashboard()
+    {
+        // Assegnazioni che hanno almeno una rendicontazione ore con status='inserito'
+        $assegnazioniConPendenti = Assegnazione::findWithDeleted()
+            ->alias('a')
+            ->leftJoin(
+                '{{%rendicontazione_ore}} ro',
+                'ro.assegnazione_id = a.id AND ro.deleted_at IS NULL AND ro.status = :statusIns',
+                [':statusIns' => RendicontazioneOre::STATUS_INSERITO]
+            )
+            ->andWhere(['a.deleted_at' => null])
+            ->andWhere(['IS NOT', 'ro.id', null])
+            ->groupBy('a.id')
+            ->all();
+
+        $righe = [];
+        $totaleOreDaApprovare = 0;
+        $totaleOreApprovateGlobale = 0;
+
+        foreach ($assegnazioniConPendenti as $assegnazione) {
+            $docente = $assegnazione->docente;
+            $modulo = $assegnazione->modulo;
+            $avviso = $modulo ? $modulo->avviso : null;
+            $oreContratto = $assegnazione->contratto ? $assegnazione->contratto->ore_contrattualizzate : 0;
+            $oreApprovate = RendicontazioneOre::getTotaleOreApprovate($assegnazione->id);
+            $oreInAttesa = RendicontazioneOre::getTotaleOreInserite($assegnazione->id);
+
+            $totaleOreDaApprovare += $oreInAttesa;
+            $totaleOreApprovateGlobale += $oreApprovate;
+
+            $righe[] = [
+                'assegnazione' => $assegnazione,
+                'docente' => $docente,
+                'modulo' => $modulo,
+                'avviso' => $avviso,
+                'oreContratto' => $oreContratto,
+                'oreApprovate' => $oreApprovate,
+                'oreInAttesa' => $oreInAttesa,
+            ];
+        }
+
+        // Ordina per ore in attesa DESC
+        usort($righe, function ($a, $b) {
+            return $b['oreInAttesa'] <=> $a['oreInAttesa'];
+        });
+
+        // Statistiche totali ore approvate (anche per assegnazioni senza pendenti)
+        $totaleOreApprovateTutte = (float) RendicontazioneOre::findWithDeleted()
+            ->alias('ro')
+            ->leftJoin('{{%assegnazione}} a', 'a.id = ro.assegnazione_id AND a.deleted_at IS NULL')
+            ->where(['ro.status' => RendicontazioneOre::STATUS_APPROVATO])
+            ->andWhere(['ro.deleted_at' => null])
+            ->sum('ro.ore') ?: 0;
+
+        return $this->render('dashboard', [
+            'righe' => $righe,
+            'totaleAssegnazioniPendenti' => count($assegnazioniConPendenti),
+            'totaleOreDaApprovare' => $totaleOreDaApprovare,
+            'totaleOreApprovate' => $totaleOreApprovateTutte,
+        ]);
     }
 
     /**

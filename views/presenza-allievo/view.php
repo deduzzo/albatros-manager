@@ -56,8 +56,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div class="subheader">Giustificato</div>
                             <div class="mt-2">
                                 <?= $model->giustificato
-                                    ? '<span class="badge bg-warning fs-5">Si</span>'
-                                    : '<span class="badge bg-secondary fs-5">No</span>' ?>
+                                    ? '<span class="badge bg-orange text-orange-fg fs-5">Si</span>'
+                                    : '<span class="badge bg-default text-default-fg fs-5">No</span>' ?>
                             </div>
                         </div>
                     </div>

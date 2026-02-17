@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $model->codice;
                         <?= Html::encode($this->title) ?>
                     </h2>
                     <?php if ($model->isApertoIscrizioni()): ?>
-                        <span class="badge bg-success">Aperto per iscrizioni</span>
+                        <span class="badge bg-green text-green-fg">Aperto per iscrizioni</span>
                     <?php endif; ?>
                 </div>
                 <div class="col-auto ms-auto">
@@ -142,11 +142,11 @@ $this->params['breadcrumbs'][] = $model->codice;
                         <div class="card-body">
                             <div class="d-flex mb-2">
                                 <span class="me-auto">Candidature ricevute</span>
-                                <span class="badge bg-primary"><?= $model->getIstanzeCount() ?></span>
+                                <span class="badge bg-blue text-blue-fg"><?= $model->getIstanzeCount() ?></span>
                             </div>
                             <div class="d-flex mb-2">
                                 <span class="me-auto">Assegnazioni</span>
-                                <span class="badge bg-success"><?= count($model->assegnazioni) ?></span>
+                                <span class="badge bg-green text-green-fg"><?= count($model->assegnazioni) ?></span>
                             </div>
                         </div>
                     </div>
@@ -256,6 +256,13 @@ $this->params['breadcrumbs'][] = $model->codice;
                     $totalePagatoModulo = $contrattoAttivo->getTotalePagato();
                     $rimanente = $contrattoAttivo->getSaldoRimanente();
                     $percPagato = ($compensoContrattualizzato > 0) ? round(($totalePagatoModulo / $compensoContrattualizzato) * 100) : 0;
+
+                    // Calcolo ore per alert
+                    $assOre = $model->getAssegnazioni()->one();
+                    $oreContrattoVal = $contrattoAttivo->ore_contrattualizzate;
+                    $oreApprVal = $assOre ? \app\models\RendicontazioneOre::getTotaleOreApprovate($assOre->id) : 0;
+                    $percOreVal = ($oreContrattoVal > 0) ? round(($oreApprVal / $oreContrattoVal) * 100) : 0;
+                    $importoOreRendicontate = $oreApprVal * $contrattoAttivo->compenso_orario;
                 ?>
                 <div class="card-body">
                     <div class="row g-3 mb-4">
@@ -306,10 +313,40 @@ $this->params['breadcrumbs'][] = $model->codice;
                             <small class="fw-bold"><?= $percPagato ?>%</small>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar <?= $percPagato >= 100 ? 'bg-success' : ($percPagato > 0 ? 'bg-warning' : 'bg-secondary') ?>"
+                            <div class="progress-bar <?= $percPagato >= 100 ? 'bg-green' : ($percPagato > 0 ? 'bg-orange' : 'bg-default') ?>"
                                  style="width: <?= min($percPagato, 100) ?>%"></div>
                         </div>
                     </div>
+
+                    <!-- Alert Ore Rendicontate -->
+                    <?php if ($oreContrattoVal > 0 && $oreApprVal < $oreContrattoVal): ?>
+                    <div class="alert alert-warning mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="ti ti-alert-triangle me-2" style="font-size: 1.5rem;"></i>
+                            <div class="flex-fill">
+                                <strong>Ore non completamente rendicontate:</strong>
+                                <?= number_format($oreApprVal, 1, ',', '.') ?>/<?= $oreContrattoVal ?> ore (<?= $percOreVal ?>%)
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <?= Html::a(
+                                '<i class="ti ti-clock-dollar me-1"></i> Paga solo ore rendicontate come acconto',
+                                ['/pagamento/create',
+                                    'contratto_id' => $contrattoAttivo->id,
+                                    'tipo' => 'acconto',
+                                    'importo' => $importoOreRendicontate,
+                                ],
+                                ['class' => 'btn btn-sm btn-green']
+                            ) ?>
+                        </div>
+                    </div>
+                    <?php elseif ($oreContrattoVal > 0): ?>
+                    <div class="alert alert-success mb-3">
+                        <i class="ti ti-circle-check me-2"></i>
+                        <strong>Ore completamente rendicontate:</strong>
+                        <?= number_format($oreApprVal, 1, ',', '.') ?>/<?= $oreContrattoVal ?> ore
+                    </div>
+                    <?php endif; ?>
 
                     <?php $pagamenti = $contrattoAttivo->pagamenti; ?>
                     <?php if ($pagamenti): ?>
@@ -324,6 +361,7 @@ $this->params['breadcrumbs'][] = $model->codice;
                                     <th class="text-end">Netto</th>
                                     <th>Stato</th>
                                     <th>Note</th>
+                                    <th>Azioni</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -336,6 +374,10 @@ $this->params['breadcrumbs'][] = $model->codice;
                                     <td class="text-end"><strong><?= Yii::$app->formatter->asCurrency($pagamento->importo_netto) ?></strong></td>
                                     <td><span class="badge <?= $pagamento->getStatusBadgeClass() ?>"><?= $pagamento->getStatusLabel() ?></span></td>
                                     <td><small class="text-muted"><?= Html::encode($pagamento->note) ?></small></td>
+                                    <td class="text-end">
+                                        <?= Html::a('<i class="ti ti-eye"></i>', ['/pagamento/view', 'id' => $pagamento->id], ['class' => 'btn btn-sm btn-outline-primary', 'title' => 'Dettaglio']) ?>
+                                        <?= Html::a('<i class="ti ti-edit"></i>', ['/pagamento/update', 'id' => $pagamento->id], ['class' => 'btn btn-sm btn-outline-blue', 'title' => 'Modifica']) ?>
+                                    </td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -404,12 +446,12 @@ $this->params['breadcrumbs'][] = $model->codice;
                         </div>
                     </div>
                     <div class="progress" style="height: 8px;">
-                        <div class="progress-bar <?= $percOre > 100 ? 'bg-danger' : ($percOre >= 100 ? 'bg-success' : 'bg-primary') ?>"
+                        <div class="progress-bar <?= $percOre > 100 ? 'bg-red' : ($percOre >= 100 ? 'bg-green' : 'bg-blue') ?>"
                              style="width: <?= min($percOre, 100) ?>%"></div>
                     </div>
                     <?php if ($oreApprovate > $oreContrattualizzate && $oreContrattualizzate > 0): ?>
                     <div class="mt-2">
-                        <span class="badge bg-danger"><i class="ti ti-alert-triangle me-1"></i>Ore Superiori: +<?= number_format($oreApprovate - $oreContrattualizzate, 1, ',', '.') ?></span>
+                        <span class="badge bg-red text-red-fg"><i class="ti ti-alert-triangle me-1"></i>Ore Superiori: +<?= number_format($oreApprovate - $oreContrattualizzate, 1, ',', '.') ?></span>
                     </div>
                     <?php endif; ?>
                 </div>
