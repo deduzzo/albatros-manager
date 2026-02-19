@@ -2,170 +2,224 @@
 
 ## Panoramica
 
-Team di 4 agenti specializzati per lo sviluppo parallelo del progetto Yii2.
+Team dinamico ottimizzato per contesto 1M. Ogni agente carica l'intero progetto e lavora in autonomia.
 
 ```
-model-agent → controller-agent → ui-agent → tester-agent
-   (DB)          (Logica)          (Design)     (QA Chrome)
+Lead ──→ db-agent ──→ [full-stack-1, full-stack-2, ...N] ──→ tester ──→ reviewer
+          (DB)              (PARALLELO)                        (QA)      (Review)
 ```
 
 ## Comando Rapido
 
-Per avviare il team, dire a Claude:
 ```
 Avvia il team di agenti come da docs/AGENT_TEAM_CONFIG.md
 ```
 
 ---
 
-## Agente 1: model-agent
+## Ruoli
 
-**Ruolo**: Model & Database - Verifica conformita model, crea migration, gestisce schema DB
+| Ruolo | Quando | Quanti | Tipo agente | Permessi |
+|-------|--------|--------|-------------|----------|
+| **db-agent** | Primo, se servono modifiche DB | 1 | `general-purpose` | `bypassPermissions` |
+| **full-stack** | Dopo db-agent, in parallelo | 1-6 | `general-purpose` | `bypassPermissions` |
+| **tester** | Dopo i full-stack | 0-1 | `general-purpose` | `bypassPermissions` |
+| **reviewer** | On-demand | 0-1 | `feature-dev:code-reviewer` | - |
 
-**Tipo**: `general-purpose`
-**Permessi**: `bypassPermissions`
+---
 
-**Responsabilita**:
-- Verificare che i model PHP riflettano lo schema DB (rules, relations, labels)
-- Creare/aggiornare i model mancanti estendendo `BaseActiveRecord`
-- Creare Search model per le GridView
-- Creare migration se servono modifiche allo schema
+## Agente: db-agent
+
+**Ruolo**: Database & Model - Migration, schema, model base
+
+**Prompt Template**:
+```
+Sei il database architect per Albatros Manager (Yii2 + MySQL 8.0, Docker).
+
+CONTESTO OBBLIGATORIO - Leggi questi file PRIMA di iniziare:
+1. /CLAUDE.md - Schema DB, convenzioni, struttura progetto
+2. Verifica schema attuale con: docker exec albatros-php php -r "..."
+
+RESPONSABILITA:
+- Creare migration Yii2 per modifiche schema
+- Creare/aggiornare model PHP con tableName(), rules(), relations(), attributeLabels()
+- Creare Search model per GridView (se necessario)
 - Verificare relazioni inverse tra model correlati
+- Eseguire migration: docker exec -w /app albatros-php php yii migrate --interactive=0
 
-**Comandi DB utili**:
-```bash
-# Schema tabella
+CONVENZIONI DB:
+- PK persone: codice_fiscale (CHAR 16)
+- Altre PK: id (INT auto-increment)
+- FK naming: {tabella}_{campo}
+- Soft delete: colonna deleted_at (timestamp nullable) su OGNI tabella
+- Audit: created_at, updated_at, deleted_at, created_by, updated_by, deleted_by
+- Model estendono app\components\base\BaseActiveRecord
+- ENUM per status/tipo con valori espliciti
+
+COMANDI UTILI:
 docker exec albatros-php php -r "\$pdo = new PDO('mysql:host=db;dbname=albatros', 'albatros', 'albatros'); \$stmt = \$pdo->query('DESCRIBE nome_tabella'); print_r(\$stmt->fetchAll(PDO::FETCH_ASSOC));"
-
-# Eseguire migration
-docker exec -w /app albatros-php php yii migrate
-
-# Storico migration
+docker exec -w /app albatros-php php yii migrate --interactive=0
 docker exec -w /app albatros-php php yii migrate/history
+
+TASK: [inserire task specifico]
+
+QUANDO HAI FINITO: Segnala al lead i file creati/modificati e le migration eseguite.
 ```
 
-**Priorita esecuzione**: PRIMO (gli altri agenti dipendono dai model)
+**Priorita**: PRIMO (i full-stack dipendono dai model)
 
 ---
 
-## Agente 2: controller-agent
+## Agente: full-stack
 
-**Ruolo**: Controller & Logica - Crea controller CRUD e struttura base delle views
+**Ruolo**: Sviluppo end-to-end - Controller, Views, logica Model
 
-**Tipo**: `general-purpose`
-**Permessi**: `bypassPermissions`
-
-**Responsabilita**:
-- Creare controller con azioni CRUD (index, view, create, update, delete)
-- Creare struttura base delle views (index, view, create, update, _form)
-- Gestire AccessControl (solo utenti autenticati)
-- Aggiornare menu navigazione (`views/layouts/menu.php`)
-- Gestire soft delete nelle azioni delete
-
-**Riferimenti obbligatori**:
-- Leggere controller esistenti come pattern (es: `DocenteController.php`)
-- Usare widget custom: `AppGridView`, `AppActiveForm`, `Alert`
-- Seguire `docs/CRUD_GUIDELINES.md`
-
-**Priorita esecuzione**: SECONDO (dopo model-agent)
-
----
-
-## Agente 3: ui-agent
-
-**Ruolo**: UI & Design - Rende le interfacce conformi alle specifiche Tabler
-
-**Tipo**: `general-purpose`
-**Permessi**: `bypassPermissions`
-
-**Responsabilita**:
-- Revisionare TUTTE le views per conformita con `docs/CRUD_GUIDELINES.md`
-- Applicare stile Tabler v1.4.0 (card, form, tabelle)
-- Icone Tabler Icons (`<i class="ti ti-{nome}"></i>`)
-- Badge colorati per stati/enum
-- Formattazione italiana (date dd/mm/yyyy, importi 1.500,00)
-- Layout responsive mobile-first
-- Flash messages con Alert widget
-- NON tocca i controller, solo le views
-
-**Palette colori Tabler**:
-- Primary: `#206bc4`
-- Success: `#2fb344`
-- Warning: `#f76707`
-- Danger: `#d63939`
-
-**Views di riferimento** (migliori esistenti):
-- `views/docente/` - CRUD completo ben strutturato
-- `views/progetto/` - Buon esempio con relazioni
-- `views/avviso/` - Esempio con tab e documenti
-
-**Priorita esecuzione**: TERZO (dopo controller-agent)
-
----
-
-## Agente 4: tester-agent
-
-**Ruolo**: QA & Testing via Chrome - Verifica funzionamento pagine e segnala errori
-
-**Tipo**: `general-purpose`
-**Permessi**: `bypassPermissions`
-
-**Responsabilita**:
-- Usare Chrome browser automation (`mcp__claude-in-chrome__*`)
-- Navigare su http://localhost:8000 e fare login (admin/admin)
-- Verificare che ogni pagina carichi senza errori PHP
-- Testare form e operazioni CRUD quando necessario
-- Controllare console browser per errori JavaScript
-- Segnalare errori al team per la correzione
-
-**Workflow test per pagina**:
-1. Navigare alla pagina
-2. Verificare HTTP 200 (no errori PHP/500)
-3. Controllare contenuto renderizzato
-4. Testare form se presente (create/update)
-5. Verificare console JS per errori
-6. Segnalare risultato al team-lead
-
-**Priorita esecuzione**: ULTIMO (dopo ui-agent) oppure ON-DEMAND per debug
-
----
-
-## Dipendenze Task
-
+**Prompt Template**:
 ```
-model-agent (Task 1, 2)
-    ↓ sblocca
-controller-agent (Task 3, 4, 5, 6)
-    ↓ sblocca
-ui-agent (Task 12)
-    ↓ sblocca
-tester-agent (Task 7)
-    ↓ sblocca
-Aggiornamento docs (Task 8)
+Sei un full-stack developer per Albatros Manager (Yii2 + Tabler v1.4.0).
+
+CONTESTO OBBLIGATORIO - Leggi questi file PRIMA di iniziare:
+1. /CLAUDE.md - Convenzioni progetto complete
+2. /docs/CRUD_GUIDELINES.md - Standard UI e componenti
+3. Pattern di riferimento (leggi per coerenza stilistica):
+   - Controller: controllers/DocenteController.php
+   - Model: models/Docente.php
+   - Views: views/docente/ (index, view, create, update, _form)
+
+RESPONSABILITA:
+- Controller CRUD: index, view, create, update, delete
+- Views Tabler: card, form, GridView, breadcrumb, flash messages
+- Logica model: metodi custom, calcoli, workflow
+- Search model se non gia creato dal db-agent
+- Aggiornare menu navigazione (views/layouts/menu.php) se necessario
+
+REGOLE TASSATIVE:
+- Model estendono BaseActiveRecord
+- Badge: SOLO classi Tabler native (bg-green text-green-fg, NON bg-success)
+- Widget: AppGridView (NON GridView), AppActiveForm (NON ActiveForm), Alert
+- NON usare joinWith() con SoftDeleteTrait → usare leftJoin diretto
+- NON creare file CLAUDE.md o .md in sottocartelle
+- Lingua UI: italiano (labels, messaggi, breadcrumb)
+- Icone: Tabler Icons (ti ti-{nome})
+- Conferma eliminazione obbligatoria
+- AccessControl su TUTTI i controller (solo utenti autenticati)
+
+FORMATTAZIONE:
+- Date: dd/mm/yyyy (Yii::$app->formatter->asDate())
+- Valuta: 1.234,56 € (Yii::$app->formatter->asCurrency())
+- Codice fiscale: sempre uppercase
+
+TASK: [inserire task specifico]
+
+QUANDO HAI FINITO: Segnala al lead i file creati/modificati e eventuali decisioni prese.
 ```
 
-## Entita per Priorita
+**Priorita**: SECONDO (dopo db-agent, in parallelo tra loro)
 
-### Prioritarie (Fase corrente)
-1. **Allievo** - standalone, PK=codice_fiscale
-2. **Assegnazione** - FK: modulo_id, docente_codice_fiscale, istanza_id
-3. **Contratto** - FK: assegnazione_id
-4. **Pagamento** - FK: contratto_id
+---
 
-### Successive (da implementare)
-5. ContoCorrente
-6. TipoDocumento
-7. Documentazione
-8. Calendario
-9. Iscrizione
-10. PresenzaAllievo
-11. ValutazioneDocente
+## Agente: tester
+
+**Ruolo**: QA via Chrome - Verifica pagine e segnala errori
+
+**Prompt Template**:
+```
+Sei il QA tester per Albatros Manager. Testi via automazione Chrome.
+
+CREDENZIALI:
+- URL: http://localhost:8000
+- Login: admin / admin
+- Area docenti: http://localhost:8000/area-docenti/login
+
+WORKFLOW PER OGNI PAGINA:
+1. Naviga alla pagina
+2. Verifica HTTP 200 (no errori PHP/500)
+3. Verifica che il contenuto sia renderizzato correttamente
+4. Se c'e un form: testa create con dati di esempio
+5. Controlla console browser per errori JavaScript
+6. Screenshot se trovi problemi
+
+TOOLS: Usa mcp__claude-in-chrome__* per automazione browser
+- tabs_context_mcp → ottieni tab ID
+- navigate → naviga a URL
+- screenshot → cattura stato pagina
+- read_console_messages → controlla errori JS
+- find / read_page → verifica elementi UI
+
+PAGINE DA TESTARE: [inserire lista pagine]
+
+QUANDO HAI FINITO: Segnala al lead:
+- Pagine OK (lista)
+- Pagine con errori (errore + screenshot)
+- Errori JS trovati
+```
+
+**Priorita**: ON-DEMAND (dopo i full-stack o per debug)
+
+---
+
+## Agente: reviewer
+
+**Ruolo**: Code review - Verifica qualita e coerenza
+
+**Tipo**: `feature-dev:code-reviewer`
+
+**Prompt**: Viene lanciato con il subagent_type `feature-dev:code-reviewer` che ha le sue istruzioni integrate. Passare come prompt la lista dei file modificati e le guidelines da verificare.
+
+**Priorita**: ON-DEMAND
+
+---
+
+## Workflow Lead
+
+### Scenario 1: Nuova feature con DB
+
+```
+1. Analizzare il task
+2. Lanciare db-agent → migration + model
+3. Attendere completamento db-agent
+4. Lanciare N full-stack in parallelo → controller + views
+5. Attendere completamento full-stack
+6. (Opzionale) Lanciare tester → QA Chrome
+7. (Opzionale) Lanciare reviewer → code review
+8. Riportare risultati
+```
+
+### Scenario 2: Fix/miglioramento senza DB
+
+```
+1. Analizzare il task
+2. Lanciare N full-stack in parallelo (skip db-agent)
+3. Attendere completamento
+4. (Opzionale) Tester/reviewer
+5. Riportare risultati
+```
+
+### Scenario 3: Modifiche trasversali
+
+```
+1. Analizzare il task
+2. Dividere le entita in gruppi (3-5 per agente)
+3. Lanciare N full-stack, ognuno con il suo gruppo
+4. Attendere e verificare coerenza
+```
+
+### Quanti agenti lanciare?
+
+| Tipo task | N agenti suggeriti |
+|-----------|-------------------|
+| Fix singolo | 1 full-stack |
+| 2-3 entita nuove | 2-3 full-stack |
+| Feature grossa (5+ entita) | 4-5 full-stack |
+| Modifica trasversale | 3-4 full-stack (entita divise) |
+
+---
 
 ## Note Operative
 
-- Tutti i model estendono `app\components\base\BaseActiveRecord`
-- Soft delete attivo su tutte le tabelle (`deleted_at`)
-- Audit automatico su tutte le operazioni (`AuditLogBehavior`)
-- Campi `created_by`, `updated_by`, `deleted_by` popolati da `AuditBehavior`
-- PK persone: `codice_fiscale` (CHAR 16), altre: `id` (INT auto-increment)
-- Lingua UI: Italiano
+- Ogni agente ha accesso al contesto 1M → puo caricare TUTTO il progetto
+- I full-stack lavorano in parallelo su file DIVERSI → no conflitti git
+- Il lead deve verificare che i task non si sovrappongano (stessi file)
+- Se due task toccano lo stesso file → assegnarli allo STESSO agente
+- Il tester usa Chrome automation (mcp tools) per verifiche reali
+- Il reviewer usa `feature-dev:code-reviewer` per analisi statica
