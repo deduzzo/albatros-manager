@@ -9,6 +9,8 @@ use app\models\IstanzaTag;
 use app\models\IstanzaDocumento;
 use app\models\IstanzaSnapshot;
 use app\models\StoricoEsito;
+use app\models\Avviso;
+use app\models\Modulo;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -305,6 +307,65 @@ class IstanzaController extends Controller
             return ['success' => true];
         }
         return ['success' => false, 'error' => 'Errore durante l\'eliminazione del documento.'];
+    }
+
+    /**
+     * Graduatoria per bando/modulo: mostra tutti i candidati con esito CTS ordinati per punteggio.
+     * @param int|null $avviso_id Filtra per bando
+     * @param int|null $modulo_id Filtra per modulo
+     * @return string
+     */
+    public function actionGraduatoria($avviso_id = null, $modulo_id = null)
+    {
+        $query = Istanza::find()
+            ->with(['docente', 'avviso', 'modulo', 'assegnazione'])
+            ->andWhere(['istanza.deleted_at' => null])
+            ->andWhere(['is not', 'istanza.esito_cts', null]);
+
+        // Filtri
+        $avviso = null;
+        $modulo = null;
+        if ($modulo_id) {
+            $query->andWhere(['istanza.modulo_id' => $modulo_id]);
+            $modulo = Modulo::findOne($modulo_id);
+            $avviso = $modulo ? $modulo->avviso : null;
+        } elseif ($avviso_id) {
+            $query->andWhere(['istanza.avviso_id' => $avviso_id]);
+            $avviso = Avviso::findOne($avviso_id);
+        }
+
+        // Ordinamento per punteggio decrescente
+        $query->orderBy(['istanza.punteggio_totale' => SORT_DESC, 'istanza.data_presentazione' => SORT_ASC]);
+
+        $istanze = $query->all();
+
+        // Lista bandi e moduli per i filtri dropdown
+        $bandiList = Avviso::find()
+            ->select(['id', 'titolo'])
+            ->orderBy(['titolo' => SORT_ASC])
+            ->indexBy('id')
+            ->column();
+
+        $moduliList = [];
+        if ($avviso_id || ($avviso)) {
+            $filterAvvisoId = $avviso_id ?: ($avviso ? $avviso->id : null);
+            $moduliList = Modulo::find()
+                ->select(["CONCAT(codice, ' - ', titolo)", 'id'])
+                ->where(['avviso_id' => $filterAvvisoId])
+                ->orderBy(['codice' => SORT_ASC])
+                ->indexBy('id')
+                ->column();
+        }
+
+        return $this->render('graduatoria', [
+            'istanze' => $istanze,
+            'avviso' => $avviso,
+            'modulo' => $modulo,
+            'avviso_id' => $avviso_id,
+            'modulo_id' => $modulo_id,
+            'bandiList' => $bandiList,
+            'moduliList' => $moduliList,
+        ]);
     }
 
     protected function findModel($id)

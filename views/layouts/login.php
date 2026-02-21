@@ -29,10 +29,10 @@ TablerAsset::register($this);
         }
     </style>
 </head>
-<body class="d-flex flex-column bg-white">
+<body class="bg-white">
 <?php $this->beginBody() ?>
 
-<div class="page page-center">
+<div class="page">
     <?= $content ?>
 </div>
 

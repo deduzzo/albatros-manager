@@ -198,6 +198,149 @@ class Modulo extends BaseActiveRecord
         return $this->getIstanze()->count();
     }
 
+    /**
+     * Calcola i posti disponibili per le iscrizioni studenti.
+     * @return int
+     */
+    public function getPostiDisponibili()
+    {
+        $maxAllievi = $this->max_allievi ?: 0;
+        $iscritti = $this->getIscrizioni()
+            ->andWhere(['not in', 'status', [Iscrizione::STATUS_RITIRATO, Iscrizione::STATUS_NON_AMMESSO]])
+            ->count();
+        return max(0, $maxAllievi - $iscritti);
+    }
+
+    /**
+     * Restituisce il docente assegnato al modulo.
+     * @return Docente|null
+     */
+    public function getDocenteAssegnato()
+    {
+        $assegnazione = $this->getAssegnazioni()
+            ->andWhere(['not', ['status' => Assegnazione::STATUS_REVOCATO]])
+            ->one();
+        return $assegnazione ? $assegnazione->docente : null;
+    }
+
+    // --- Metodi graduatoria e idonei ---
+
+    /**
+     * Restituisce l'assegnazione attiva (non revocata) per questo modulo.
+     * @return Assegnazione|null
+     */
+    public function getAssegnazioneAttiva()
+    {
+        return $this->getAssegnazioni()
+            ->andWhere(['not', ['assegnazione.status' => Assegnazione::STATUS_REVOCATO]])
+            ->one();
+    }
+
+    /**
+     * Verifica se il modulo ha un docente attualmente assegnato (non revocato).
+     * @return bool
+     */
+    public function haDocenteAssegnato()
+    {
+        return $this->getAssegnazioneAttiva() !== null;
+    }
+
+    /**
+     * Restituisce le istanze con esito idoneo per questo modulo, ordinate per punteggio.
+     * Esclude docenti che hanno già un'assegnazione attiva (non revocata) sullo stesso modulo.
+     * @return Istanza[]
+     */
+    public function getIstanzeIdonee()
+    {
+        return Istanza::find()
+            ->where([
+                'istanza.modulo_id' => $this->id,
+                'istanza.esito_cts' => Istanza::ESITO_CTS_IDONEO,
+            ])
+            ->andWhere(['istanza.deleted_at' => null])
+            ->andWhere(['!=', 'istanza.status', Istanza::STATUS_RINUNCIA])
+            ->with(['docente'])
+            ->orderBy(['istanza.punteggio_totale' => SORT_DESC, 'istanza.data_presentazione' => SORT_ASC])
+            ->all();
+    }
+
+    /**
+     * Restituisce la graduatoria completa del modulo (tutte le istanze con esito CTS).
+     * @return Istanza[]
+     */
+    public function getGraduatoria()
+    {
+        return Istanza::find()
+            ->where([
+                'istanza.modulo_id' => $this->id,
+            ])
+            ->andWhere(['istanza.deleted_at' => null])
+            ->andWhere(['is not', 'istanza.esito_cts', null])
+            ->with(['docente'])
+            ->orderBy(['istanza.punteggio_totale' => SORT_DESC, 'istanza.data_presentazione' => SORT_ASC])
+            ->all();
+    }
+
+    /**
+     * Restituisce il prossimo docente idoneo disponibile per un subentro.
+     * Esclude docenti già assegnati (con assegnazione non revocata) sullo stesso modulo.
+     * @return Istanza|null
+     */
+    public function getProssimoIdoneo()
+    {
+        // CF dei docenti con assegnazione attiva su questo modulo
+        $cfAssegnatiAttivi = Assegnazione::find()
+            ->select('docente_codice_fiscale')
+            ->where(['modulo_id' => $this->id])
+            ->andWhere(['not', ['status' => Assegnazione::STATUS_REVOCATO]])
+            ->andWhere(['assegnazione.deleted_at' => null])
+            ->column();
+
+        $query = Istanza::find()
+            ->where([
+                'istanza.modulo_id' => $this->id,
+                'istanza.esito_cts' => Istanza::ESITO_CTS_IDONEO,
+            ])
+            ->andWhere(['istanza.deleted_at' => null])
+            ->andWhere(['!=', 'istanza.status', Istanza::STATUS_RINUNCIA]);
+
+        if (!empty($cfAssegnatiAttivi)) {
+            $query->andWhere(['not in', 'istanza.docente_codice_fiscale', $cfAssegnatiAttivi]);
+        }
+
+        return $query
+            ->orderBy(['istanza.punteggio_totale' => SORT_DESC, 'istanza.data_presentazione' => SORT_ASC])
+            ->one();
+    }
+
+    /**
+     * Conta docenti idonei disponibili per subentro.
+     * @return int
+     */
+    public function getIdoneiDisponibiliCount()
+    {
+        $cfAssegnatiAttivi = Assegnazione::find()
+            ->select('docente_codice_fiscale')
+            ->where(['modulo_id' => $this->id])
+            ->andWhere(['not', ['status' => Assegnazione::STATUS_REVOCATO]])
+            ->andWhere(['assegnazione.deleted_at' => null])
+            ->column();
+
+        $query = Istanza::find()
+            ->where([
+                'istanza.modulo_id' => $this->id,
+                'istanza.esito_cts' => Istanza::ESITO_CTS_IDONEO,
+            ])
+            ->andWhere(['istanza.deleted_at' => null])
+            ->andWhere(['!=', 'istanza.status', Istanza::STATUS_RINUNCIA]);
+
+        if (!empty($cfAssegnatiAttivi)) {
+            $query->andWhere(['not in', 'istanza.docente_codice_fiscale', $cfAssegnatiAttivi]);
+        }
+
+        return (int) $query->count();
+    }
+
     // --- Metodi di rendicontazione ---
 
     /**

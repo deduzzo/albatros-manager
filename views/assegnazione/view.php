@@ -26,7 +26,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= Html::encode($docenteNome) ?> &rarr; <?= Html::encode($moduloTitolo) ?>
                     </div>
                 </div>
-                <div class="col-auto ms-auto">
+                <div class="col-auto ms-auto d-flex gap-2">
+                    <?php if ($model->isRevocabile()): ?>
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal-revoca">
+                            <i class="ti ti-user-minus me-1"></i> Revoca / Rinuncia
+                        </button>
+                    <?php endif; ?>
+                    <?php if ($model->status === \app\models\Assegnazione::STATUS_REVOCATO && $model->modulo && $model->modulo->getIdoneiDisponibiliCount() > 0): ?>
+                        <?= Html::a('<i class="ti ti-replace me-1"></i> Subentro (' . $model->modulo->getIdoneiDisponibiliCount() . ' idonei)', ['subentro', 'id' => $model->id], ['class' => 'btn btn-green']) ?>
+                    <?php endif; ?>
                     <?= Html::a('<i class="ti ti-edit me-1"></i> Modifica', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
                     <?= Html::a('<i class="ti ti-trash me-1"></i> Elimina', ['delete', 'id' => $model->id], [
                         'class' => 'btn btn-danger',
@@ -166,8 +174,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 <!-- Footer con azioni -->
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-footer">
+                        <div class="card-footer d-flex gap-2">
                             <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Torna alla lista', ['index'], ['class' => 'btn btn-secondary']) ?>
+                            <?php if ($model->modulo): ?>
+                                <?= Html::a('<i class="ti ti-list-numbers me-1"></i> Graduatoria modulo', ['/istanza/graduatoria', 'modulo_id' => $model->modulo_id], ['class' => 'btn btn-azure']) ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -175,3 +186,54 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
     </div>
 </div>
+
+<!-- Modal Revoca -->
+<?php if ($model->isRevocabile()): ?>
+<div class="modal modal-blur fade" id="modal-revoca" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <?= Html::beginForm(['revoca', 'id' => $model->id], 'post') ?>
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="ti ti-user-minus me-2 text-warning"></i>
+                    Revoca Assegnazione
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-3">
+                    <div class="d-flex">
+                        <i class="ti ti-alert-triangle me-2 mt-1"></i>
+                        <div>
+                            Stai per revocare l'assegnazione di <strong><?= Html::encode($docenteNome) ?></strong>
+                            al modulo <strong><?= Html::encode($moduloTitolo) ?></strong>.
+                            <?php $idoneiCount = $model->modulo ? $model->modulo->getIdoneiDisponibiliCount() : 0; ?>
+                            <?php if ($idoneiCount > 0): ?>
+                                <br><span class="text-azure">Ci sono <strong><?= $idoneiCount ?></strong> docenti idonei disponibili per il subentro.</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo</label>
+                    <select name="tipo_revoca" class="form-select">
+                        <option value="rinuncia">Rinuncia del docente</option>
+                        <option value="subentro">Revoca amministrativa</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Motivazione</label>
+                    <textarea name="note_revoca" class="form-control" rows="3" placeholder="Inserisci la motivazione della revoca..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="submit" class="btn btn-warning">
+                    <i class="ti ti-user-minus me-1"></i> Conferma Revoca
+                </button>
+            </div>
+            <?= Html::endForm() ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

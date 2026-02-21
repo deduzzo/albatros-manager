@@ -117,6 +117,68 @@ class Assegnazione extends BaseActiveRecord
         };
     }
 
+    // --- Revoca e Subentro ---
+
+    /**
+     * Verifica se l'assegnazione può essere revocata.
+     * @return bool
+     */
+    public function isRevocabile()
+    {
+        return in_array($this->status, [self::STATUS_ASSEGNATO, self::STATUS_ACCETTATO]);
+    }
+
+    /**
+     * Revoca l'assegnazione e registra la rinuncia/revoca nello storico.
+     * @param string $note Motivazione della revoca
+     * @param string $esitoStorico Tipo di esito (rinuncia o altro)
+     * @return bool
+     */
+    public function revoca($note = '', $esitoStorico = StoricoEsito::ESITO_RINUNCIA)
+    {
+        if (!$this->isRevocabile()) {
+            return false;
+        }
+
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            // Aggiorna status assegnazione
+            $this->status = self::STATUS_REVOCATO;
+            $this->note = trim(($this->note ? $this->note . "\n" : '') . $note);
+            if (!$this->save(false)) {
+                throw new \Exception('Errore nel salvare la revoca dell\'assegnazione.');
+            }
+
+            // Registra nello storico esiti dell'istanza
+            if ($this->istanza) {
+                $storico = new StoricoEsito();
+                $storico->istanza_id = $this->istanza_id;
+                $storico->esito = $esitoStorico;
+                $storico->data_esito = date('Y-m-d');
+                $storico->note = $note;
+                if (!$storico->save()) {
+                    throw new \Exception('Errore nel salvare lo storico esito.');
+                }
+            }
+
+            $transaction->commit();
+            return true;
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            \Yii::error('Errore revoca assegnazione #' . $this->id . ': ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Verifica se l'assegnazione è attiva (non revocata).
+     * @return bool
+     */
+    public function isAttiva()
+    {
+        return $this->status !== self::STATUS_REVOCATO;
+    }
+
     // --- Rendicontazione ore ---
 
     public function getRendicontazioniOre()

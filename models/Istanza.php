@@ -159,11 +159,11 @@ class Istanza extends BaseActiveRecord
     public static function getStatusLabels()
     {
         return [
-            self::STATUS_PRESENTATA => 'Presentata',
+            self::STATUS_PRESENTATA => 'Presentato',
             self::STATUS_IN_VALUTAZIONE => 'In Valutazione',
-            self::STATUS_VALUTATA => 'Valutata',
-            self::STATUS_ACCETTATA => 'Accettata',
-            self::STATUS_RIFIUTATA => 'Rifiutata',
+            self::STATUS_VALUTATA => 'Valutato',
+            self::STATUS_ACCETTATA => 'Accettato',
+            self::STATUS_RIFIUTATA => 'Rifiutato',
             self::STATUS_RINUNCIA => 'Rinuncia',
         ];
     }

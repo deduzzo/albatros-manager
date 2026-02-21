@@ -23,6 +23,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= Html::encode($this->title) ?>
                     </h2>
                 </div>
+                <div class="col-auto ms-auto">
+                    <?= Html::a('<i class="ti ti-list-numbers me-1"></i> Graduatoria', ['/istanza/graduatoria'], ['class' => 'btn btn-azure']) ?>
+                    <?= Html::a('<i class="ti ti-plus me-1"></i> Nuova Istanza', ['create'], ['class' => 'btn btn-primary']) ?>
+                </div>
             </div>
         </div>
     </div>
@@ -99,6 +103,16 @@ $this->params['breadcrumbs'][] = $this->title;
                                 return '<span class="badge ' . $model->getStatusBadgeClass() . '">' . $model->getStatusLabel() . '</span>';
                             },
                             'filter' => Istanza::getStatusLabels(),
+                            'headerOptions' => ['style' => 'width: 120px;'],
+                        ],
+                        [
+                            'attribute' => 'esito_cts',
+                            'label' => 'Esito CTS',
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                return $model->getEsitoCtsBadgeHtml();
+                            },
+                            'filter' => Istanza::getEsitoCtsLabels(),
                             'headerOptions' => ['style' => 'width: 120px;'],
                         ],
                         [

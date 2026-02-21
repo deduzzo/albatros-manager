@@ -11,12 +11,13 @@ use yii\data\ActiveDataProvider;
 class IstanzaSearch extends Istanza
 {
     public $docente_nome;
+    public $esito_cts;
 
     public function rules()
     {
         return [
             [['id', 'avviso_id', 'modulo_id', 'posizione_graduatoria'], 'integer'],
-            [['docente_codice_fiscale', 'docente_nome', 'status', 'data_presentazione'], 'safe'],
+            [['docente_codice_fiscale', 'docente_nome', 'status', 'esito_cts', 'data_presentazione'], 'safe'],
             [['punteggio_titoli', 'punteggio_esperienza', 'punteggio_totale'], 'number'],
         ];
     }
@@ -44,6 +45,7 @@ class IstanzaSearch extends Istanza
                     'punteggio_totale',
                     'posizione_graduatoria',
                     'status',
+                    'esito_cts',
                     'created_at',
                     'docente_nome' => [
                         'asc' => ['docente.cognome' => SORT_ASC, 'docente.nome' => SORT_ASC],
@@ -67,6 +69,7 @@ class IstanzaSearch extends Istanza
             'istanza.avviso_id' => $this->avviso_id,
             'istanza.modulo_id' => $this->modulo_id,
             'istanza.status' => $this->status,
+            'istanza.esito_cts' => $this->esito_cts,
         ]);
 
         $query->andFilterWhere(['like', 'istanza.docente_codice_fiscale', $this->docente_codice_fiscale]);

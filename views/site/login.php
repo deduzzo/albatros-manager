@@ -3,11 +3,13 @@
 /** @var yii\web\View $this */
 /** @var app\models\LoginForm $loginForm */
 /** @var app\models\forms\DocenteLoginForm $docenteLoginForm */
+/** @var app\models\forms\AllievoLoginForm $studenteLoginForm */
 /** @var app\models\Avviso[] $bandiAperti */
-/** @var app\models\Progetto[] $progettiAttivi */
 /** @var string|null $loginError */
 /** @var string|null $docenteError */
 /** @var string|null $activeCard */
+/** @var array $demoDocenti */
+/** @var array $demoAllievi */
 
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -16,63 +18,84 @@ use yii\widgets\ActiveForm;
 $this->title = 'Accedi';
 $this->context->layout = 'login';
 
-// Determina se un utente e' gia autenticato (admin o docente)
 $isAdminLogged = !Yii::$app->user->isGuest;
 $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
+
+// Tipo selezionato: default admin, preserva scelta dopo errore POST
+$selectedType = $activeCard ?: 'admin';
 ?>
 
 <style>
-    .login-card {
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border-left-width: 3px !important;
-        border-left-style: solid !important;
+    .role-selector {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
-    .login-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(0,0,0,.12);
-    }
-    .login-card.active {
-        box-shadow: 0 4px 16px rgba(0,0,0,.12);
-    }
-    .login-card .card-body {
-        transition: padding 0.3s ease;
-    }
-    .login-card-form {
-        max-height: 0;
-        opacity: 0;
-        overflow: hidden;
-        transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
-        padding: 0 1.25rem;
-    }
-    .login-card.active .login-card-form {
-        max-height: 500px;
-        opacity: 1;
-        padding: 0 1.25rem 1.25rem;
-    }
-    .login-card-header {
+    .role-option {
         display: flex;
         align-items: center;
         gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e6e7e9;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #fff;
     }
-    .login-card-icon {
-        width: 48px;
-        height: 48px;
+    .role-option:hover {
+        border-color: #adb5bd;
+        background: #f8f9fa;
+    }
+    .role-option.selected {
+        border-color: var(--role-color, #206bc4);
+        background: var(--role-bg, rgba(32,107,196,0.04));
+        box-shadow: 0 0 0 1px var(--role-color, #206bc4);
+    }
+    .role-option .role-icon {
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
         border-radius: 8px;
-        font-size: 1.5rem;
+        font-size: 1.25rem;
+        flex-shrink: 0;
     }
-    .login-card-desc {
-        max-height: 40px;
-        opacity: 1;
-        transition: max-height 0.3s ease, opacity 0.2s ease;
-        overflow: hidden;
+    .role-option .role-info {
+        flex: 1;
+        min-width: 0;
     }
-    .login-card.active .login-card-desc {
-        max-height: 0;
-        opacity: 0;
+    .role-option .role-name {
+        font-weight: 600;
+        font-size: 0.9375rem;
+        line-height: 1.2;
+    }
+    .role-option .role-desc {
+        font-size: 0.75rem;
+        color: #667382;
+        line-height: 1.3;
+    }
+    .role-option .role-check {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e6e7e9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+    .role-option.selected .role-check {
+        border-color: var(--role-color, #206bc4);
+        background: var(--role-color, #206bc4);
+        color: #fff;
+    }
+    .login-form-panel {
+        display: none;
+    }
+    .login-form-panel.active {
+        display: block;
     }
     .section-divider {
         display: flex;
@@ -135,196 +158,224 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
         <p class="text-secondary">Sistema di Gestione Docenti FSE/PNRR</p>
     </div>
 
-    <!-- LOGIN CARDS -->
-    <div class="row g-3 mb-5">
-
-        <!-- Card Amministratore -->
-        <div class="col-12 col-lg-4">
-            <div class="card login-card border-blue<?= $activeCard === 'admin' ? ' active' : '' ?>" id="card-admin" onclick="activateCard('admin')">
+    <!-- LOGIN BOX -->
+    <div class="card mb-5" style="max-width: 680px; margin: 0 auto;">
+        <div class="row g-0">
+            <!-- Selettore ruolo (colonna sinistra) -->
+            <div class="col-12 col-md-5 border-end">
                 <div class="card-body">
-                    <div class="login-card-header">
-                        <div class="login-card-icon bg-blue-lt text-blue">
-                            <i class="ti ti-shield-lock"></i>
+                    <div class="mb-2">
+                        <span class="text-muted small text-uppercase fw-bold">Accedi come</span>
+                    </div>
+                    <div class="role-selector">
+                        <div class="role-option <?= $selectedType === 'admin' ? 'selected' : '' ?>"
+                             style="--role-color: #206bc4; --role-bg: rgba(32,107,196,0.04);"
+                             data-role="admin" onclick="selectRole('admin')">
+                            <div class="role-icon bg-blue-lt text-blue">
+                                <i class="ti ti-shield-lock"></i>
+                            </div>
+                            <div class="role-info">
+                                <div class="role-name">Amministratore</div>
+                                <div class="role-desc">Pannello di gestione</div>
+                            </div>
+                            <div class="role-check">
+                                <i class="ti ti-check" style="font-size: 12px;"></i>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="mb-0 h4">Amministratore</h3>
+                        <div class="role-option <?= $selectedType === 'docente' ? 'selected' : '' ?>"
+                             style="--role-color: #2fb344; --role-bg: rgba(47,179,68,0.04);"
+                             data-role="docente" onclick="selectRole('docente')">
+                            <div class="role-icon bg-green-lt text-green">
+                                <i class="ti ti-school"></i>
+                            </div>
+                            <div class="role-info">
+                                <div class="role-name">Docente</div>
+                                <div class="role-desc">Candidature e ore</div>
+                            </div>
+                            <div class="role-check">
+                                <i class="ti ti-check" style="font-size: 12px;"></i>
+                            </div>
                         </div>
-                    </div>
-                    <div class="login-card-desc mt-2">
-                        <small class="text-secondary">Accesso al pannello di gestione completo</small>
-                    </div>
-                </div>
-                <div class="login-card-form" id="form-admin">
-                    <hr class="mt-0 mb-3">
-                    <?php $form = ActiveForm::begin([
-                        'id' => 'login-form-admin',
-                        'action' => Url::to(['/site/login']),
-                        'fieldConfig' => [
-                            'template' => "{input}\n{error}",
-                            'errorOptions' => ['class' => 'invalid-feedback d-block'],
-                        ],
-                    ]); ?>
-                    <input type="hidden" name="login_type" value="admin">
-
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <?= $form->field($loginForm, 'username')->textInput([
-                            'class' => 'form-control',
-                            'placeholder' => 'Inserisci username',
-                            'onclick' => 'event.stopPropagation()',
-                        ]) ?>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <?= $form->field($loginForm, 'password')->passwordInput([
-                            'class' => 'form-control',
-                            'placeholder' => 'Inserisci password',
-                            'onclick' => 'event.stopPropagation()',
-                        ]) ?>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-check">
-                            <?= Html::activeCheckbox($loginForm, 'rememberMe', [
-                                'class' => 'form-check-input',
-                                'label' => false,
-                                'onclick' => 'event.stopPropagation()',
-                            ]) ?>
-                            <span class="form-check-label">Ricordami</span>
-                        </label>
-                    </div>
-
-                    <div class="form-footer">
-                        <?= Html::submitButton('<i class="ti ti-login me-1"></i> Accedi', [
-                            'class' => 'btn btn-blue w-100',
-                            'onclick' => 'event.stopPropagation()',
-                        ]) ?>
-                    </div>
-                    <?php ActiveForm::end(); ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card Docente -->
-        <div class="col-12 col-lg-4">
-            <div class="card login-card border-green<?= $activeCard === 'docente' ? ' active' : '' ?>" id="card-docente" onclick="activateCard('docente')">
-                <div class="card-body">
-                    <div class="login-card-header">
-                        <div class="login-card-icon bg-green-lt text-green">
-                            <i class="ti ti-school"></i>
+                        <div class="role-option"
+                             style="--role-color: #ae3ec9; --role-bg: rgba(174,62,201,0.04);"
+                             data-role="studente" onclick="selectRole('studente')">
+                            <div class="role-icon bg-purple-lt text-purple">
+                                <i class="ti ti-users"></i>
+                            </div>
+                            <div class="role-info">
+                                <div class="role-name">Studente</div>
+                                <div class="role-desc">Corsi e iscrizioni</div>
+                            </div>
+                            <div class="role-check">
+                                <i class="ti ti-check" style="font-size: 12px;"></i>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="mb-0 h4">Docente</h3>
-                        </div>
-                    </div>
-                    <div class="login-card-desc mt-2">
-                        <small class="text-secondary">Gestisci candidature, ore e contratti</small>
-                    </div>
-                </div>
-                <div class="login-card-form" id="form-docente">
-                    <hr class="mt-0 mb-3">
-                    <?php $formDocente = ActiveForm::begin([
-                        'id' => 'login-form-docente',
-                        'action' => Url::to(['/site/login']),
-                        'fieldConfig' => [
-                            'template' => "{input}\n{error}",
-                            'errorOptions' => ['class' => 'invalid-feedback d-block'],
-                        ],
-                    ]); ?>
-                    <input type="hidden" name="login_type" value="docente">
-
-                    <div class="mb-3">
-                        <label class="form-label">Codice Fiscale</label>
-                        <?= $formDocente->field($docenteLoginForm, 'codice_fiscale')->textInput([
-                            'class' => 'form-control',
-                            'placeholder' => 'Es: RSSMRA80A01F205X',
-                            'maxlength' => 16,
-                            'style' => 'text-transform: uppercase;',
-                            'onclick' => 'event.stopPropagation()',
-                        ]) ?>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Password
-                            <?php if (YII_DEBUG): ?>
-                            <span class="form-label-description text-secondary">(vuota per test)</span>
-                            <?php endif; ?>
-                        </label>
-                        <?= $formDocente->field($docenteLoginForm, 'password')->passwordInput([
-                            'class' => 'form-control',
-                            'placeholder' => YII_DEBUG ? 'Lascia vuoto per test' : 'La tua password',
-                            'onclick' => 'event.stopPropagation()',
-                        ]) ?>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-check">
-                            <?= Html::activeCheckbox($docenteLoginForm, 'rememberMe', [
-                                'class' => 'form-check-input',
-                                'label' => false,
-                                'onclick' => 'event.stopPropagation()',
-                            ]) ?>
-                            <span class="form-check-label">Ricordami</span>
-                        </label>
-                    </div>
-
-                    <div class="form-footer">
-                        <?= Html::submitButton('<i class="ti ti-login me-1"></i> Accedi', [
-                            'class' => 'btn btn-green w-100',
-                            'onclick' => 'event.stopPropagation()',
-                        ]) ?>
-                    </div>
-                    <?php ActiveForm::end(); ?>
-
-                    <div class="text-center mt-3" onclick="event.stopPropagation()">
-                        <a href="<?= Url::to(['/area-docenti/registrazione']) ?>" class="text-secondary">
-                            <small>Non hai un account? <strong>Registrati</strong></small>
-                        </a>
-                        <span class="mx-1 text-secondary">|</span>
-                        <a href="<?= Url::to(['/area-docenti/password-dimenticata']) ?>" class="text-secondary">
-                            <small>Password dimenticata?</small>
-                        </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Card Studente -->
-        <div class="col-12 col-lg-4">
-            <div class="card login-card border-purple<?= $activeCard === 'studente' ? ' active' : '' ?>" id="card-studente" onclick="activateCard('studente')">
+            <!-- Form login (colonna destra) -->
+            <div class="col-12 col-md-7">
                 <div class="card-body">
-                    <div class="login-card-header">
-                        <div class="login-card-icon bg-purple-lt text-purple">
-                            <i class="ti ti-users"></i>
-                        </div>
-                        <div>
-                            <h3 class="mb-0 h4">Studente</h3>
-                        </div>
-                    </div>
-                    <div class="login-card-desc mt-2">
-                        <small class="text-secondary">Consulta corsi, lezioni e materiali</small>
-                    </div>
-                </div>
-                <div class="login-card-form" id="form-studente">
-                    <hr class="mt-0 mb-3">
-                    <div class="text-center py-3" onclick="event.stopPropagation()">
+                    <!-- Form Admin -->
+                    <div class="login-form-panel <?= $selectedType === 'admin' ? 'active' : '' ?>" id="panel-admin">
+                        <?php $form = ActiveForm::begin([
+                            'id' => 'login-form-admin',
+                            'action' => Url::to(['/site/login']),
+                            'fieldConfig' => [
+                                'template' => "{input}\n{error}",
+                                'errorOptions' => ['class' => 'invalid-feedback d-block'],
+                            ],
+                        ]); ?>
+                        <input type="hidden" name="login_type" value="admin">
+
                         <div class="mb-3">
-                            <span class="avatar avatar-lg bg-purple-lt text-purple">
-                                <i class="ti ti-hourglass"></i>
-                            </span>
+                            <label class="form-label">Username</label>
+                            <?= $form->field($loginForm, 'username')->textInput([
+                                'class' => 'form-control',
+                                'placeholder' => 'Inserisci username',
+                                'autocomplete' => 'username',
+                            ]) ?>
                         </div>
-                        <h4 class="text-secondary mb-1">Area in fase di attivazione</h4>
-                        <p class="text-secondary mb-3">
-                            <small>L'area studenti sara disponibile a breve. Nel frattempo puoi esplorare la versione demo.</small>
-                        </p>
-                        <div class="d-flex flex-column gap-2">
-                            <a href="<?= Url::to(['/demo-studenti']) ?>" class="btn btn-purple">
-                                <i class="ti ti-eye me-1"></i> Consulta i Corsi Disponibili
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <?= $form->field($loginForm, 'password')->passwordInput([
+                                'class' => 'form-control',
+                                'placeholder' => 'Inserisci password',
+                            ]) ?>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-check">
+                                <?= Html::activeCheckbox($loginForm, 'rememberMe', [
+                                    'class' => 'form-check-input',
+                                    'label' => false,
+                                ]) ?>
+                                <span class="form-check-label">Ricordami</span>
+                            </label>
+                        </div>
+
+                        <div class="form-footer">
+                            <?= Html::submitButton('<i class="ti ti-login me-1"></i> Accedi come Amministratore', [
+                                'class' => 'btn btn-blue w-100',
+                            ]) ?>
+                        </div>
+                        <?php ActiveForm::end(); ?>
+                    </div>
+
+                    <!-- Form Docente -->
+                    <div class="login-form-panel <?= $selectedType === 'docente' ? 'active' : '' ?>" id="panel-docente">
+                        <?php $formDocente = ActiveForm::begin([
+                            'id' => 'login-form-docente',
+                            'action' => Url::to(['/site/login']),
+                            'fieldConfig' => [
+                                'template' => "{input}\n{error}",
+                                'errorOptions' => ['class' => 'invalid-feedback d-block'],
+                            ],
+                        ]); ?>
+                        <input type="hidden" name="login_type" value="docente">
+
+                        <div class="mb-3">
+                            <label class="form-label">Codice Fiscale</label>
+                            <?= $formDocente->field($docenteLoginForm, 'codice_fiscale')->textInput([
+                                'class' => 'form-control',
+                                'placeholder' => 'Es: RSSMRA80A01F205X',
+                                'maxlength' => 16,
+                                'style' => 'text-transform: uppercase;',
+                            ]) ?>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Password
+                                <?php if (YII_DEBUG): ?>
+                                <span class="form-label-description text-secondary">(vuota per test)</span>
+                                <?php endif; ?>
+                            </label>
+                            <?= $formDocente->field($docenteLoginForm, 'password')->passwordInput([
+                                'class' => 'form-control',
+                                'placeholder' => YII_DEBUG ? 'Lascia vuoto per test' : 'La tua password',
+                            ]) ?>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-check">
+                                <?= Html::activeCheckbox($docenteLoginForm, 'rememberMe', [
+                                    'class' => 'form-check-input',
+                                    'label' => false,
+                                ]) ?>
+                                <span class="form-check-label">Ricordami</span>
+                            </label>
+                        </div>
+
+                        <div class="form-footer">
+                            <?= Html::submitButton('<i class="ti ti-login me-1"></i> Accedi come Docente', [
+                                'class' => 'btn btn-green w-100',
+                            ]) ?>
+                        </div>
+                        <?php ActiveForm::end(); ?>
+
+                        <div class="text-center mt-3">
+                            <a href="<?= Url::to(['/area-docenti/registrazione']) ?>" class="text-secondary">
+                                <small>Non hai un account? <strong>Registrati</strong></small>
                             </a>
-                            <a href="<?= Url::to(['/demo-studenti/registrazione']) ?>" class="btn btn-outline-purple">
-                                <i class="ti ti-user-plus me-1"></i> Registrati come Studente
+                            <span class="mx-1 text-secondary">|</span>
+                            <a href="<?= Url::to(['/area-docenti/password-dimenticata']) ?>" class="text-secondary">
+                                <small>Password dimenticata?</small>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Form Studente -->
+                    <div class="login-form-panel <?= $selectedType === 'studente' ? 'active' : '' ?>" id="panel-studente">
+                        <?php $formStudente = ActiveForm::begin([
+                            'id' => 'login-form-studente',
+                            'action' => Url::to(['/site/login']),
+                            'fieldConfig' => [
+                                'template' => "{input}\n{error}",
+                                'errorOptions' => ['class' => 'invalid-feedback d-block'],
+                            ],
+                        ]); ?>
+                        <input type="hidden" name="login_type" value="studente">
+
+                        <div class="mb-3">
+                            <label class="form-label">Codice Fiscale</label>
+                            <?= $formStudente->field($studenteLoginForm, 'codice_fiscale')->textInput([
+                                'class' => 'form-control',
+                                'placeholder' => 'Es: RSSMRA90A01F205X',
+                                'maxlength' => 16,
+                                'style' => 'text-transform: uppercase;',
+                            ]) ?>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Password
+                                <?php if (YII_DEBUG): ?>
+                                <span class="form-label-description text-secondary">(vuota per test)</span>
+                                <?php endif; ?>
+                            </label>
+                            <?= $formStudente->field($studenteLoginForm, 'password')->passwordInput([
+                                'class' => 'form-control',
+                                'placeholder' => YII_DEBUG ? 'Lascia vuoto per test' : 'La tua password',
+                            ]) ?>
+                        </div>
+
+                        <div class="form-footer">
+                            <?= Html::submitButton('<i class="ti ti-login me-1"></i> Accedi come Studente', [
+                                'class' => 'btn btn-purple w-100',
+                            ]) ?>
+                        </div>
+                        <?php ActiveForm::end(); ?>
+
+                        <div class="text-center mt-3">
+                            <a href="<?= Url::to(['/area-studenti/registrazione']) ?>" class="text-secondary">
+                                <small>Non hai un account? <strong>Registrati</strong></small>
+                            </a>
+                            <span class="mx-1 text-secondary">|</span>
+                            <a href="<?= Url::to(['/studenti']) ?>" class="text-secondary">
+                                <small>Consulta i bandi</small>
                             </a>
                         </div>
                     </div>
@@ -333,11 +384,78 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
         </div>
     </div>
 
+    <!-- CARD DEBUG CREDENZIALI -->
+    <?php if (Yii::$app->params['demoMode'] ?? false): ?>
+    <div class="mb-4">
+        <div class="card border-orange">
+            <div class="card-status-top bg-orange"></div>
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-bug me-2 text-orange"></i>
+                    Credenziali di Accesso Demo
+                </h3>
+                <div class="card-actions">
+                    <span class="badge bg-orange text-orange-fg">DEMO</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 rounded bg-blue-lt">
+                            <h4 class="mb-2"><i class="ti ti-shield-lock me-1 text-blue"></i> Amministratore</h4>
+                            <div class="mb-1"><strong>Username:</strong> <code>admin</code></div>
+                            <div><strong>Password:</strong> <code>admin</code></div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 rounded bg-green-lt">
+                            <h4 class="mb-2"><i class="ti ti-school me-1 text-green"></i> Docente</h4>
+                            <div class="mb-1"><strong>Password:</strong> <code>(vuota)</code></div>
+                            <?php if (!empty($demoDocenti)): ?>
+                            <div class="mt-2">
+                                <small class="text-secondary d-block mb-1">CF di esempio:</small>
+                                <?php foreach ($demoDocenti as $dd): ?>
+                                <div class="mb-1">
+                                    <code class="user-select-all" style="font-size: 0.7rem;"><?= Html::encode($dd['codice_fiscale']) ?></code>
+                                    <small class="text-muted"><?= Html::encode($dd['cognome'] . ' ' . $dd['nome']) ?></small>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php else: ?>
+                            <div class="text-secondary mt-1"><small>Inserire un CF esistente, password vuota</small></div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="p-3 rounded bg-purple-lt">
+                            <h4 class="mb-2"><i class="ti ti-users me-1 text-purple"></i> Studente</h4>
+                            <div class="mb-1"><strong>Accesso:</strong> Pubblico (iscrizione ai bandi)</div>
+                            <?php if (!empty($demoAllievi)): ?>
+                            <div class="mt-2">
+                                <small class="text-secondary d-block mb-1">Allievi registrati:</small>
+                                <?php foreach ($demoAllievi as $da): ?>
+                                <div class="mb-1">
+                                    <code class="user-select-all" style="font-size: 0.7rem;"><?= Html::encode($da['codice_fiscale']) ?></code>
+                                    <small class="text-muted"><?= Html::encode($da['cognome'] . ' ' . $da['nome']) ?></small>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php else: ?>
+                            <div class="text-secondary mt-1"><small>Nessun allievo registrato. Iscriviti a un bando.</small></div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- BANDI APERTI -->
     <?php if (!empty($bandiAperti)): ?>
     <div class="mb-4">
         <div class="section-divider mb-3">
-            <span><i class="ti ti-speakerphone me-1"></i> Bandi Aperti per Docenti</span>
+            <span><i class="ti ti-speakerphone me-1"></i> Bandi Aperti</span>
         </div>
         <div class="row g-3">
             <?php foreach ($bandiAperti as $bando): ?>
@@ -362,7 +480,7 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
                             <small class="text-secondary">
                                 <i class="ti ti-book me-1"></i><?= $bando->getModuliCount() ?> moduli
                             </small>
-                            <a href="<?= Url::to(['/area-docenti/bandi/' . $bando->id]) ?>" class="btn btn-sm btn-outline-green">
+                            <a href="<?= Url::to(['/studenti/bando', 'id' => $bando->id]) ?>" class="btn btn-sm btn-outline-green">
                                 Dettagli <i class="ti ti-arrow-right ms-1"></i>
                             </a>
                         </div>
@@ -375,7 +493,7 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
     <?php else: ?>
     <div class="mb-4">
         <div class="section-divider mb-3">
-            <span><i class="ti ti-speakerphone me-1"></i> Bandi Aperti per Docenti</span>
+            <span><i class="ti ti-speakerphone me-1"></i> Bandi Aperti</span>
         </div>
         <div class="card">
             <div class="card-body text-center py-4">
@@ -388,51 +506,6 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
     </div>
     <?php endif; ?>
 
-    <!-- CORSI DISPONIBILI -->
-    <?php if (!empty($progettiAttivi)): ?>
-    <div class="mb-4">
-        <div class="section-divider mb-3">
-            <span><i class="ti ti-school me-1"></i> Corsi Disponibili</span>
-        </div>
-        <div class="row g-3">
-            <?php foreach ($progettiAttivi as $progetto): ?>
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card bando-card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start mb-2">
-                            <span class="badge bg-azure-lt me-2">Attivo</span>
-                            <?php if ($progetto->fonteFinanziamento): ?>
-                            <small class="text-secondary ms-auto">
-                                <?= Html::encode($progetto->fonteFinanziamento->descrizione) ?>
-                            </small>
-                            <?php endif; ?>
-                        </div>
-                        <h4 class="mb-1"><?= Html::encode($progetto->titolo) ?></h4>
-                        <?php if ($progetto->codice_progetto): ?>
-                        <p class="text-secondary mb-2">
-                            <small><i class="ti ti-hash me-1"></i><?= Html::encode($progetto->codice_progetto) ?></small>
-                        </p>
-                        <?php endif; ?>
-                        <div class="d-flex align-items-center justify-content-between">
-                            <?php if ($progetto->numero_studenti): ?>
-                            <small class="text-secondary">
-                                <i class="ti ti-users me-1"></i><?= $progetto->numero_studenti ?> studenti
-                            </small>
-                            <?php else: ?>
-                            <span></span>
-                            <?php endif; ?>
-                            <a href="<?= Url::to(['/demo-studenti', 'id' => $progetto->id]) ?>" class="btn btn-sm btn-outline-azure">
-                                Scopri <i class="ti ti-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <!-- LINK RAPIDI -->
     <div class="mb-4">
         <div class="section-divider mb-3">
@@ -440,10 +513,10 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
         </div>
         <div class="row g-2 text-center">
             <div class="col-6 col-md-3">
-                <a href="<?= Url::to(['/area-docenti/bandi']) ?>" class="card card-sm bando-card text-decoration-none">
+                <a href="<?= Url::to(['/studenti']) ?>" class="card card-sm bando-card text-decoration-none">
                     <div class="card-body py-3">
                         <i class="ti ti-clipboard-list text-green mb-1" style="font-size: 1.5rem;"></i>
-                        <div class="small">Bandi Docenti</div>
+                        <div class="small">Bandi Aperti</div>
                     </div>
                 </a>
             </div>
@@ -456,10 +529,10 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
                 </a>
             </div>
             <div class="col-6 col-md-3">
-                <a href="<?= Url::to(['/demo-studenti']) ?>" class="card card-sm bando-card text-decoration-none">
+                <a href="<?= Url::to(['/studenti']) ?>" class="card card-sm bando-card text-decoration-none">
                     <div class="card-body py-3">
                         <i class="ti ti-school text-purple mb-1" style="font-size: 1.5rem;"></i>
-                        <div class="small">Corsi Studenti</div>
+                        <div class="small">Iscriviti a un Bando</div>
                     </div>
                 </a>
             </div>
@@ -481,24 +554,29 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
 </div>
 
 <script>
-function activateCard(type) {
-    var cards = document.querySelectorAll('.login-card');
-    cards.forEach(function(card) {
-        var cardType = card.id.replace('card-', '');
-        if (cardType === type) {
-            card.classList.toggle('active');
-        } else {
-            card.classList.remove('active');
-        }
+function selectRole(type) {
+    // Deseleziona tutti
+    document.querySelectorAll('.role-option').forEach(function(el) {
+        el.classList.remove('selected');
     });
+    // Seleziona il cliccato
+    document.querySelector('.role-option[data-role="' + type + '"]').classList.add('selected');
 
-    // Focus sul primo input del form attivo
+    // Mostra il pannello corretto
+    document.querySelectorAll('.login-form-panel').forEach(function(el) {
+        el.classList.remove('active');
+    });
+    var panel = document.getElementById('panel-' + type);
+    if (panel) {
+        panel.classList.add('active');
+    }
+
+    // Focus sul primo input
     setTimeout(function() {
-        var activeCard = document.querySelector('.login-card.active');
-        if (activeCard) {
-            var input = activeCard.querySelector('input[type="text"], input[type="password"]');
+        if (panel) {
+            var input = panel.querySelector('input[type="text"], input[type="password"]');
             if (input) input.focus();
         }
-    }, 350);
+    }, 100);
 }
 </script>

@@ -27,7 +27,7 @@ $isActive = function($controllers) use ($currentController) {
                     </li>
 
                     <!-- Configurazione -->
-                    <li class="nav-item dropdown <?= $isActive(['fonte-finanziamento', 'conto-corrente', 'sede', 'tipo-documento']) ?>">
+                    <li class="nav-item dropdown <?= $isActive(['fonte-finanziamento', 'conto-corrente', 'sede', 'tipo-documento', 'configurazione', 'criterio-valutazione']) ?>">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-settings"></i>
@@ -46,6 +46,13 @@ $isActive = function($controllers) use ($currentController) {
                             </a>
                             <a class="dropdown-item <?= $currentController == 'tipo-documento' ? 'active' : '' ?>" href="<?= Url::to(['/tipo-documento/index']) ?>">
                                 <i class="ti ti-file-text me-2"></i> Tipi Documento
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item <?= $currentController == 'configurazione' ? 'active' : '' ?>" href="<?= Url::to(['/configurazione/index']) ?>">
+                                <i class="ti ti-building me-2"></i> Dati Fondazione
+                            </a>
+                            <a class="dropdown-item <?= $currentController == 'criterio-valutazione' ? 'active' : '' ?>" href="<?= Url::to(['/criterio-valutazione/index']) ?>">
+                                <i class="ti ti-star me-2"></i> Criteri Valutazione
                             </a>
                         </div>
                     </li>
@@ -128,8 +135,16 @@ $isActive = function($controllers) use ($currentController) {
                             <a class="dropdown-item <?= $currentController == 'iscrizione' ? 'active' : '' ?>" href="<?= Url::to(['/iscrizione/index']) ?>">
                                 <i class="ti ti-user-plus me-2"></i> Iscrizioni
                             </a>
+                            <div class="dropdown-divider"></div>
+                            <span class="dropdown-header">Graduatorie</span>
+                            <a class="dropdown-item <?= $currentController == 'istanza' && $currentAction == 'graduatoria' ? 'active' : '' ?>" href="<?= Url::to(['/istanza/graduatoria']) ?>">
+                                <i class="ti ti-list-numbers me-2"></i> Graduatoria Docenti
+                            </a>
                             <a class="dropdown-item <?= $currentController == 'presenza-allievo' ? 'active' : '' ?>" href="<?= Url::to(['/presenza-allievo/index']) ?>">
                                 <i class="ti ti-checkbox me-2"></i> Presenze
+                            </a>
+                            <a class="dropdown-item <?= $currentController == 'iscrizione' && in_array($currentAction, ['candidature', 'graduatoria-studenti', 'valuta']) ? 'active' : '' ?>" href="<?= Url::to(['/iscrizione/candidature']) ?>">
+                                <i class="ti ti-users me-2"></i> Candidature Studenti
                             </a>
                             <a class="dropdown-item <?= $currentController == 'valutazione-docente' ? 'active' : '' ?>" href="<?= Url::to(['/valutazione-docente/index']) ?>">
                                 <i class="ti ti-star me-2"></i> Valutazioni Docenti

@@ -46,10 +46,12 @@ class Avviso extends BaseActiveRecord
         return [
             [['progetto_id', 'codice_avviso', 'titolo'], 'required'],
             [['progetto_id'], 'integer'],
-            [['descrizione', 'note'], 'string'],
+            [['descrizione', 'note', 'destinatari'], 'string'],
             [['data_pubblicazione', 'data_scadenza'], 'date', 'format' => 'php:Y-m-d'],
             [['codice_avviso'], 'string', 'max' => 100],
-            [['titolo'], 'string', 'max' => 255],
+            [['titolo', 'sottotitolo'], 'string', 'max' => 255],
+            [['colore_hex'], 'string', 'max' => 7],
+            [['obiettivi', 'prospettive', 'requisiti_ammissione', 'certificazioni'], 'safe'],
             [['status'], 'in', 'range' => [self::STATUS_BOZZA, self::STATUS_PUBBLICATO, self::STATUS_CHIUSO, self::STATUS_ANNULLATO]],
             [['data_scadenza'], 'compare', 'compareAttribute' => 'data_pubblicazione', 'operator' => '>=', 'message' => 'La scadenza deve essere successiva alla pubblicazione'],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
@@ -64,7 +66,14 @@ class Avviso extends BaseActiveRecord
             'progetto_id' => 'Progetto',
             'codice_avviso' => 'Codice Avviso',
             'titolo' => 'Titolo',
+            'sottotitolo' => 'Sottotitolo',
             'descrizione' => 'Descrizione',
+            'obiettivi' => 'Obiettivi',
+            'destinatari' => 'Destinatari',
+            'prospettive' => 'Prospettive Professionali',
+            'requisiti_ammissione' => 'Requisiti di Ammissione',
+            'certificazioni' => 'Certificazioni',
+            'colore_hex' => 'Colore',
             'data_pubblicazione' => 'Data Pubblicazione',
             'data_scadenza' => 'Data Scadenza',
             'status' => 'Stato',
@@ -72,6 +81,79 @@ class Avviso extends BaseActiveRecord
             'created_at' => 'Creato il',
             'updated_at' => 'Aggiornato il',
         ];
+    }
+
+    /**
+     * Decodifica un campo JSON, restituendo array vuoto se null/invalido.
+     */
+    public function getJsonArray($attribute)
+    {
+        $value = $this->$attribute;
+        if (is_array($value)) {
+            return $value;
+        }
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+        return [];
+    }
+
+    /**
+     * Colore hex per le card nella UI pubblica.
+     */
+    public function getColore()
+    {
+        return $this->colore_hex ?: '#206bc4';
+    }
+
+    /**
+     * Restituisce il nome colore Tabler piu' vicino al colore hex configurato.
+     * Usare con le classi bg-{colore}, text-{colore}, bg-{colore}-lt.
+     * @return string Nome colore Tabler (blue, green, red, azure, purple, orange, teal, cyan, indigo, pink, lime, yellow)
+     */
+    public function getTablerColor()
+    {
+        $hex = strtolower(ltrim($this->getColore(), '#'));
+        $tablerColors = [
+            'blue'   => '206bc4',
+            'azure'  => '4299e1',
+            'indigo' => '4263eb',
+            'purple' => 'ae3ec9',
+            'pink'   => 'd6336c',
+            'red'    => 'd63939',
+            'orange' => 'f76707',
+            'yellow' => 'f59f00',
+            'lime'   => '74b816',
+            'green'  => '2fb344',
+            'teal'   => '0ca678',
+            'cyan'   => '17a2b8',
+        ];
+
+        // Match esatto o default
+        foreach ($tablerColors as $name => $tHex) {
+            if ($hex === $tHex) {
+                return $name;
+            }
+        }
+
+        // Distanza minima RGB
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+        $best = 'blue';
+        $bestDist = PHP_INT_MAX;
+        foreach ($tablerColors as $name => $tHex) {
+            $tr = hexdec(substr($tHex, 0, 2));
+            $tg = hexdec(substr($tHex, 2, 2));
+            $tb = hexdec(substr($tHex, 4, 2));
+            $dist = ($r - $tr) ** 2 + ($g - $tg) ** 2 + ($b - $tb) ** 2;
+            if ($dist < $bestDist) {
+                $bestDist = $dist;
+                $best = $name;
+            }
+        }
+        return $best;
     }
 
     public function getProgetto()

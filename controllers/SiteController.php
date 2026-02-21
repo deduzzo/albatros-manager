@@ -19,6 +19,7 @@ use app\models\FonteFinanziamento;
 use app\models\AuditLog;
 use app\models\Avviso;
 use app\models\forms\DocenteLoginForm;
+use app\models\forms\AllievoLoginForm;
 
 class SiteController extends Controller
 {
@@ -208,8 +209,14 @@ class SiteController extends Controller
             return $this->redirect(['/docente-area/index']);
         }
 
+        // Se studente gia loggato, vai all'area studenti
+        if (!Yii::$app->studenteUser->isGuest) {
+            return $this->redirect(['/studente-area/index']);
+        }
+
         $loginForm = new LoginForm();
         $docenteLoginForm = new DocenteLoginForm();
+        $studenteLoginForm = new AllievoLoginForm();
         $loginError = null;
         $docenteError = null;
         $activeCard = null;
@@ -225,6 +232,12 @@ class SiteController extends Controller
                     return $this->redirect(['/docente-area/index']);
                 }
                 $docenteError = true;
+            } elseif ($loginType === 'studente') {
+                $activeCard = 'studente';
+                if ($studenteLoginForm->load(Yii::$app->request->post()) && $studenteLoginForm->login()) {
+                    Yii::$app->session->setFlash('success', 'Benvenuto nell\'area studenti!');
+                    return $this->redirect(['/studente-area/index']);
+                }
             } else {
                 $activeCard = 'admin';
                 if ($loginForm->load(Yii::$app->request->post()) && $loginForm->login()) {
@@ -242,22 +255,36 @@ class SiteController extends Controller
             ->limit(6)
             ->all();
 
-        // Dati pubblici: progetti attivi
-        $progettiAttivi = Progetto::find()
-            ->where(['status' => Progetto::STATUS_ATTIVO])
-            ->with(['fonteFinanziamento'])
-            ->orderBy(['created_at' => SORT_DESC])
-            ->limit(6)
-            ->all();
+        // CF demo per la card credenziali (solo in demoMode)
+        $demoDocenti = [];
+        $demoAllievi = [];
+        if (Yii::$app->params['demoMode'] ?? false) {
+            $demoDocenti = Docente::find()
+                ->select(['codice_fiscale', 'cognome', 'nome'])
+                ->where(['deleted_at' => null])
+                ->orderBy(['cognome' => SORT_ASC])
+                ->limit(3)
+                ->asArray()
+                ->all();
+            $demoAllievi = Allievo::find()
+                ->select(['codice_fiscale', 'cognome', 'nome'])
+                ->where(['deleted_at' => null])
+                ->orderBy(['cognome' => SORT_ASC])
+                ->limit(3)
+                ->asArray()
+                ->all();
+        }
 
         return $this->render('login', [
             'loginForm' => $loginForm,
             'docenteLoginForm' => $docenteLoginForm,
+            'studenteLoginForm' => $studenteLoginForm,
             'bandiAperti' => $bandiAperti,
-            'progettiAttivi' => $progettiAttivi,
             'loginError' => $loginError,
             'docenteError' => $docenteError,
             'activeCard' => $activeCard,
+            'demoDocenti' => $demoDocenti,
+            'demoAllievi' => $demoAllievi,
         ]);
     }
 

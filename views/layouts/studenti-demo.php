@@ -10,6 +10,7 @@ use app\components\widgets\Alert;
 
 TablerAsset::register($this);
 
+$isStudenteLogged = !Yii::$app->studenteUser->isGuest;
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -28,54 +29,47 @@ TablerAsset::register($this);
         :root {
             --tblr-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
         }
-        .demo-badge {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 9999;
-        }
     </style>
 </head>
 <body>
 <?php $this->beginBody() ?>
 
-<!-- Badge DEMO -->
-<div class="demo-badge">
-    <span class="badge bg-orange text-orange-fg fs-6">
-        <i class="ti ti-flask me-1"></i> DEMO - Nessun dato salvato
-    </span>
-</div>
-
 <div class="page">
-    <!-- Header Area Studenti -->
-    <header class="navbar navbar-expand-md d-print-none" data-bs-theme="dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <!-- Header Area Studenti Pubblica -->
+    <header class="navbar navbar-expand-md d-print-none bg-purple text-purple-fg" data-bs-theme="dark">
         <div class="container-xl">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-studenti">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-                <a href="<?= Url::to(['/demo-studenti/index']) ?>" class="text-decoration-none text-white">
+                <a href="<?= Url::to(['/studenti/index']) ?>" class="text-decoration-none text-white">
                     <i class="ti ti-school me-2"></i>
                     <span>Area Studenti</span>
                 </a>
             </h1>
             <div class="navbar-nav flex-row order-md-last">
-                <a href="<?= Url::to(['/demo-studenti/login']) ?>" class="btn btn-light">
-                    <i class="ti ti-login me-1"></i> Accedi
-                </a>
+                <?php if ($isStudenteLogged): ?>
+                    <a href="<?= Url::to(['/studente-area/index']) ?>" class="btn btn-light">
+                        <i class="ti ti-layout-dashboard me-1"></i> La Mia Area
+                    </a>
+                <?php else: ?>
+                    <a href="<?= Url::to(['/area-studenti/login']) ?>" class="btn btn-light">
+                        <i class="ti ti-login me-1"></i> Accedi
+                    </a>
+                <?php endif; ?>
             </div>
             <div class="collapse navbar-collapse" id="navbar-studenti">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Url::to(['/demo-studenti/index']) ?>">
+                        <a class="nav-link" href="<?= Url::to(['/studenti/index']) ?>">
                             <span class="nav-link-icon"><i class="ti ti-home"></i></span>
                             <span class="nav-link-title">Home</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?= Url::to(['/demo-studenti/corsi']) ?>">
-                            <span class="nav-link-icon"><i class="ti ti-book"></i></span>
-                            <span class="nav-link-title">Corsi Disponibili</span>
+                        <a class="nav-link" href="<?= Url::to(['/studenti/index']) ?>#bandi">
+                            <span class="nav-link-icon"><i class="ti ti-speakerphone"></i></span>
+                            <span class="nav-link-title">Bandi Aperti</span>
                         </a>
                     </li>
                 </ul>
@@ -99,11 +93,11 @@ TablerAsset::register($this);
                     <div class="col-12">
                         <ul class="list-inline list-inline-dots mb-0">
                             <li class="list-inline-item text-muted">
-                                &copy; <?= date('Y') ?> Albatros Manager - Demo Area Studenti
+                                &copy; <?= date('Y') ?> Fondazione ITS Albatros Academy
                             </li>
                             <li class="list-inline-item">
-                                <a href="<?= Url::to(['/site/index']) ?>" class="link-secondary">
-                                    <i class="ti ti-arrow-left me-1"></i> Torna all'Amministrazione
+                                <a href="<?= Url::to(['/site/login']) ?>" class="link-secondary">
+                                    Accedi
                                 </a>
                             </li>
                         </ul>

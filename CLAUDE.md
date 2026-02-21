@@ -70,10 +70,12 @@ public function getStatusBadgeClass()
 }
 ```
 
-**Nelle View** con colore inline (es. badge categoria):
+**Nelle View** - NON usare colori inline (`style="background-color: #hex"`). Usare il metodo `getTablerColor()` sui model che hanno un colore hex (es. `Avviso`):
 ```php
-// CORRETTO - aggiungere sempre color: #fff per sfondo colorato inline
-'<span class="badge" style="background-color: ' . Html::encode($colore) . '; color: #fff;">' . $testo . '</span>'
+// CORRETTO - usare classi Tabler dinamiche
+$tc = $avviso->getTablerColor(); // Ritorna 'blue', 'green', 'purple', ecc.
+'<span class="badge bg-' . $tc . ' text-' . $tc . '-fg">' . $testo . '</span>'
+'<div class="card-header bg-' . $tc . '-lt">...</div>'
 ```
 
 ## Autenticazione
@@ -219,6 +221,127 @@ Workflow di inserimento e validazione ore:
 'area-docenti/elimina-ore/<id:\d+>' => 'docente-area/elimina-ore',
 ```
 
+## Area Studenti (Portale Riservato)
+
+Area self-service per gli studenti, separata dall'area amministrativa e dall'area docenti. Ha autenticazione propria, layout dedicato (viola) e funzionalita specifiche.
+
+### Accesso
+
+| Campo | Valore |
+|-------|--------|
+| **URL Login** | http://localhost:8000/area-studenti/login |
+| **URL Registrazione** | http://localhost:8000/area-studenti/registrazione |
+| **URL Bandi Pubblici** | http://localhost:8000/studenti |
+| **Autenticazione** | Codice Fiscale + Password (tabella `allievo_auth`) |
+| **Layout** | `views/layouts/studente.php` (tema viola) |
+| **Controller Autenticato** | `controllers/StudenteAreaController.php` |
+| **Controller Pubblico** | `controllers/StudentiController.php` |
+
+### Login Test (solo DEBUG mode)
+
+Come per i docenti, in modalita sviluppo gli studenti possono accedere con solo il CF (password vuota). Se non esiste un record `allievo_auth`, viene creato automaticamente.
+
+### Autenticazione Studente
+
+L'area studenti usa un sistema di autenticazione separato:
+- **Component Yii**: `Yii::$app->studenteUser` (NON `Yii::$app->user` ne `docenteUser`)
+- **Identity**: `app\models\AllievoAuth` (tabella `allievo_auth`)
+- **Allievo**: `Yii::$app->studenteUser->identity->allievo`
+- **Codice Fiscale**: `Yii::$app->studenteUser->identity->allievo_codice_fiscale`
+
+### Funzionalita Disponibili
+
+| Sezione | URL | Descrizione |
+|---------|-----|-------------|
+| Dashboard | `/area-studenti` | Stat cards, bandi in scadenza, azioni rapide |
+| Bandi Aperti | `/area-studenti/bandi` | Lista bandi disponibili per candidatura |
+| Dettaglio Bando | `/area-studenti/bandi/{id}` | Moduli, requisiti, pulsante "Candidati" |
+| Candidatura | `/area-studenti/candidatura/{id}` | Form 4 sezioni (anagrafica, formazione, lavoro, privacy) |
+| Le Mie Candidature | `/area-studenti/le-mie-candidature` | Storico candidature con stato e punteggio |
+| Dettaglio Candidatura | `/area-studenti/candidatura-view/{id}` | Punteggi per criterio, storico, motivazione |
+| Profilo | `/area-studenti/profilo` | Modifica dati anagrafici |
+
+### Workflow Candidature Studenti
+
+```
+Studente si registra → Login area riservata → Consulta bandi aperti
+→ Compila candidatura (anagrafica + formazione + lavoro + privacy)
+→ Status: "candidato" (snapshot dati formazione/lavoro)
+→ Admin valuta → Assegna punteggi per criterio → Calcola punteggio totale
+→ Admin pubblica graduatoria
+→ Status: "ammesso" / "ammesso_con_riserva" / "non_ammesso" (con motivazione)
+→ Studente ammesso → Inizia corso → "frequentante"
+→ Fine corso → "completato" con valutazione finale e attestato
+```
+
+**Stati iscrizione**:
+- `candidato` (azure) - Candidatura presentata
+- `in_valutazione` (orange) - In fase di valutazione admin
+- `ammesso` (green) - Ammesso in graduatoria
+- `ammesso_con_riserva` (lime) - Ammesso con condizioni
+- `non_ammesso` (red) - Non ammesso (con motivazione)
+- `frequentante` (blue) - Sta frequentando il corso
+- `completato` (teal) - Corso completato
+- `ritirato` (default) - Ritirato
+
+### Pagine Pubbliche Bandi (no login)
+
+Le pagine `/studenti` e `/studenti/bando/{id}` sono accessibili senza login e mostrano i bandi aperti con tutti i dettagli (moduli, requisiti, certificazioni, scadenze).
+
+### Route Area Studenti (config/web.php)
+
+```php
+'area-studenti' => 'studente-area/index',
+'area-studenti/login' => 'studente-area/login',
+'area-studenti/registrazione' => 'studente-area/registrazione',
+'area-studenti/logout' => 'studente-area/logout',
+'area-studenti/profilo' => 'studente-area/profilo',
+'area-studenti/bandi' => 'studente-area/bandi',
+'area-studenti/bandi/<id:\d+>' => 'studente-area/bando',
+'area-studenti/candidatura/<id:\d+>' => 'studente-area/candidatura',
+'area-studenti/le-mie-candidature' => 'studente-area/le-mie-candidature',
+'area-studenti/candidatura-view/<id:\d+>' => 'studente-area/candidatura-view',
+```
+
+## Criteri Valutazione Studenti
+
+Sistema di valutazione candidature con criteri pesati (globali + per bando).
+
+**Tabelle**: `criterio_valutazione_studente` → `punteggio_iscrizione`
+**Controller**: `CriterioValutazioneController` (CRUD criteri), azioni in `IscrizioneController` (valutazione, graduatoria, ammissione)
+
+**5 criteri globali default**: Titolo di Studio (peso 2.0), Esperienza Lavorativa (1.5), Motivazione (1.0), Requisiti Specifici (1.5), Situazione Occupazionale (1.0)
+
+**Workflow admin**:
+- `/iscrizione/candidature` - Lista bandi con conteggio candidature
+- `/iscrizione/candidature?avviso_id={id}` - Lista candidature per bando
+- `/iscrizione/valuta/{id}` - Form punteggi per criterio (calcolo live JS)
+- `/iscrizione/graduatoria-studenti?avviso_id={id}` - Graduatoria ordinata + ammissione singola/massiva
+- `/iscrizione/storico/{id}` - Timeline cambi stato
+
+## Configurazione Fondazione
+
+Gestione dati fondazione tramite tabella `configurazione` (chiave-valore).
+
+**Controller**: `ConfigurazioneController` (`/configurazione/index`)
+**Model**: `Configurazione` con metodi statici `get(chiave)`, `set(chiave, valore)`, `getByGruppo()`
+**Dati**: nome_fondazione, indirizzo, telefono, email, pec, partita_iva, codice_fiscale_ente, sito_web, logo_url
+
+## Subentro Docenti Idonei
+
+Sistema per sostituire un docente revocato/rinunciatario con un idoneo dalla graduatoria.
+
+**Workflow**:
+1. Admin revoca assegnazione (`AssegnazioneController::actionRevoca`) con motivazione
+2. Sistema registra `StoricoEsito::ESITO_RINUNCIA` sull'istanza
+3. Se ci sono idonei → redirect a pagina subentro (`actionSubentro`)
+4. Admin seleziona un idoneo dalla lista ordinata per punteggio
+5. Sistema crea nuova assegnazione + registra `ESITO_SUBENTRO`
+
+**Model**: `Modulo::getIstanzeIdonee()`, `getProssimoIdoneo()`, `getGraduatoria()`, `getIdoneiDisponibiliCount()`
+**Model**: `Assegnazione::isRevocabile()`, `revoca()`, `isAttiva()`
+**Viste**: `views/assegnazione/subentro.php`, `views/istanza/graduatoria.php`
+
 ## Ambiente Docker
 
 ```bash
@@ -275,7 +398,7 @@ FONTE_FINANZIAMENTO (FSE, PNRR, MIM)
                 └── VALUTAZIONE_DOCENTE
 ```
 
-### Tabelle (31 totali)
+### Tabelle (36 totali)
 
 | Tabella | PK | Descrizione |
 |---------|-----|-------------|
@@ -301,7 +424,12 @@ FONTE_FINANZIAMENTO (FSE, PNRR, MIM)
 | assegnazione | id | Assegnazioni deliberate da CTS |
 | contratto | id | Contratti (CoCoCo/P.IVA, date lezioni) |
 | calendario | id | Lezioni programmate |
-| iscrizione | id | Iscrizioni allievi |
+| iscrizione | id | Candidature/iscrizioni studenti (workflow candidatura→ammissione→frequenza) |
+| criterio_valutazione_studente | id | Criteri valutazione candidature (globali + per bando) |
+| punteggio_iscrizione | id | Punteggi per criterio per ogni candidatura |
+| storico_iscrizione | id | Timeline cambi stato iscrizione (NO soft delete) |
+| allievo_auth | id | Autenticazione area studenti (CF + password) |
+| configurazione | id | Impostazioni chiave-valore sistema/fondazione (NO soft delete) |
 | presenza_allievo | id | Presenze per lezione |
 | pagamento | id | Pagamenti docenti (con ore_extra workflow) |
 | rendicontazione_ore | id | Ore giornaliere rendicontate dai docenti |
@@ -445,7 +573,7 @@ albatros-manager-yii2/
 ├── config/
 │   ├── db.php                        # Configurazione database
 │   └── web.php                       # Configurazione app
-├── migrations/                        # 40 migration files
+├── migrations/                        # 48 migration files
 ├── models/
 │   ├── User.php                      # Model utente (autenticazione DB)
 │   ├── LoginForm.php                 # Form login
@@ -461,13 +589,21 @@ albatros-manager-yii2/
 │   ├── TagCategoria.php, TagCurriculum.php # Sistema tag competenze
 │   ├── IstanzaDocumento.php, IstanzaTag.php, IstanzaSnapshot.php # Dati istanza
 │   ├── StoricoEsito.php              # Timeline esiti CTS
+│   ├── AllievoAuth.php               # Autenticazione area studenti
+│   ├── Configurazione.php            # Impostazioni chiave-valore (NO BaseActiveRecord)
+│   ├── CriterioValutazioneStudente.php # Criteri valutazione candidature
+│   ├── PunteggioIscrizione.php       # Punteggi per criterio per candidatura
+│   ├── StoricoIscrizione.php         # Timeline cambi stato iscrizione (NO BaseActiveRecord)
+│   ├── forms/AllievoLoginForm.php    # Form login studente
+│   ├── forms/AllievoRegistrazioneForm.php # Form registrazione studente
 │   └── *Search.php                   # Model di ricerca per GridView
 ├── views/
 │   ├── layouts/
 │   │   ├── main.php                  # Layout principale Tabler
 │   │   ├── login.php                 # Layout pagina login (no menu)
 │   │   ├── docente.php               # Layout area docenti (separato)
-│   │   ├── studenti-demo.php         # Layout demo studenti
+│   │   ├── studente.php              # Layout area studenti autenticata (viola)
+│   │   ├── studenti-demo.php         # Layout area studenti pubblica
 │   │   ├── header.php                # Header con notifiche/profilo
 │   │   ├── menu.php                  # Menu navigazione sidebar
 │   │   └── footer.php                # Footer
@@ -476,6 +612,10 @@ albatros-manager-yii2/
 │   │   └── login.php                 # Pagina login Tabler
 │   ├── {entita}/                     # CRUD views per ogni entita (index, view, create, update, _form)
 │   ├── docente-area/                 # Views portale docenti
+│   ├── studente-area/               # Views portale studenti (10 file)
+│   ├── studenti/                    # Views pagine pubbliche bandi
+│   ├── configurazione/              # Views dati fondazione
+│   ├── criterio-valutazione/        # Views CRUD criteri valutazione
 │   ├── audit-log/                    # Views visualizzazione audit
 │   ├── rendicontazione-ore/          # Views ore: index, view, dashboard, riepilogo
 │   └── report/                       # Views report e statistiche
@@ -506,7 +646,10 @@ albatros-manager-yii2/
 │   ├── TagCategoriaController.php    # CRUD categorie tag
 │   ├── TagCurriculumController.php   # CRUD tag curriculum
 │   ├── DocenteAreaController.php     # Portale riservato docenti
-│   └── DemoStudentiController.php    # Demo area studenti
+│   ├── StudenteAreaController.php   # Portale riservato studenti
+│   ├── StudentiController.php       # Pagine pubbliche bandi studenti
+│   ├── ConfigurazioneController.php # Dati fondazione
+│   └── CriterioValutazioneController.php # CRUD criteri valutazione
 ├── docs/
 │   ├── schema-er.html                # Diagramma ER interattivo
 │   ├── CRUD_GUIDELINES.md            # Linee guida sviluppo CRUD
@@ -844,6 +987,12 @@ Il sistema include 3 manuali HTML navigabili nel browser e stampabili/scaricabil
 | Compenso TP/RU | Sez. 9 | - | - |
 | Export Consulente Lavoro | Sez. 13 | - | - |
 | Wizard Onboarding | Sez. 1 | Sez. 1 | Sez. 1 |
+| Area Studenti (portale autenticato) | Sez. 16 | - | Sez. 2-4 |
+| Candidature Studenti + Graduatoria | Sez. 16 | - | Sez. 3 |
+| Criteri Valutazione | Sez. 16 | - | - |
+| Dati Fondazione (Configurazione) | Sez. 3 | - | - |
+| Subentro Docenti Idonei | Sez. 8 | - | - |
+| Graduatoria Docenti | Sez. 8 | - | - |
 
 ## Questionario Anonimo Valutazione Docenti
 
@@ -872,6 +1021,11 @@ Sistema di valutazione anonima tramite codici monouso.
 - phpMyAdmin: http://localhost:8080
 - App (Admin): http://localhost:8000
 - Area Docenti: http://localhost:8000/area-docenti/login
+- Area Studenti: http://localhost:8000/area-studenti/login
+- Bandi Pubblici: http://localhost:8000/studenti
+- Configurazione Fondazione: http://localhost:8000/configurazione
+- Criteri Valutazione: http://localhost:8000/criterio-valutazione
+- Graduatoria Docenti: http://localhost:8000/istanza/graduatoria
 - Import Dati: http://localhost:8000/import
 - Tabler Icons: https://tabler.io/icons
 - Tabler Docs: https://tabler.io/docs

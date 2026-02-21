@@ -35,6 +35,17 @@ $config = [
             'returnUrlParam' => '__docenteReturnUrl',
             'loginUrl' => ['docente-area/login'],
         ],
+        'studenteUser' => [
+            'class' => 'yii\web\User',
+            'identityClass' => 'app\models\AllievoAuth',
+            'enableAutoLogin' => true,
+            'identityCookie' => ['name' => '_studenteIdentity', 'httpOnly' => true],
+            'idParam' => '__studenteId',
+            'authTimeoutParam' => '__studenteAuthExpire',
+            'absoluteAuthTimeoutParam' => '__studenteAbsoluteAuthExpire',
+            'returnUrlParam' => '__studenteReturnUrl',
+            'loginUrl' => ['studente-area/login'],
+        ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
@@ -94,6 +105,29 @@ $config = [
                 // Valutazione pubblica anonima
                 'valutazione/<codice:[A-Z0-9]{8}>' => 'valutazione-public/index',
                 'valutazione-public/<action:[\w-]+>' => 'valutazione-public/<action>',
+
+                // Area Studenti Autenticata
+                'area-studenti' => 'studente-area/index',
+                'area-studenti/login' => 'studente-area/login',
+                'area-studenti/registrazione' => 'studente-area/registrazione',
+                'area-studenti/logout' => 'studente-area/logout',
+                'area-studenti/profilo' => 'studente-area/profilo',
+                'area-studenti/bandi' => 'studente-area/bandi',
+                'area-studenti/bandi/<id:\d+>' => 'studente-area/bando',
+                'area-studenti/candidatura/<id:\d+>' => 'studente-area/candidatura',
+                'area-studenti/le-mie-candidature' => 'studente-area/le-mie-candidature',
+                'area-studenti/candidatura-view/<id:\d+>' => 'studente-area/candidatura-view',
+                'area-studenti/password-dimenticata' => 'studente-area/password-dimenticata',
+
+                // Area Studenti (pubblica)
+                'studenti' => 'studenti/index',
+                'studenti/bando/<id:\d+>' => 'studenti/bando',
+                'studenti/iscrizione/<id:\d+>' => 'studenti/iscrizione',
+                'studenti/conferma' => 'studenti/conferma',
+                'studenti/<action:[\w-]+>' => 'studenti/<action>',
+                // Backward compatibility: vecchio URL demo
+                'demo-studenti' => 'studenti/index',
+                'demo-studenti/<action:[\w-]+>' => 'studenti/<action>',
 
                 // CRUD standard per ogni entità
                 '<controller:[\w-]+>' => '<controller>/index',
