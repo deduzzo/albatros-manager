@@ -42,14 +42,24 @@ class DocenteSearch extends Docente
     public $min_valutazione;
 
     /**
+     * @var float|null valutazione media calcolata (per sorting/filtering in griglia)
+     */
+    public $valutazione_media;
+
+    /**
+     * @var int|null numero contratti calcolato (per sorting/filtering in griglia)
+     */
+    public $num_contratti;
+
+    /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
             [['codice_fiscale', 'cognome', 'nome', 'email', 'citta', 'provincia', 'titolo_studio', 'ricerca', 'provenienza', 'esito_cts'], 'safe'],
-            [['tag_id', 'categoria_id', 'min_contratti'], 'integer'],
-            [['min_valutazione'], 'number'],
+            [['tag_id', 'categoria_id', 'min_contratti', 'num_contratti'], 'integer'],
+            [['min_valutazione', 'valutazione_media'], 'number'],
         ];
     }
 
@@ -73,6 +83,8 @@ class DocenteSearch extends Docente
             'esito_cts' => 'Esito CTS',
             'min_contratti' => 'Minimo Contratti',
             'min_valutazione' => 'Valutazione Minima',
+            'valutazione_media' => 'Valutazione',
+            'num_contratti' => 'Contratti',
         ]);
     }
 
@@ -85,6 +97,27 @@ class DocenteSearch extends Docente
     public function search($params)
     {
         $query = Docente::find();
+
+        // Subquery per valutazione media
+        $subQueryVal = (new \yii\db\Query())
+            ->select('AVG(vd.punteggio_globale)')
+            ->from('valutazione_docente vd')
+            ->where('vd.docente_codice_fiscale = docente.codice_fiscale')
+            ->andWhere(['vd.deleted_at' => null]);
+
+        // Subquery per numero contratti
+        $subQueryContr = (new \yii\db\Query())
+            ->select('COUNT(c.id)')
+            ->from('contratto c')
+            ->leftJoin('assegnazione a', 'a.id = c.assegnazione_id AND a.deleted_at IS NULL')
+            ->where('a.docente_codice_fiscale = docente.codice_fiscale')
+            ->andWhere(['c.deleted_at' => null]);
+
+        $query->addSelect([
+            'docente.*',
+            'valutazione_media' => $subQueryVal,
+            'num_contratti' => $subQueryContr,
+        ]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -100,6 +133,16 @@ class DocenteSearch extends Docente
                     'titolo_studio',
                     'created_at',
                     'updated_at',
+                    'valutazione_media' => [
+                        'asc' => ['valutazione_media' => SORT_ASC],
+                        'desc' => ['valutazione_media' => SORT_DESC],
+                        'label' => 'Valutazione',
+                    ],
+                    'num_contratti' => [
+                        'asc' => ['num_contratti' => SORT_ASC],
+                        'desc' => ['num_contratti' => SORT_DESC],
+                        'label' => 'Contratti',
+                    ],
                 ],
             ],
             'pagination' => [
@@ -127,7 +170,7 @@ class DocenteSearch extends Docente
             ->andFilterWhere(['like', 'citta', $this->citta])
             ->andFilterWhere(['like', 'titolo_studio', $this->titolo_studio]);
 
-        // Ricerca full-text (cerca in più campi)
+        // Ricerca full-text (cerca in piu campi)
         if (!empty($this->ricerca)) {
             $query->andWhere([
                 'or',
@@ -162,19 +205,24 @@ class DocenteSearch extends Docente
             $query->distinct();
         }
 
-        // Filtro per numero minimo contratti
+        // Filtro per numero minimo contratti (legacy, dai filtri avanzati)
         if ($this->min_contratti !== null && $this->min_contratti > 0) {
-            $query->innerJoin('assegnazione a', 'a.docente_codice_fiscale = docente.codice_fiscale')
-                ->innerJoin('contratto c', 'c.assegnazione_id = a.id')
-                ->groupBy('docente.codice_fiscale')
-                ->having(['>=', new Expression('COUNT(c.id)'), $this->min_contratti]);
+            $query->andHaving(['>=', new Expression('num_contratti'), $this->min_contratti]);
         }
 
-        // Filtro per valutazione minima
+        // Filtro per valutazione minima (legacy, dai filtri avanzati)
         if ($this->min_valutazione !== null && $this->min_valutazione > 0) {
-            $query->innerJoin('valutazione_docente v', 'v.docente_codice_fiscale = docente.codice_fiscale')
-                ->groupBy('docente.codice_fiscale')
-                ->having(['>=', new Expression('AVG(v.punteggio_globale)'), $this->min_valutazione]);
+            $query->andHaving(['>=', new Expression('valutazione_media'), $this->min_valutazione]);
+        }
+
+        // Filtro colonna griglia: num_contratti
+        if ($this->num_contratti !== null && $this->num_contratti !== '') {
+            $query->andHaving(['num_contratti' => $this->num_contratti]);
+        }
+
+        // Filtro colonna griglia: valutazione_media
+        if ($this->valutazione_media !== null && $this->valutazione_media !== '') {
+            $query->andHaving(['>=', new Expression('valutazione_media'), $this->valutazione_media]);
         }
 
         return $dataProvider;

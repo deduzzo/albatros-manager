@@ -21,6 +21,7 @@ $this->params['breadcrumbs'][] = $model->codice_progetto;
                     </h2>
                 </div>
                 <div class="col-auto ms-auto">
+                    <?= Html::a('<i class="ti ti-file-spreadsheet me-1"></i> Export Consulente', ['report/export-consulente', 'progetto_id' => $model->id], ['class' => 'btn bg-azure text-azure-fg']) ?>
                     <?= Html::a('<i class="ti ti-edit me-1"></i> Modifica', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
                     <?= Html::a('<i class="ti ti-trash me-1"></i> Elimina', ['delete', 'id' => $model->id], [
                         'class' => 'btn btn-danger',

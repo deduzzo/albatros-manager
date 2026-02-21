@@ -5,6 +5,7 @@ use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $counts array */
+/* @var $progetti app\models\Progetto[] */
 
 $this->title = 'Export Dati';
 $this->params['breadcrumbs'][] = ['label' => 'Report', 'url' => ['statistiche']];
@@ -92,5 +93,61 @@ $entities = [
                 </div>
             </div>
         </div>
+
+        <!-- Export per Consulente del Lavoro -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="ti ti-briefcase me-2"></i>Export per Consulente del Lavoro</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Genera un file Excel con tutti i dati anagrafici, contrattuali e retributivi dei docenti per un progetto specifico.
+                    Il file contiene le informazioni necessarie al consulente del lavoro per la gestione dei contratti.
+                </p>
+                <?php if (!empty($progetti)): ?>
+                <div class="row align-items-end g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Seleziona Progetto</label>
+                        <select id="consulente-progetto-id" class="form-select">
+                            <option value="">-- Seleziona un progetto --</option>
+                            <?php foreach ($progetti as $p): ?>
+                            <option value="<?= $p->id ?>"><?= Html::encode($p->codice_progetto . ' - ' . $p->titolo) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" id="btn-export-consulente" class="btn bg-azure text-azure-fg" disabled>
+                            <i class="ti ti-file-spreadsheet me-1"></i> Scarica Excel
+                        </button>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="text-muted text-center py-3">
+                    <i class="ti ti-folder-off mb-2" style="font-size: 2rem;"></i>
+                    <p>Nessun progetto disponibile</p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </div>
+
+<?php
+$exportUrl = Url::to(['report/export-consulente']);
+$js = <<<JS
+    var select = document.getElementById('consulente-progetto-id');
+    var btn = document.getElementById('btn-export-consulente');
+    if (select && btn) {
+        select.addEventListener('change', function() {
+            btn.disabled = !this.value;
+        });
+        btn.addEventListener('click', function() {
+            var progettoId = select.value;
+            if (progettoId) {
+                window.location.href = '{$exportUrl}?progetto_id=' + progettoId;
+            }
+        });
+    }
+JS;
+$this->registerJs($js);
+?>

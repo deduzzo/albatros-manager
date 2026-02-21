@@ -5,6 +5,7 @@ namespace app\controllers;
 use Yii;
 use app\models\ValutazioneDocente;
 use app\models\ValutazioneDocenteSearch;
+use app\models\ValutazioneCodice;
 use app\models\Modulo;
 use app\models\Docente;
 use yii\web\Controller;
@@ -89,6 +90,67 @@ class ValutazioneDocenteController extends Controller
         $this->findModel($id)->delete();
         Yii::$app->session->setFlash('success', 'Valutazione eliminata con successo.');
         return $this->redirect(['index']);
+    }
+
+    /**
+     * Genera codici di valutazione per un modulo
+     */
+    public function actionGeneraCodici($modulo_id)
+    {
+        $modulo = Modulo::findOne($modulo_id);
+        if ($modulo === null) {
+            throw new NotFoundHttpException('Modulo non trovato.');
+        }
+
+        $codiciGenerati = [];
+        $quantita = 0;
+
+        if (Yii::$app->request->isPost) {
+            $quantita = (int) Yii::$app->request->post('quantita', 20);
+            if ($quantita < 1) {
+                $quantita = 1;
+            }
+            if ($quantita > 500) {
+                $quantita = 500;
+            }
+            $codiciGenerati = ValutazioneCodice::generaCodici($modulo_id, $quantita);
+            Yii::$app->session->setFlash('success', count($codiciGenerati) . ' codici generati con successo.');
+        }
+
+        // Codici esistenti per questo modulo
+        $codiciEsistenti = ValutazioneCodice::find()
+            ->where(['modulo_id' => $modulo_id])
+            ->orderBy(['created_at' => SORT_DESC])
+            ->all();
+
+        return $this->render('genera-codici', [
+            'modulo' => $modulo,
+            'codiciGenerati' => $codiciGenerati,
+            'codiciEsistenti' => $codiciEsistenti,
+        ]);
+    }
+
+    /**
+     * Stampa codici per distribuzione (layout vuoto)
+     */
+    public function actionStampaCodici($modulo_id)
+    {
+        $modulo = Modulo::findOne($modulo_id);
+        if ($modulo === null) {
+            throw new NotFoundHttpException('Modulo non trovato.');
+        }
+
+        $codici = ValutazioneCodice::find()
+            ->where(['modulo_id' => $modulo_id, 'usato_at' => null])
+            ->orderBy(['id' => SORT_ASC])
+            ->all();
+
+        $this->layout = false;
+
+        return $this->render('stampa-codici', [
+            'modulo' => $modulo,
+            'codici' => $codici,
+        ]);
     }
 
     protected function findModel($id)

@@ -63,6 +63,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="page-body">
         <div class="container-xl">
+            <?php if ($model->isSovraimpegnato()): ?>
+                <div class="alert alert-warning mb-3">
+                    <div class="d-flex">
+                        <div><i class="ti ti-alert-triangle icon me-2"></i></div>
+                        <div>
+                            <h4 class="alert-title">Attenzione: Docente sovra-impegnato</h4>
+                            <div class="text-muted">Questo docente ha <strong><?= $model->getModuliAttivi() ?></strong> moduli attivi con contratto in corso. Considerare di ridistribuire gli incarichi.</div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <div class="row row-deck row-cards">
                 <!-- Statistiche rapide -->
                 <div class="col-sm-6 col-lg-3">

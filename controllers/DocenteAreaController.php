@@ -70,7 +70,7 @@ class DocenteAreaController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -230,6 +230,14 @@ class DocenteAreaController extends Controller
     {
         Yii::$app->docenteUser->logout();
         return $this->redirect(['login']);
+    }
+
+    /**
+     * Guida interattiva area docenti
+     */
+    public function actionGuida()
+    {
+        return $this->render('guida');
     }
 
     /**

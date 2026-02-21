@@ -160,6 +160,16 @@ $this->title = 'Dashboard';
                                 </div>
                                 <i class="ti ti-chevron-right ms-auto"></i>
                             </a>
+                            <a href="<?= Url::to(['/site/manuale-docente']) ?>" class="list-group-item list-group-item-action d-flex align-items-center" target="_blank">
+                                <span class="avatar bg-azure-lt me-3">
+                                    <i class="ti ti-book"></i>
+                                </span>
+                                <div>
+                                    <strong>Manuale Docente</strong>
+                                    <div class="text-secondary small">Guida all'utilizzo dell'area docenti</div>
+                                </div>
+                                <i class="ti ti-chevron-right ms-auto"></i>
+                            </a>
                         </div>
                     </div>
                 </div>

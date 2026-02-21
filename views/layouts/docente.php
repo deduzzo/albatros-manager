@@ -54,6 +54,25 @@ $currentAction = Yii::$app->controller->action->id;
             </h1>
             <div class="navbar-nav flex-row order-md-last">
                 <?php if (!$docenteUser->isGuest): ?>
+                    <!-- Aiuto dropdown -->
+                    <div class="nav-item dropdown me-3">
+                        <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" title="Aiuto">
+                            <i class="ti ti-help"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                            <h6 class="dropdown-header">Aiuto</h6>
+                            <a href="<?= Url::to(['/docente-area/guida']) ?>" class="dropdown-item">
+                                <i class="ti ti-compass me-2"></i> Guida Interattiva
+                            </a>
+                            <a href="<?= Url::to(['/site/manuale-docente']) ?>" class="dropdown-item" target="_blank">
+                                <i class="ti ti-book me-2"></i> Manuale Utente
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="<?= Url::to(['/site/supporto']) ?>" class="dropdown-item" target="_blank">
+                                <i class="ti ti-bug me-2"></i> Segnala un Problema
+                            </a>
+                        </div>
+                    </div>
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown">
                             <span class="avatar avatar-sm bg-blue-lt">

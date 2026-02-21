@@ -173,12 +173,63 @@ $this->params['breadcrumbs'][] = $this->title;
                             },
                         ],
                         [
+                            'label' => 'Moduli Attivi',
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $count = $model->getModuliAttivi();
+                                if ($count === 0) {
+                                    return '<span class="badge bg-default text-default-fg">0</span>';
+                                }
+                                if ($count > 5) {
+                                    $class = 'bg-red text-red-fg';
+                                } elseif ($count >= 3) {
+                                    $class = 'bg-orange text-orange-fg';
+                                } else {
+                                    $class = 'bg-green text-green-fg';
+                                }
+                                return '<span class="badge ' . $class . '">' . $count . '</span>';
+                            },
+                            'headerOptions' => ['style' => 'width: 110px;'],
+                        ],
+                        [
+                            'attribute' => 'valutazione_media',
                             'label' => 'Valutazione',
                             'format' => 'raw',
                             'content' => function($model) {
-                                return $model->getValutazioneStarsHtml();
+                                $media = $model->valutazione_media;
+                                if ($media === null) {
+                                    return '<span class="text-muted">-</span>';
+                                }
+                                $media = (float) $media;
+                                $mediaArrotondata = round($media);
+                                $html = '';
+                                for ($i = 1; $i <= 5; $i++) {
+                                    if ($i <= $mediaArrotondata) {
+                                        $html .= '<i class="ti ti-star-filled text-yellow"></i>';
+                                    } else {
+                                        $html .= '<i class="ti ti-star text-muted"></i>';
+                                    }
+                                }
+                                $html .= ' <span class="text-muted small">(' . number_format($media, 1) . ')</span>';
+                                return $html;
                             },
-                            'headerOptions' => ['style' => 'width: 150px;'],
+                            'headerOptions' => ['style' => 'width: 170px;'],
+                            'filter' => [1 => '1+', 2 => '2+', 3 => '3+', 4 => '4+', 5 => '5'],
+                        ],
+                        [
+                            'attribute' => 'num_contratti',
+                            'label' => 'Contratti',
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $count = (int) $model->num_contratti;
+                                if ($count === 0) {
+                                    return '<span class="text-muted">-</span>';
+                                }
+                                $badgeClass = $count >= 5 ? 'bg-green text-green-fg' : ($count >= 2 ? 'bg-azure text-azure-fg' : 'bg-default text-default-fg');
+                                return '<span class="badge ' . $badgeClass . '">' . $count . '</span>';
+                            },
+                            'headerOptions' => ['style' => 'width: 100px;'],
+                            'contentOptions' => ['class' => 'text-center'],
                         ],
                         ['class' => 'yii\grid\ActionColumn'],
                     ],

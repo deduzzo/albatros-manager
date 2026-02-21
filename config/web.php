@@ -89,6 +89,11 @@ $config = [
                 'area-docenti/le-mie-ore/<assegnazione_id:\d+>' => 'docente-area/le-mie-ore',
                 'area-docenti/modifica-ore/<id:\d+>' => 'docente-area/modifica-ore',
                 'area-docenti/elimina-ore/<id:\d+>' => 'docente-area/elimina-ore',
+                'area-docenti/guida' => 'docente-area/guida',
+
+                // Valutazione pubblica anonima
+                'valutazione/<codice:[A-Z0-9]{8}>' => 'valutazione-public/index',
+                'valutazione-public/<action:[\w-]+>' => 'valutazione-public/<action>',
 
                 // CRUD standard per ogni entità
                 '<controller:[\w-]+>' => '<controller>/index',

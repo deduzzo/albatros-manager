@@ -283,6 +283,11 @@ $sediCount = \app\models\Sede::find()->count();
                                     </div>
                                 ', ['/docente/create'], ['class' => 'text-reset']) ?>
                             </div>
+                            <div class="col-12">
+                                <a href="<?= Url::to(['site/manuale-admin']) ?>" class="btn bg-azure text-azure-fg w-100" target="_blank">
+                                    <i class="ti ti-book me-1"></i> Manuale Amministratore
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

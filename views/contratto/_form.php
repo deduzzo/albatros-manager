@@ -1,5 +1,6 @@
 <?php
 
+use Yii;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use app\models\Contratto;
@@ -94,6 +95,16 @@ use app\models\Contratto;
                     'min' => '0',
                     'placeholder' => '60.00',
                 ])->label('Compenso Orario (&euro;) <span class="text-danger">*</span>') ?>
+                <?php
+                if (isset($model->assegnazione) && $model->assegnazione->docente) {
+                    $docente = $model->assegnazione->docente;
+                    $fonte = $model->assegnazione->modulo->avviso->progetto->fonteFinanziamento->nome ?? null;
+                    $suggerito = $docente->getCompensoDefault($fonte);
+                    if ($suggerito) {
+                        echo '<div class="text-muted small mt-1"><i class="ti ti-info-circle me-1"></i>Compenso suggerito per ' . ($docente->provenienza === 'RU' ? 'Ricercatore Universitario' : 'Professionista') . ': <strong>' . Yii::$app->formatter->asCurrency($suggerito) . '/ora</strong></div>';
+                    }
+                }
+                ?>
             </div>
             <div class="col-md-3">
                 <?= $form->field($model, 'ore_contrattualizzate')->textInput([

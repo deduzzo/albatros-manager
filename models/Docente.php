@@ -458,6 +458,44 @@ class Docente extends BaseActiveRecord
     }
 
     /**
+     * Conta i moduli attivi del docente (con contratto non ancora scaduto)
+     * @return int
+     */
+    public function getModuliAttivi()
+    {
+        return (int) Assegnazione::find()
+            ->alias('ass')
+            ->leftJoin('contratto c', 'c.assegnazione_id = ass.id AND c.deleted_at IS NULL')
+            ->where(['ass.docente_codice_fiscale' => $this->codice_fiscale])
+            ->andWhere(['ass.deleted_at' => null])
+            ->andWhere(['>=', 'c.data_fine', date('Y-m-d')])
+            ->count();
+    }
+
+    /**
+     * Verifica se il docente e' sovra-impegnato
+     * @param int $soglia Numero massimo di moduli attivi
+     * @return bool
+     */
+    public function isSovraimpegnato($soglia = 5)
+    {
+        return $this->getModuliAttivi() > $soglia;
+    }
+
+    /**
+     * Restituisce il compenso orario suggerito in base alla provenienza e fonte di finanziamento
+     * @param string|null $fonteFinanziamento Nome della fonte di finanziamento
+     * @return float|null
+     */
+    public function getCompensoDefault($fonteFinanziamento = null)
+    {
+        if ($fonteFinanziamento === 'PNRR' || $fonteFinanziamento === 'pnrr') {
+            return $this->provenienza === self::PROVENIENZA_RU ? 70 : 60;
+        }
+        return null;
+    }
+
+    /**
      * Verifica il check digit del codice fiscale italiano.
      * Algoritmo: peso pari/dispari, modulo 26.
      * @param string $cf Codice fiscale da verificare

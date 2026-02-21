@@ -23,8 +23,11 @@ use app\components\base\BaseActiveRecord;
  * @property int|null $updated_by
  * @property int|null $deleted_by
  *
+ * @property int|null $valutazione_codice_id
+ *
  * @property Modulo $modulo
  * @property Docente $docente
+ * @property ValutazioneCodice $valutazioneCodice
  */
 class ValutazioneDocente extends BaseActiveRecord
 {
@@ -43,6 +46,7 @@ class ValutazioneDocente extends BaseActiveRecord
             [['data_valutazione'], 'date', 'format' => 'php:Y-m-d'],
             [['docente_codice_fiscale'], 'string', 'max' => 16],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
+            [['valutazione_codice_id'], 'integer'],
             [['created_by', 'updated_by', 'deleted_by'], 'integer'],
         ];
     }
@@ -72,6 +76,11 @@ class ValutazioneDocente extends BaseActiveRecord
     public function getDocente()
     {
         return $this->hasOne(Docente::class, ['codice_fiscale' => 'docente_codice_fiscale']);
+    }
+
+    public function getValutazioneCodice()
+    {
+        return $this->hasOne(ValutazioneCodice::class, ['id' => 'valutazione_codice_id']);
     }
 
     /**

@@ -786,12 +786,89 @@ Sistema di tagging per competenze docenti.
 | Dashboard "Attivita Recenti" con dati hardcoded finti | Query reale da `audit_log` | `controllers/SiteController.php`, `views/site/index.php` |
 | `joinWith()` + SoftDeleteTrait causava conflitti alias | Usare `leftJoin` diretto | Pattern documentato in Convenzioni |
 
+## Manuali Utente
+
+Il sistema include 3 manuali HTML navigabili nel browser e stampabili/scaricabili come PDF.
+
+| Manuale | URL | Vista | Destinatario |
+|---------|-----|-------|-------------|
+| Amministratore | `/site/manuale-admin` | `views/site/manuale-admin.php` | Staff amministrativo |
+| Docente | `/site/manuale-docente` | `views/site/manuale-docente.php` | Docenti area riservata |
+| Studente | `/site/manuale-studente` | `views/site/manuale-studente.php` | Studenti/corsisti |
+
+**Link nei layout**:
+- Dashboard admin (`views/site/index.php`): pulsante "Manuale Amministratore"
+- Header admin (`views/layouts/header.php`): dropdown "Manuali" con link a tutti e 3
+- Dashboard docente (`views/docente-area/index.php`): link al manuale docente
+
+**Caratteristiche**:
+- Layout `login` (pagina pulita senza menu sidebar)
+- Sidebar indice sticky con scrollspy
+- Pulsante "Stampa/Salva PDF" con `window.print()`
+- CSS `@media print` per nascondere navigazione
+- Accessibili senza login (azioni guest in SiteController)
+
+### REGOLA MANUTENZIONE MANUALI
+
+> **OBBLIGATORIO**: Ogni volta che si implementa una nuova feature o si modifica una feature esistente,
+> verificare e aggiornare i manuali utente corrispondenti.
+
+**Checklist per ogni feature implementata**:
+1. La feature riguarda l'area admin? → Aggiornare `views/site/manuale-admin.php`
+2. La feature riguarda l'area docenti? → Aggiornare `views/site/manuale-docente.php`
+3. La feature riguarda l'area studenti? → Aggiornare `views/site/manuale-studente.php`
+4. Aggiornare la tabella "Mappa Feature-Manuale" qui sotto
+
+### Mappa Feature-Manuale (aggiornare ad ogni release)
+
+| Feature | Manuale Admin | Manuale Docente | Manuale Studente |
+|---------|:---:|:---:|:---:|
+| Login unificato | Sez. 1 | Sez. 2 | Sez. 2 |
+| Dashboard | Sez. 2 | Sez. 1 | - |
+| Configurazione (Fonti, Conti, Sedi) | Sez. 3 | - | - |
+| Gestione Progetti | Sez. 4 | - | - |
+| Avvisi/Bandi | Sez. 5 | Sez. 4 | - |
+| Moduli Formativi | Sez. 6 | - | - |
+| Gestione Docenti + Long List | Sez. 7 | - | - |
+| Processo Selezione (CTS) | Sez. 8 | Sez. 5-6 | - |
+| Contratti | Sez. 9 | - | - |
+| Pagamenti + Liquidazione Massiva | Sez. 10 | - | - |
+| Rendicontazione Ore | Sez. 11 | Sez. 7-9 | - |
+| Gestione Allievi + Presenze | Sez. 12 | - | Sez. 3 |
+| Valutazione Docenti (Questionario) | Sez. 12 | - | - |
+| Report + Export | Sez. 13 | - | - |
+| Import Dati Excel | Sez. 14 | - | - |
+| Area Docenti (panoramica admin) | Sez. 15 | Sez. 1-10 | - |
+| Iscrizione Corsi | - | - | Sez. 2 |
+| Alert Sovra-impegnato | Sez. 7 | - | - |
+| Compenso TP/RU | Sez. 9 | - | - |
+| Export Consulente Lavoro | Sez. 13 | - | - |
+| Wizard Onboarding | Sez. 1 | Sez. 1 | Sez. 1 |
+
+## Questionario Anonimo Valutazione Docenti
+
+Sistema di valutazione anonima tramite codici monouso.
+
+**Flusso**:
+1. Admin genera codici per un modulo (`ValutazioneDocenteController::actionGeneraCodici`)
+2. Stampa foglietti con codici (`actionStampaCodici`)
+3. Studente accede a `/valutazione/{CODICE}` (pagina pubblica, no login)
+4. Compila 5 criteri (1-5 stelle) + commento → salva + invalida codice
+
+**Tabelle**: `valutazione_codice` (id, modulo_id, codice VARCHAR 8 UNIQUE, usato_at)
+**Controller pubblico**: `ValutazionePublicController` (accesso guest)
+**Viste**: `views/valutazione-public/` (index, grazie, errore)
+**Route**: `'valutazione/<codice:[A-Z0-9]{8}>' => 'valutazione-public/index'`
+
 ## Link Utili
 
 - Schema ER: `docs/schema-er.html`
 - Changelog DB: `docs/modifiche-database-feb-2025.md`
 - CRUD Guidelines: `docs/CRUD_GUIDELINES.md`
 - Team Agenti: `docs/AGENT_TEAM_CONFIG.md`
+- Manuale Admin: http://localhost:8000/site/manuale-admin
+- Manuale Docente: http://localhost:8000/site/manuale-docente
+- Manuale Studente: http://localhost:8000/site/manuale-studente
 - phpMyAdmin: http://localhost:8080
 - App (Admin): http://localhost:8000
 - Area Docenti: http://localhost:8000/area-docenti/login

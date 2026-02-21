@@ -19,6 +19,31 @@ use yii\helpers\Url;
                 <a href="#" class="nav-link px-0 me-3" id="theme-toggle" title="Cambia tema">
                     <i class="ti ti-moon" id="theme-icon"></i>
                 </a>
+                <!-- Aiuto dropdown -->
+                <div class="nav-item dropdown me-3">
+                    <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" title="Aiuto">
+                        <i class="ti ti-help"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                        <h6 class="dropdown-header">Aiuto</h6>
+                        <a href="<?= Url::to(['/site/guida-admin']) ?>" class="dropdown-item" target="_blank">
+                            <i class="ti ti-compass me-2"></i> Guida Interattiva
+                        </a>
+                        <a href="<?= Url::to(['/site/manuale-admin']) ?>" class="dropdown-item" target="_blank">
+                            <i class="ti ti-book me-2"></i> Manuale Amministratore
+                        </a>
+                        <a href="<?= Url::to(['/site/manuale-docente']) ?>" class="dropdown-item" target="_blank">
+                            <i class="ti ti-school me-2"></i> Manuale Docente
+                        </a>
+                        <a href="<?= Url::to(['/site/manuale-studente']) ?>" class="dropdown-item" target="_blank">
+                            <i class="ti ti-users me-2"></i> Manuale Studente
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="<?= Url::to(['/site/supporto']) ?>" class="dropdown-item" target="_blank">
+                            <i class="ti ti-bug me-2"></i> Segnala un Problema
+                        </a>
+                    </div>
+                </div>
                 <div class="nav-item dropdown d-none d-md-flex me-3">
                     <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Notifiche">
                         <i class="ti ti-bell"></i>

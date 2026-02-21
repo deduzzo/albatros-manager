@@ -12,9 +12,14 @@ use app\models\Docente;
 use app\models\Modulo;
 use app\models\Contratto;
 use app\models\Pagamento;
+use yii\web\NotFoundHttpException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 /**
  * ReportController - Statistiche e Export dati
@@ -144,8 +149,14 @@ class ReportController extends Controller
             'progetti' => (int)Progetto::find()->count(),
         ];
 
+        // Lista progetti per export consulente
+        $progetti = Progetto::find()
+            ->orderBy(['titolo' => SORT_ASC])
+            ->all();
+
         return $this->render('export', [
             'counts' => $counts,
+            'progetti' => $progetti,
         ]);
     }
 
@@ -230,6 +241,170 @@ class ReportController extends Controller
 
         $filename = $entity . '_' . date('Y-m-d_His') . '.xlsx';
 
+        $response = Yii::$app->response;
+        $response->format = \yii\web\Response::FORMAT_RAW;
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        $writer = new Xlsx($spreadsheet);
+        ob_start();
+        $writer->save('php://output');
+        $response->content = ob_get_clean();
+
+        return $response;
+    }
+
+    /**
+     * Export Excel per consulente del lavoro - dati completi docenti con contratto per progetto
+     */
+    public function actionExportConsulente($progetto_id)
+    {
+        $progetto = Progetto::findOne($progetto_id);
+        if (!$progetto) {
+            throw new NotFoundHttpException('Progetto non trovato.');
+        }
+
+        // Query con leftJoin chain: progetto → avviso → modulo → assegnazione → contratto + docente + sede
+        $rows = (new Query())
+            ->select([
+                'd.cognome',
+                'd.nome',
+                'd.codice_fiscale',
+                'd.data_nascita',
+                'd.luogo_nascita',
+                'd.indirizzo',
+                'd.cap',
+                'd.citta',
+                'd.provincia',
+                'd.email',
+                'd.telefono',
+                'd.titolo_studio',
+                'd.provenienza',
+                'p.titolo AS nome_progetto',
+                'm.titolo AS nome_modulo',
+                's.nome AS sede_nome',
+                'c.ore_contrattualizzate',
+                'c.compenso_orario',
+                'c.compenso_totale',
+                'c.tipo AS tipo_contratto',
+                'c.data_inizio_lezioni',
+                'c.data_fine_lezioni',
+            ])
+            ->from('progetto p')
+            ->leftJoin('avviso a', 'a.progetto_id = p.id AND a.deleted_at IS NULL')
+            ->leftJoin('modulo m', 'm.avviso_id = a.id AND m.deleted_at IS NULL')
+            ->leftJoin('sede s', 's.id = m.sede_id AND s.deleted_at IS NULL')
+            ->leftJoin('assegnazione ass', 'ass.modulo_id = m.id AND ass.deleted_at IS NULL')
+            ->leftJoin('contratto c', 'c.assegnazione_id = ass.id AND c.deleted_at IS NULL')
+            ->leftJoin('docente d', 'd.codice_fiscale = ass.docente_codice_fiscale AND d.deleted_at IS NULL')
+            ->where(['p.id' => $progetto_id])
+            ->andWhere(['p.deleted_at' => null])
+            ->andWhere(['IS NOT', 'c.id', null]) // Solo assegnazioni con contratto
+            ->orderBy(['d.cognome' => SORT_ASC, 'd.nome' => SORT_ASC, 'm.titolo' => SORT_ASC])
+            ->all();
+
+        if (empty($rows)) {
+            Yii::$app->session->setFlash('warning', 'Nessun contratto trovato per questo progetto.');
+            return $this->redirect(['/progetto/view', 'id' => $progetto_id]);
+        }
+
+        // Mappa tipo contratto
+        $tipoContrattoLabels = Contratto::getTipoList();
+
+        // Crea Excel
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Consulente Lavoro');
+
+        // Headers
+        $headers = [
+            'Cognome', 'Nome', 'Codice Fiscale', 'Data Nascita', 'Luogo Nascita',
+            'Indirizzo', 'CAP', 'Citta', 'Provincia', 'Email', 'Telefono',
+            'Titolo Studio', 'Provenienza', 'Nome Progetto', 'Nome Modulo', 'Sede',
+            'Ore Contrattualizzate', 'Compenso Orario (EUR)', 'Compenso Totale (EUR)',
+            'Tipo Contratto', 'Data Inizio Lezioni', 'Data Fine Lezioni',
+        ];
+
+        // Scrivi headers
+        foreach ($headers as $colIdx => $header) {
+            $cell = $sheet->getCellByColumnAndRow($colIdx + 1, 1);
+            $cell->setValue($header);
+        }
+
+        // Stile header: sfondo blu (#206bc4), testo bianco, grassetto
+        $headerRange = 'A1:V1';
+        $sheet->getStyle($headerRange)->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+                'size' => 11,
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '206BC4'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => 'CCCCCC'],
+                ],
+            ],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(25);
+
+        // Scrivi dati
+        $rowNum = 2;
+        foreach ($rows as $row) {
+            $sheet->setCellValueByColumnAndRow(1, $rowNum, $row['cognome']);
+            $sheet->setCellValueByColumnAndRow(2, $rowNum, $row['nome']);
+            $sheet->setCellValueByColumnAndRow(3, $rowNum, $row['codice_fiscale']);
+            $sheet->setCellValueByColumnAndRow(4, $rowNum, $row['data_nascita']);
+            $sheet->setCellValueByColumnAndRow(5, $rowNum, $row['luogo_nascita']);
+            $sheet->setCellValueByColumnAndRow(6, $rowNum, $row['indirizzo']);
+            $sheet->setCellValueByColumnAndRow(7, $rowNum, $row['cap']);
+            $sheet->setCellValueByColumnAndRow(8, $rowNum, $row['citta']);
+            $sheet->setCellValueByColumnAndRow(9, $rowNum, $row['provincia']);
+            $sheet->setCellValueByColumnAndRow(10, $rowNum, $row['email']);
+            $sheet->setCellValueByColumnAndRow(11, $rowNum, $row['telefono']);
+            $sheet->setCellValueByColumnAndRow(12, $rowNum, $row['titolo_studio']);
+            $sheet->setCellValueByColumnAndRow(13, $rowNum, $row['provenienza']);
+            $sheet->setCellValueByColumnAndRow(14, $rowNum, $row['nome_progetto']);
+            $sheet->setCellValueByColumnAndRow(15, $rowNum, $row['nome_modulo']);
+            $sheet->setCellValueByColumnAndRow(16, $rowNum, $row['sede_nome']);
+            $sheet->setCellValueByColumnAndRow(17, $rowNum, (int)$row['ore_contrattualizzate']);
+            $sheet->setCellValueByColumnAndRow(18, $rowNum, (float)$row['compenso_orario']);
+            $sheet->setCellValueByColumnAndRow(19, $rowNum, (float)$row['compenso_totale']);
+            $sheet->setCellValueByColumnAndRow(20, $rowNum, $tipoContrattoLabels[$row['tipo_contratto']] ?? $row['tipo_contratto']);
+            $sheet->setCellValueByColumnAndRow(21, $rowNum, $row['data_inizio_lezioni']);
+            $sheet->setCellValueByColumnAndRow(22, $rowNum, $row['data_fine_lezioni']);
+
+            $rowNum++;
+        }
+
+        // Formato numeri EUR con 2 decimali per colonne R e S (18 e 19)
+        $lastRow = $rowNum - 1;
+        if ($lastRow >= 2) {
+            $sheet->getStyle("R2:R{$lastRow}")->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle("S2:S{$lastRow}")->getNumberFormat()
+                ->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        }
+
+        // Auto-dimensionamento colonne
+        foreach (range(1, count($headers)) as $colIdx) {
+            $sheet->getColumnDimensionByColumn($colIdx)->setAutoSize(true);
+        }
+
+        // Genera nome file sicuro
+        $titoloSafe = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $progetto->titolo);
+        $titoloSafe = substr($titoloSafe, 0, 50);
+        $filename = 'Consulente_' . $titoloSafe . '_' . date('Y-m-d') . '.xlsx';
+
+        // Invia come download
         $response = Yii::$app->response;
         $response->format = \yii\web\Response::FORMAT_RAW;
         $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

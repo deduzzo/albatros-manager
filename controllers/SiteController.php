@@ -17,6 +17,8 @@ use app\models\Contratto;
 use app\models\Pagamento;
 use app\models\FonteFinanziamento;
 use app\models\AuditLog;
+use app\models\Avviso;
+use app\models\forms\DocenteLoginForm;
 
 class SiteController extends Controller
 {
@@ -30,7 +32,7 @@ class SiteController extends Controller
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error'],
+                        'actions' => ['login', 'error', 'manuale-admin', 'manuale-docente', 'manuale-studente', 'guida-admin', 'guida-docente', 'supporto'],
                         'allow' => true,
                     ],
                     [
@@ -190,24 +192,72 @@ class SiteController extends Controller
     }
 
     /**
-     * Login action.
+     * Login unificato: gestisce admin, docente e mostra contenuti pubblici.
      *
      * @return Response|string
      */
     public function actionLogin()
     {
+        // Se admin gia loggato, vai alla dashboard admin
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+        // Se docente gia loggato, vai all'area docenti
+        if (!Yii::$app->docenteUser->isGuest) {
+            return $this->redirect(['/docente-area/index']);
         }
 
-        $model->password = '';
+        $loginForm = new LoginForm();
+        $docenteLoginForm = new DocenteLoginForm();
+        $loginError = null;
+        $docenteError = null;
+        $activeCard = null;
+
+        // Gestione POST in base al tipo di login
+        if (Yii::$app->request->isPost) {
+            $loginType = Yii::$app->request->post('login_type', 'admin');
+
+            if ($loginType === 'docente') {
+                $activeCard = 'docente';
+                if ($docenteLoginForm->load(Yii::$app->request->post()) && $docenteLoginForm->login()) {
+                    Yii::$app->session->setFlash('success', 'Benvenuto nell\'area docenti!');
+                    return $this->redirect(['/docente-area/index']);
+                }
+                $docenteError = true;
+            } else {
+                $activeCard = 'admin';
+                if ($loginForm->load(Yii::$app->request->post()) && $loginForm->login()) {
+                    return $this->goBack();
+                }
+                $loginForm->password = '';
+                $loginError = true;
+            }
+        }
+
+        // Dati pubblici: bandi aperti
+        $bandiAperti = Avviso::findAperti()
+            ->with(['progetto', 'moduli'])
+            ->orderBy(['data_scadenza' => SORT_ASC])
+            ->limit(6)
+            ->all();
+
+        // Dati pubblici: progetti attivi
+        $progettiAttivi = Progetto::find()
+            ->where(['status' => Progetto::STATUS_ATTIVO])
+            ->with(['fonteFinanziamento'])
+            ->orderBy(['created_at' => SORT_DESC])
+            ->limit(6)
+            ->all();
+
         return $this->render('login', [
-            'model' => $model,
+            'loginForm' => $loginForm,
+            'docenteLoginForm' => $docenteLoginForm,
+            'bandiAperti' => $bandiAperti,
+            'progettiAttivi' => $progettiAttivi,
+            'loginError' => $loginError,
+            'docenteError' => $docenteError,
+            'activeCard' => $activeCard,
         ]);
     }
 
@@ -249,5 +299,111 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+
+    /**
+     * Manuale Amministratore (accessibile senza login)
+     */
+    public function actionManualeAdmin()
+    {
+        $this->layout = 'login';
+        return $this->render('manuale-admin');
+    }
+
+    /**
+     * Manuale Docente (accessibile senza login)
+     */
+    public function actionManualeDocente()
+    {
+        $this->layout = 'login';
+        return $this->render('manuale-docente');
+    }
+
+    /**
+     * Manuale Studente (accessibile senza login)
+     */
+    public function actionManualeStudente()
+    {
+        $this->layout = 'login';
+        return $this->render('manuale-studente');
+    }
+
+    /**
+     * Guida interattiva Amministratore (usa layout admin per autenticati, login per guest)
+     */
+    public function actionGuidaAdmin()
+    {
+        if (Yii::$app->user->isGuest) {
+            $this->layout = 'login';
+        }
+        return $this->render('guida-admin');
+    }
+
+    /**
+     * Guida interattiva Docente
+     */
+    public function actionGuidaDocente()
+    {
+        $this->layout = 'login';
+        return $this->render('guida-docente');
+    }
+
+    /**
+     * Form segnalazione problemi (accessibile a tutti, layout pulito)
+     */
+    public function actionSupporto()
+    {
+        $this->layout = 'login';
+
+        if (Yii::$app->request->isPost) {
+            $data = [
+                'timestamp' => date('Y-m-d H:i:s'),
+                'nome' => Yii::$app->request->post('nome', ''),
+                'email' => Yii::$app->request->post('email', ''),
+                'tipo' => Yii::$app->request->post('tipo', 'altro'),
+                'descrizione' => Yii::$app->request->post('descrizione', ''),
+                'user_agent' => Yii::$app->request->userAgent,
+                'ip' => Yii::$app->request->userIP,
+                'url_referrer' => Yii::$app->request->referrer,
+                'admin_user_id' => Yii::$app->user->isGuest ? null : Yii::$app->user->id,
+                'docente_cf' => Yii::$app->docenteUser->isGuest ? null : (Yii::$app->docenteUser->identity->docente_codice_fiscale ?? null),
+            ];
+
+            // Salva in file JSON nella directory runtime/support
+            $dir = Yii::getAlias('@runtime/support');
+            if (!is_dir($dir)) {
+                mkdir($dir, 0775, true);
+            }
+            $filename = 'segnalazione_' . date('Ymd_His') . '_' . Yii::$app->security->generateRandomString(6) . '.json';
+            file_put_contents($dir . '/' . $filename, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+            // Gestione upload screenshot
+            $screenshot = \yii\web\UploadedFile::getInstanceByName('screenshot');
+            if ($screenshot && $screenshot->size <= 5 * 1024 * 1024 && in_array($screenshot->extension, ['jpg', 'jpeg', 'png'])) {
+                $screenshotName = pathinfo($filename, PATHINFO_FILENAME) . '.' . $screenshot->extension;
+                $screenshot->saveAs($dir . '/' . $screenshotName);
+            }
+
+            return $this->render('supporto-grazie');
+        }
+
+        // Precompila dati se utente autenticato
+        $nome = '';
+        $email = '';
+        if (!Yii::$app->user->isGuest) {
+            $nome = Yii::$app->user->identity->username ?? '';
+            $email = Yii::$app->user->identity->email ?? '';
+        } elseif (!Yii::$app->docenteUser->isGuest) {
+            $docente = Yii::$app->docenteUser->identity->docente ?? null;
+            if ($docente) {
+                $nome = $docente->cognome . ' ' . $docente->nome;
+                $email = $docente->email ?? '';
+            }
+        }
+
+        return $this->render('supporto', [
+            'nome' => $nome,
+            'email' => $email,
+        ]);
     }
 }
