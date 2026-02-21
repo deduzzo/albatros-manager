@@ -319,9 +319,14 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
                         <p class="text-secondary mb-3">
                             <small>L'area studenti sara disponibile a breve. Nel frattempo puoi esplorare la versione demo.</small>
                         </p>
-                        <a href="<?= Url::to(['/demo-studenti']) ?>" class="btn btn-purple">
-                            <i class="ti ti-external-link me-1"></i> Esplora la Demo
-                        </a>
+                        <div class="d-flex flex-column gap-2">
+                            <a href="<?= Url::to(['/demo-studenti']) ?>" class="btn btn-purple">
+                                <i class="ti ti-eye me-1"></i> Consulta i Corsi Disponibili
+                            </a>
+                            <a href="<?= Url::to(['/demo-studenti/registrazione']) ?>" class="btn btn-outline-purple">
+                                <i class="ti ti-user-plus me-1"></i> Registrati come Studente
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -427,6 +432,47 @@ $isDocenteLogged = !Yii::$app->docenteUser->isGuest;
         </div>
     </div>
     <?php endif; ?>
+
+    <!-- LINK RAPIDI -->
+    <div class="mb-4">
+        <div class="section-divider mb-3">
+            <span><i class="ti ti-link me-1"></i> Link Rapidi</span>
+        </div>
+        <div class="row g-2 text-center">
+            <div class="col-6 col-md-3">
+                <a href="<?= Url::to(['/area-docenti/bandi']) ?>" class="card card-sm bando-card text-decoration-none">
+                    <div class="card-body py-3">
+                        <i class="ti ti-clipboard-list text-green mb-1" style="font-size: 1.5rem;"></i>
+                        <div class="small">Bandi Docenti</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="<?= Url::to(['/area-docenti/registrazione']) ?>" class="card card-sm bando-card text-decoration-none">
+                    <div class="card-body py-3">
+                        <i class="ti ti-user-plus text-green mb-1" style="font-size: 1.5rem;"></i>
+                        <div class="small">Registrati Docente</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="<?= Url::to(['/demo-studenti']) ?>" class="card card-sm bando-card text-decoration-none">
+                    <div class="card-body py-3">
+                        <i class="ti ti-school text-purple mb-1" style="font-size: 1.5rem;"></i>
+                        <div class="small">Corsi Studenti</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="<?= Url::to(['/site/supporto']) ?>" class="card card-sm bando-card text-decoration-none">
+                    <div class="card-body py-3">
+                        <i class="ti ti-help text-azure mb-1" style="font-size: 1.5rem;"></i>
+                        <div class="small">Assistenza</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- FOOTER -->
     <div class="text-center text-secondary mt-4 mb-3">
