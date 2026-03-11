@@ -33,7 +33,7 @@ Sistema di gestione per docenti e corsi finanziati da FSE, PNRR e MIM.
 
 | Area | Component Yii | Identity Model | Tabella | Credenziali Dev |
 |------|---------------|----------------|---------|-----------------|
-| **Admin** | `Yii::$app->user` | `User` | `utente` | admin/admin |
+| **Admin** | `Yii::$app->user` | `User` | `utente` | Vedi utenti in DB (no credenziali di prova) |
 | **Docenti** | `Yii::$app->docenteUser` | `DocenteAuth` | `docente_auth` | CF + password (debug: solo CF) |
 | **Studenti** | `Yii::$app->studenteUser` | `AllievoAuth` | `allievo_auth` | CF + password (debug: solo CF) |
 

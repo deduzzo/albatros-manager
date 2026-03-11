@@ -400,6 +400,7 @@ $selectedType = $activeCard ?: 'admin';
             </div>
             <div class="card-body">
                 <div class="row g-3">
+                    <?php if (Yii::$app->params['demoModeAdmin'] ?? false): ?>
                     <div class="col-12 col-md-4">
                         <div class="p-3 rounded bg-blue-lt">
                             <h4 class="mb-2"><i class="ti ti-shield-lock me-1 text-blue"></i> Amministratore</h4>
@@ -407,6 +408,7 @@ $selectedType = $activeCard ?: 'admin';
                             <div><strong>Password:</strong> <code>admin</code></div>
                         </div>
                     </div>
+                    <?php endif; ?>
                     <div class="col-12 col-md-4">
                         <div class="p-3 rounded bg-green-lt">
                             <h4 class="mb-2"><i class="ti ti-school me-1 text-green"></i> Docente</h4>

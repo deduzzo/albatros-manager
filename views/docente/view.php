@@ -80,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="row row-deck row-cards">
                 <!-- Statistiche rapide -->
                 <div class="col-sm-6 col-lg-3">
-                    <div class="card">
+                    <a href="#valutazioni-studenti" class="card text-decoration-none" style="cursor:pointer;">
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div class="subheader">Valutazione Media</div>
@@ -92,7 +92,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <?= $model->getValutazioniCount() ?> valutazioni ricevute
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 <div class="col-sm-6 col-lg-3">
                     <div class="card">
@@ -499,6 +499,208 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?php endif; ?>
                     </div>
                 </div>
+
+                <!-- Dashboard Valutazioni Studenti -->
+                <?php
+                    $valutazioni = \app\models\ValutazioneDocente::find()
+                        ->where(['docente_codice_fiscale' => $model->codice_fiscale])
+                        ->andWhere(['deleted_at' => null])
+                        ->all();
+                    $numValutazioni = count($valutazioni);
+                ?>
+                <?php if ($numValutazioni > 0): ?>
+                <div class="col-12" id="valutazioni-studenti">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="ti ti-star me-2"></i>
+                                Valutazioni Studenti
+                                <span class="badge bg-blue-lt ms-2"><?= $numValutazioni ?></span>
+                            </h3>
+                            <div class="card-actions">
+                                <?= Html::a('<i class="ti ti-list me-1"></i> Vedi tutte', ['/valutazione-docente/index', 'ValutazioneDocenteSearch[docente_codice_fiscale]' => $model->codice_fiscale], ['class' => 'btn btn-sm btn-outline-primary']) ?>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <?php
+                                // Calcola statistiche
+                                $punteggiGlobali = array_map(fn($v) => (float)$v->punteggio_globale, $valutazioni);
+                                $mediaGlobale = array_sum($punteggiGlobali) / count($punteggiGlobali);
+                                $maxGlobale = max($punteggiGlobali);
+                                $minGlobale = min($punteggiGlobali);
+
+                                // Media per criterio
+                                $criteriStats = [];
+                                $criteriNomi = [];
+                                $allPunteggi = \app\models\ValutazioneDocentePunteggio::find()
+                                    ->alias('p')
+                                    ->leftJoin('valutazione_docente v', 'v.id = p.valutazione_docente_id AND v.deleted_at IS NULL')
+                                    ->leftJoin('criterio_valutazione_docente c', 'c.id = p.criterio_id AND c.deleted_at IS NULL')
+                                    ->where(['v.docente_codice_fiscale' => $model->codice_fiscale])
+                                    ->andWhere(['p.deleted_at' => null])
+                                    ->select(['p.criterio_id', 'c.nome', 'c.codice', 'AVG(p.punteggio) as media', 'MIN(p.punteggio) as minimo', 'MAX(p.punteggio) as massimo', 'COUNT(*) as conteggio'])
+                                    ->groupBy('p.criterio_id, c.nome, c.codice')
+                                    ->orderBy('c.ordinamento')
+                                    ->asArray()
+                                    ->all();
+
+                                $radarLabels = [];
+                                $radarData = [];
+                                $migliore = null;
+                                $peggiore = null;
+                                foreach ($allPunteggi as $cp) {
+                                    $radarLabels[] = $cp['codice'] ?: ('C' . $cp['criterio_id']);
+                                    $radarData[] = round((float)$cp['media'], 1);
+                                    if ($migliore === null || (float)$cp['media'] > (float)$migliore['media']) $migliore = $cp;
+                                    if ($peggiore === null || (float)$cp['media'] < (float)$peggiore['media']) $peggiore = $cp;
+                                }
+
+                                $radarLabelsJson = json_encode($radarLabels);
+                                $radarDataJson = json_encode($radarData);
+                            ?>
+
+                            <!-- Stat cards -->
+                            <div class="row mb-4">
+                                <div class="col-sm-6 col-lg-3">
+                                    <div class="card card-sm">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <span class="bg-blue text-white avatar"><i class="ti ti-star"></i></span>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="font-weight-medium">Media Globale</div>
+                                                    <div class="h2 mb-0"><?= number_format($mediaGlobale, 1) ?><small class="text-muted">/10</small></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-3">
+                                    <div class="card card-sm">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <span class="bg-green text-white avatar"><i class="ti ti-trophy"></i></span>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="font-weight-medium">Criterio Migliore</div>
+                                                    <?php if ($migliore): ?>
+                                                    <div class="h3 mb-0"><?= number_format((float)$migliore['media'], 1) ?></div>
+                                                    <div class="text-muted small"><?= Html::encode($migliore['nome'] ? mb_substr($migliore['nome'], 0, 40) . '...' : '-') ?></div>
+                                                    <?php else: ?>
+                                                    <div class="text-muted">-</div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-3">
+                                    <div class="card card-sm">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <span class="bg-orange text-white avatar"><i class="ti ti-alert-triangle"></i></span>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="font-weight-medium">Criterio Peggiore</div>
+                                                    <?php if ($peggiore): ?>
+                                                    <div class="h3 mb-0"><?= number_format((float)$peggiore['media'], 1) ?></div>
+                                                    <div class="text-muted small"><?= Html::encode($peggiore['nome'] ? mb_substr($peggiore['nome'], 0, 40) . '...' : '-') ?></div>
+                                                    <?php else: ?>
+                                                    <div class="text-muted">-</div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-3">
+                                    <div class="card card-sm">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <span class="bg-purple text-white avatar"><i class="ti ti-chart-bar"></i></span>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="font-weight-medium">Range Voti</div>
+                                                    <div class="h3 mb-0"><?= number_format($minGlobale, 0) ?> - <?= number_format($maxGlobale, 0) ?></div>
+                                                    <div class="text-muted small">min - max globale</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Radar Chart -->
+                                <?php if (!empty($radarData)): ?>
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Radar Competenze</h4>
+                                    <div id="radar-valutazioni" style="height: 350px;"></div>
+                                </div>
+                                <?php endif; ?>
+
+                                <!-- Dettaglio per criterio -->
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Dettaglio per Criterio</h4>
+                                    <table class="table table-vcenter">
+                                        <thead>
+                                            <tr>
+                                                <th>Criterio</th>
+                                                <th style="width: 200px;">Media</th>
+                                                <th style="width: 60px;" class="text-end">Voto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($allPunteggi as $cp): ?>
+                                            <?php $media = round((float)$cp['media'], 1); $perc = $media * 10; ?>
+                                            <tr>
+                                                <td>
+                                                    <div class="text-truncate" style="max-width: 200px;" title="<?= Html::encode($cp['nome']) ?>">
+                                                        <?= Html::encode($cp['nome'] ? mb_substr($cp['nome'], 0, 35) : $cp['codice']) ?>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="progress progress-sm">
+                                                        <div class="progress-bar <?= $perc >= 70 ? 'bg-green' : ($perc >= 50 ? 'bg-orange' : 'bg-red') ?>" style="width: <?= $perc ?>%"></div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-end">
+                                                    <strong class="<?= $media >= 7 ? 'text-green' : ($media >= 5 ? 'text-orange' : 'text-red') ?>"><?= $media ?></strong>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <?php
+                \app\components\assets\ApexChartsAsset::register($this);
+                $this->registerJs("
+                    if (document.getElementById('radar-valutazioni')) {
+                        var options = {
+                            chart: { type: 'radar', height: 350, toolbar: { show: false } },
+                            series: [{ name: 'Media', data: $radarDataJson }],
+                            labels: $radarLabelsJson,
+                            yaxis: { min: 0, max: 10, tickAmount: 5 },
+                            colors: ['#206bc4'],
+                            fill: { opacity: 0.2 },
+                            stroke: { width: 2 },
+                            markers: { size: 3 },
+                            plotOptions: { radar: { polygons: { strokeColors: '#e9ecef', connectorColors: '#e9ecef' } } }
+                        };
+                        new ApexCharts(document.getElementById('radar-valutazioni'), options).render();
+                    }
+                ");
+                ?>
+                <?php endif; ?>
 
                 <!-- Footer con azioni -->
                 <div class="col-12">
