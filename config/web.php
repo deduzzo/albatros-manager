@@ -101,6 +101,9 @@ $config = [
                 'area-docenti/modifica-ore/<id:\d+>' => 'docente-area/modifica-ore',
                 'area-docenti/elimina-ore/<id:\d+>' => 'docente-area/elimina-ore',
                 'area-docenti/guida' => 'docente-area/guida',
+                'area-docenti/rimborsi' => 'docente-area/rimborsi',
+                'area-docenti/nuovo-rimborso/<assegnazione_id:\d+>' => 'docente-area/nuovo-rimborso',
+                'area-docenti/modifica-rimborso/<id:\d+>' => 'docente-area/modifica-rimborso',
 
                 // Valutazione pubblica anonima
                 'valutazione/<codice:[A-Z0-9]{8}>' => 'valutazione-public/index',
@@ -145,6 +148,12 @@ $config = [
     ],
     'params' => $params,
 ];
+
+// Sovrascrive configurazione mailer da file esterno (gitignored)
+$mailConfig = __DIR__ . '/mail.php';
+if (file_exists($mailConfig)) {
+    $config['components']['mailer'] = require $mailConfig;
+}
 
 if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'debug';

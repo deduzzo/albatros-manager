@@ -179,6 +179,30 @@ class Assegnazione extends BaseActiveRecord
         return $this->status !== self::STATUS_REVOCATO;
     }
 
+    // --- Rimborsi spese ---
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRimborsiSpesa()
+    {
+        return $this->hasMany(RimborsoSpesa::class, ['assegnazione_id' => 'id']);
+    }
+
+    /**
+     * Calcola il totale dei rimborsi approvati per questa assegnazione
+     * @return float
+     */
+    public function getTotaleRimborsiApprovati()
+    {
+        return (float) RimborsoSpesa::find()
+            ->where([
+                'assegnazione_id' => $this->id,
+                'status' => RimborsoSpesa::STATUS_APPROVATO,
+            ])
+            ->sum('importo') ?: 0;
+    }
+
     // --- Rendicontazione ore ---
 
     public function getRendicontazioniOre()

@@ -21,6 +21,7 @@ use app\models\IstanzaDocumento;
 use app\models\IstanzaSnapshot;
 use app\models\TagCurriculum;
 use app\models\DocenteTag;
+use app\models\RimborsoSpesa;
 use app\models\forms\DocenteLoginForm;
 use app\models\forms\DocenteRegistrazioneForm;
 use app\models\forms\IscrizioneForm;
@@ -70,7 +71,7 @@ class DocenteAreaController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida', 'rimborsi', 'nuovo-rimborso', 'modifica-rimborso'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -594,6 +595,124 @@ class DocenteAreaController extends Controller
     }
 
     // =========================================================================
+    // Rimborsi Spesa
+    // =========================================================================
+
+    /**
+     * Lista rimborsi spesa del docente
+     */
+    public function actionRimborsi()
+    {
+        $docente = $this->getDocenteLoggato();
+
+        $rimborsi = RimborsoSpesa::find()
+            ->innerJoin('assegnazione a', 'a.id = rimborso_spesa.assegnazione_id AND a.deleted_at IS NULL')
+            ->where(['a.docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['rimborso_spesa.deleted_at' => null])
+            ->with(['assegnazione.modulo'])
+            ->orderBy(['rimborso_spesa.created_at' => SORT_DESC])
+            ->all();
+
+        // Assegnazioni attive del docente (per il dropdown "nuovo rimborso")
+        $assegnazioni = Assegnazione::find()
+            ->where(['docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['assegnazione.deleted_at' => null])
+            ->with(['modulo', 'modulo.avviso'])
+            ->orderBy(['data_assegnazione' => SORT_DESC])
+            ->all();
+
+        return $this->render('rimborsi', [
+            'rimborsi' => $rimborsi,
+            'assegnazioni' => $assegnazioni,
+        ]);
+    }
+
+    /**
+     * Form nuovo rimborso spesa
+     * @param int $assegnazione_id
+     */
+    public function actionNuovoRimborso($assegnazione_id)
+    {
+        $docente = $this->getDocenteLoggato();
+        $assegnazione = $this->findAssegnazioneDocente($assegnazione_id, $docente);
+
+        $model = new RimborsoSpesa();
+        $model->assegnazione_id = $assegnazione->id;
+        $model->status = RimborsoSpesa::STATUS_RICHIESTO;
+        $model->data_spesa = date('Y-m-d');
+
+        if ($model->load(Yii::$app->request->post())) {
+            // Upload allegato
+            $file = UploadedFile::getInstanceByName('allegato');
+            if ($file) {
+                $uploadPath = Yii::getAlias('@webroot/uploads/rimborsi');
+                if (!is_dir($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                $fileName = 'rimborso_' . $docente->codice_fiscale . '_' . time() . '.' . $file->extension;
+                $filePath = $uploadPath . '/' . $fileName;
+                if ($file->saveAs($filePath)) {
+                    $model->allegato_path = 'uploads/rimborsi/' . $fileName;
+                }
+            }
+
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Richiesta di rimborso inviata con successo.');
+                return $this->redirect(['rimborsi']);
+            }
+        }
+
+        return $this->render('rimborso-form', [
+            'model' => $model,
+            'assegnazione' => $assegnazione,
+            'isModifica' => false,
+        ]);
+    }
+
+    /**
+     * Modifica rimborso spesa (solo se status=richiesto)
+     * @param int $id
+     */
+    public function actionModificaRimborso($id)
+    {
+        $docente = $this->getDocenteLoggato();
+        $model = $this->findRimborsoDocente($id, $docente);
+
+        if (!$model->isModificabile()) {
+            throw new ForbiddenHttpException('Non puoi modificare un rimborso gia\' approvato o rifiutato.');
+        }
+
+        $assegnazione = $model->assegnazione;
+
+        if ($model->load(Yii::$app->request->post())) {
+            // Upload allegato (opzionale in modifica)
+            $file = UploadedFile::getInstanceByName('allegato');
+            if ($file) {
+                $uploadPath = Yii::getAlias('@webroot/uploads/rimborsi');
+                if (!is_dir($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                $fileName = 'rimborso_' . $docente->codice_fiscale . '_' . time() . '.' . $file->extension;
+                $filePath = $uploadPath . '/' . $fileName;
+                if ($file->saveAs($filePath)) {
+                    $model->allegato_path = 'uploads/rimborsi/' . $fileName;
+                }
+            }
+
+            if ($model->save()) {
+                Yii::$app->session->setFlash('success', 'Rimborso aggiornato con successo.');
+                return $this->redirect(['rimborsi']);
+            }
+        }
+
+        return $this->render('rimborso-form', [
+            'model' => $model,
+            'assegnazione' => $assegnazione,
+            'isModifica' => true,
+        ]);
+    }
+
+    // =========================================================================
     // Metodi helper privati
     // =========================================================================
 
@@ -631,6 +750,29 @@ class DocenteAreaController extends Controller
         }
 
         return $assegnazione;
+    }
+
+    /**
+     * Trova un rimborso spesa verificando che appartenga al docente
+     * @param int $id
+     * @param Docente $docente
+     * @return RimborsoSpesa
+     * @throws NotFoundHttpException|ForbiddenHttpException
+     */
+    private function findRimborsoDocente($id, $docente)
+    {
+        $model = RimborsoSpesa::findOne($id);
+
+        if (!$model) {
+            throw new NotFoundHttpException('Rimborso spesa non trovato.');
+        }
+
+        $assegnazione = $model->assegnazione;
+        if (!$assegnazione || $assegnazione->docente_codice_fiscale !== $docente->codice_fiscale) {
+            throw new ForbiddenHttpException('Non hai accesso a questo rimborso.');
+        }
+
+        return $model;
     }
 
     /**

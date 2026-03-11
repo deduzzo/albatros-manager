@@ -70,3 +70,6 @@ PRODUCTION_SERVER.md
 # FTP deploy config
 /config/ftp.php
 /config/version.php
+
+# Mail SMTP config (credentials)
+/config/mail.php

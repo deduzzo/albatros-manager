@@ -42,6 +42,11 @@ class DocenteSearch extends Docente
     public $min_valutazione;
 
     /**
+     * @var string|null filtro per assegnazioni attive (sì/no)
+     */
+    public $con_assegnazioni;
+
+    /**
      * @var float|null valutazione media calcolata (per sorting/filtering in griglia)
      */
     public $valutazione_media;
@@ -52,13 +57,18 @@ class DocenteSearch extends Docente
     public $num_contratti;
 
     /**
+     * @var int|null numero moduli assegnati calcolato (per sorting/filtering in griglia albo)
+     */
+    public $num_moduli_assegnati;
+
+    /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['codice_fiscale', 'cognome', 'nome', 'email', 'citta', 'provincia', 'titolo_studio', 'ricerca', 'provenienza', 'esito_cts'], 'safe'],
-            [['tag_id', 'categoria_id', 'min_contratti', 'num_contratti'], 'integer'],
+            [['codice_fiscale', 'cognome', 'nome', 'email', 'citta', 'provincia', 'titolo_studio', 'ricerca', 'provenienza', 'esito_cts', 'tipo', 'con_assegnazioni'], 'safe'],
+            [['tag_id', 'categoria_id', 'min_contratti', 'num_contratti', 'num_moduli_assegnati'], 'integer'],
             [['min_valutazione', 'valutazione_media'], 'number'],
         ];
     }
@@ -130,6 +140,7 @@ class DocenteSearch extends Docente
                     'email',
                     'citta',
                     'provincia',
+                    'tipo',
                     'titolo_studio',
                     'created_at',
                     'updated_at',
@@ -160,6 +171,7 @@ class DocenteSearch extends Docente
         $query->andFilterWhere([
             'docente.provincia' => $this->provincia,
             'docente.provenienza' => $this->provenienza,
+            'docente.tipo' => $this->tipo,
         ]);
 
         // Filtri con LIKE
@@ -290,6 +302,118 @@ class DocenteSearch extends Docente
             ->andFilterWhere(['like', 'cognome', $this->cognome])
             ->andFilterWhere(['like', 'nome', $this->nome])
             ->andFilterWhere(['like', 'citta', $this->citta]);
+
+        return $dataProvider;
+    }
+
+    /**
+     * Ricerca per la pagina Albo Docenti con filtri avanzati.
+     *
+     * @param array $params
+     * @return ActiveDataProvider
+     */
+    public function searchAlbo($params)
+    {
+        $query = Docente::find();
+
+        // Subquery per valutazione media
+        $subQueryVal = (new \yii\db\Query())
+            ->select('AVG(vd.punteggio_globale)')
+            ->from('valutazione_docente vd')
+            ->where('vd.docente_codice_fiscale = docente.codice_fiscale')
+            ->andWhere(['vd.deleted_at' => null]);
+
+        // Subquery per numero moduli assegnati attivi
+        $subQueryModuli = (new \yii\db\Query())
+            ->select('COUNT(a.id)')
+            ->from('assegnazione a')
+            ->where('a.docente_codice_fiscale = docente.codice_fiscale')
+            ->andWhere(['a.deleted_at' => null])
+            ->andWhere(['!=', 'a.status', 'revocato']);
+
+        $query->addSelect([
+            'docente.*',
+            'valutazione_media' => $subQueryVal,
+            'num_moduli_assegnati' => $subQueryModuli,
+        ]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['cognome' => SORT_ASC, 'nome' => SORT_ASC],
+                'attributes' => [
+                    'codice_fiscale',
+                    'cognome',
+                    'nome',
+                    'email',
+                    'telefono',
+                    'tipo',
+                    'provenienza',
+                    'valutazione_media' => [
+                        'asc' => ['valutazione_media' => SORT_ASC],
+                        'desc' => ['valutazione_media' => SORT_DESC],
+                        'label' => 'Valutazione',
+                    ],
+                    'num_moduli_assegnati' => [
+                        'asc' => ['num_moduli_assegnati' => SORT_ASC],
+                        'desc' => ['num_moduli_assegnati' => SORT_DESC],
+                        'label' => 'Moduli Assegnati',
+                    ],
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        // Filtri esatti
+        $query->andFilterWhere([
+            'docente.provenienza' => $this->provenienza,
+            'docente.tipo' => $this->tipo,
+        ]);
+
+        // Filtri con LIKE
+        $query->andFilterWhere(['like', 'cognome', $this->cognome])
+            ->andFilterWhere(['like', 'nome', $this->nome])
+            ->andFilterWhere(['like', 'email', $this->email]);
+
+        // Ricerca full-text (include anche ricerca nei tag)
+        if (!empty($this->ricerca)) {
+            // Subquery per trovare docenti che hanno tag con nome corrispondente
+            $tagSubquery = (new \yii\db\Query())
+                ->select('dt_s.docente_codice_fiscale')
+                ->from('docente_tag dt_s')
+                ->innerJoin('tag_curriculum tc_s', 'tc_s.id = dt_s.tag_id')
+                ->where(['like', 'tc_s.nome', $this->ricerca]);
+
+            $query->andWhere([
+                'or',
+                ['like', 'codice_fiscale', $this->ricerca],
+                ['like', 'cognome', $this->ricerca],
+                ['like', 'nome', $this->ricerca],
+                ['like', 'email', $this->ricerca],
+                ['like', 'telefono', $this->ricerca],
+                ['in', 'docente.codice_fiscale', $tagSubquery],
+            ]);
+        }
+
+        // Filtro per assegnazioni attive
+        if ($this->con_assegnazioni === '1') {
+            $query->andHaving(['>', new Expression('num_moduli_assegnati'), 0]);
+        } elseif ($this->con_assegnazioni === '0') {
+            $query->andHaving(['num_moduli_assegnati' => 0]);
+        }
+
+        // Filtro colonna griglia: valutazione_media
+        if ($this->valutazione_media !== null && $this->valutazione_media !== '') {
+            $query->andHaving(['>=', new Expression('valutazione_media'), $this->valutazione_media]);
+        }
 
         return $dataProvider;
     }

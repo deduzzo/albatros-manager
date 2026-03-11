@@ -161,6 +161,21 @@ use app\components\widgets\AppActiveForm;
 
         <div class="row">
             <div class="col-md-4">
+                <?= $form->field($model, 'tipo')->dropDownList(\app\models\Docente::getTipoList(), [
+                    'class' => 'form-select',
+                    'prompt' => 'Seleziona tipo...',
+                ]) ?>
+            </div>
+            <div class="col-md-4">
+                <?= $form->field($model, 'provenienza')->dropDownList(\app\models\Docente::getProvenienzaList(), [
+                    'class' => 'form-select',
+                    'prompt' => 'Seleziona provenienza...',
+                ]) ?>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
                 <?= $form->field($model, 'partita_iva')->textInput([
                     'maxlength' => 11,
                     'placeholder' => '12345678901',

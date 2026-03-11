@@ -29,6 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
                 <div class="col-auto ms-auto">
+                    <?= Html::a('<i class="ti ti-address-book me-1"></i> Albo Docenti', ['albo'], ['class' => 'btn btn-outline-primary me-2']) ?>
                     <?= Html::a('<i class="ti ti-plus me-1"></i> Nuovo Docente', ['create'], ['class' => 'btn btn-success']) ?>
                 </div>
             </div>
@@ -129,6 +130,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                 );
                                 return '<div class="d-flex align-items-center">' . $avatar . $nome . '</div>';
                             },
+                        ],
+                        [
+                            'attribute' => 'tipo',
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                return $model->getTipoBadge();
+                            },
+                            'filter' => \app\models\Docente::getTipoList(),
+                            'headerOptions' => ['style' => 'width: 130px;'],
                         ],
                         [
                             'attribute' => 'email',

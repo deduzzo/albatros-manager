@@ -13,6 +13,12 @@ $docenteNome = $docente ? $docente->cognome . ' ' . $docente->nome : 'N/D';
 $this->title = 'Contratto #' . $model->id . ($model->numero_contratto ? ' (' . $model->numero_contratto . ')' : '');
 $this->params['breadcrumbs'][] = ['label' => 'Contratti', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+
+// Dettagli firma
+$firmaDettagli = null;
+if ($model->firma_dettagli) {
+    $firmaDettagli = json_decode($model->firma_dettagli, true);
+}
 ?>
 
 <div class="contratto-view">
@@ -255,6 +261,137 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
 
+                <!-- Documento Contratto -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="ti ti-file-certificate me-2"></i>
+                                Documento Contratto
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Generazione PDF -->
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Contratto PDF</h4>
+                                    <?php if ($model->hasDocumentoGenerato()): ?>
+                                        <div class="alert alert-success">
+                                            <div class="d-flex align-items-center">
+                                                <i class="ti ti-check me-2" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <strong>Documento generato</strong>
+                                                    <div class="text-muted small"><?= Html::encode($model->documento_generato_path) ?></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="btn-list">
+                                            <?= Html::a('<i class="ti ti-download me-1"></i> Scarica PDF', ['download', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                                            <?= Html::a('<i class="ti ti-eye me-1"></i> Anteprima', ['anteprima', 'id' => $model->id], ['class' => 'btn btn-info', 'target' => '_blank']) ?>
+                                            <?= Html::a('<i class="ti ti-refresh me-1"></i> Rigenera', ['genera', 'id' => $model->id], [
+                                                'class' => 'btn btn-outline-orange',
+                                                'data' => [
+                                                    'confirm' => 'Sei sicuro di voler rigenerare il documento? Il precedente verra\' sovrascritto.',
+                                                    'method' => 'post',
+                                                ],
+                                            ]) ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="text-center py-4 text-muted">
+                                            <i class="ti ti-file-off" style="font-size: 3rem;"></i>
+                                            <p class="mt-2">Il documento PDF non e' stato ancora generato.</p>
+                                        </div>
+                                        <?= Html::a('<i class="ti ti-file-plus me-1"></i> Genera Contratto PDF', ['genera', 'id' => $model->id], [
+                                            'class' => 'btn btn-success',
+                                            'data' => [
+                                                'confirm' => 'Generare il documento PDF del contratto?',
+                                                'method' => 'post',
+                                            ],
+                                        ]) ?>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Upload Firmato -->
+                                <div class="col-lg-6">
+                                    <h4 class="mb-3">Contratto Firmato</h4>
+                                    <?php if ($model->documento_path): ?>
+                                        <div class="alert <?= $model->firma_verificata ? 'alert-success' : 'alert-warning' ?>">
+                                            <div class="d-flex align-items-center">
+                                                <i class="ti ti-<?= $model->firma_verificata ? 'certificate' : 'alert-triangle' ?> me-2" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <strong>
+                                                        <?php if ($model->firma_verificata): ?>
+                                                            Firma digitale VALIDA
+                                                        <?php else: ?>
+                                                            Firma non verificata
+                                                        <?php endif; ?>
+                                                    </strong>
+                                                    <div class="text-muted small">
+                                                        Tipo: <?= Html::encode($model->getFirmaTipoLabel()) ?>
+                                                        <?php if ($model->firma_data): ?>
+                                                            &mdash; Data: <?= Html::encode($model->firma_data) ?>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <?php if ($firmaDettagli && !empty($firmaDettagli['firmatario']['cn'])): ?>
+                                            <div class="datagrid mb-3">
+                                                <div class="datagrid-item">
+                                                    <div class="datagrid-title">Firmatario</div>
+                                                    <div class="datagrid-content"><?= Html::encode($firmaDettagli['firmatario']['cn']) ?></div>
+                                                </div>
+                                                <?php if (!empty($firmaDettagli['firmatario']['cf'])): ?>
+                                                <div class="datagrid-item">
+                                                    <div class="datagrid-title">Codice Fiscale</div>
+                                                    <div class="datagrid-content">
+                                                        <code><?= Html::encode($firmaDettagli['firmatario']['cf']) ?></code>
+                                                        <?php if ($docente && strtoupper($firmaDettagli['firmatario']['cf']) === strtoupper($docente->codice_fiscale)): ?>
+                                                            <span class="badge bg-green text-green-fg ms-1">Match</span>
+                                                        <?php else: ?>
+                                                            <span class="badge bg-red text-red-fg ms-1">Non corrisponde</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                                <?php endif; ?>
+                                                <?php if (!empty($firmaDettagli['firmatario']['o'])): ?>
+                                                <div class="datagrid-item">
+                                                    <div class="datagrid-title">Organizzazione</div>
+                                                    <div class="datagrid-content"><?= Html::encode($firmaDettagli['firmatario']['o']) ?></div>
+                                                </div>
+                                                <?php endif; ?>
+                                                <?php if (!empty($firmaDettagli['certificato']['emittente'])): ?>
+                                                <div class="datagrid-item">
+                                                    <div class="datagrid-title">Emittente certificato</div>
+                                                    <div class="datagrid-content"><?= Html::encode($firmaDettagli['certificato']['emittente']) ?></div>
+                                                </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+
+                                    <div class="mb-3">
+                                        <?= Html::beginForm(['upload-firmato', 'id' => $model->id], 'post', ['enctype' => 'multipart/form-data']) ?>
+                                            <div class="mb-3">
+                                                <label class="form-label">Carica contratto firmato (P7M o PDF)</label>
+                                                <input type="file" name="file_firmato" class="form-control" accept=".p7m,.pdf" required>
+                                                <div class="form-text">
+                                                    Formati accettati: .p7m (CAdES), .pdf (PAdES). La firma verra' verificata automaticamente.
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="ti ti-upload me-1"></i>
+                                                <?= $model->documento_path ? 'Sostituisci contratto firmato' : 'Carica contratto firmato' ?>
+                                            </button>
+                                        <?= Html::endForm() ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Pagamenti -->
                 <div class="col-12">
                     <div class="card">
@@ -299,6 +436,72 @@ $this->params['breadcrumbs'][] = $this->title;
                                                     <td><span class="badge <?= $pagamento->getStatusBadgeClass() ?>"><?= Html::encode($pagamento->getStatusLabel()) ?></span></td>
                                                     <td>
                                                         <?= Html::a('<i class="ti ti-eye"></i>', ['/pagamento/view', 'id' => $pagamento->id], [
+                                                            'class' => 'btn btn-info btn-sm',
+                                                            'title' => 'Visualizza',
+                                                        ]) ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fatturazione -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="ti ti-file-invoice me-2"></i>
+                                Fatturazione / Cedolini
+                            </h3>
+                            <div class="card-actions">
+                                <?= Html::a('<i class="ti ti-plus me-1"></i> Nuova Richiesta', ['/richiesta-fatturazione/create', 'contratto_id' => $model->id], ['class' => 'btn btn-sm btn-success']) ?>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <?php $richieste = $model->richiesteFatturazione; ?>
+                            <?php if (empty($richieste)): ?>
+                                <div class="text-center py-4 text-muted">
+                                    <i class="ti ti-file-invoice" style="font-size: 3rem;"></i>
+                                    <p class="mt-2">Nessuna richiesta di fatturazione per questo contratto.</p>
+                                </div>
+                            <?php else: ?>
+                                <div class="table-responsive">
+                                    <table class="table table-vcenter">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Tipo</th>
+                                                <th>Importo</th>
+                                                <th>Destinatario</th>
+                                                <th>Data Richiesta</th>
+                                                <th>Stato</th>
+                                                <th>Documento</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($richieste as $richiesta): ?>
+                                                <tr>
+                                                    <td><?= $richiesta->id ?></td>
+                                                    <td><?= $richiesta->getTipoBadge() ?></td>
+                                                    <td class="text-end"><?= Yii::$app->formatter->asCurrency($richiesta->importo, 'EUR') ?></td>
+                                                    <td><?= Html::encode($richiesta->destinatario_nome ?: $richiesta->destinatario_email) ?></td>
+                                                    <td><?= Yii::$app->formatter->asDate($richiesta->data_richiesta) ?></td>
+                                                    <td><?= $richiesta->getStatusBadge() ?></td>
+                                                    <td>
+                                                        <?php if ($richiesta->hasDocumentoRicevuto()): ?>
+                                                            <span class="badge bg-green text-green-fg"><i class="ti ti-check me-1"></i>Si</span>
+                                                        <?php else: ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <?= Html::a('<i class="ti ti-eye"></i>', ['/richiesta-fatturazione/view', 'id' => $richiesta->id], [
                                                             'class' => 'btn btn-info btn-sm',
                                                             'title' => 'Visualizza',
                                                         ]) ?>

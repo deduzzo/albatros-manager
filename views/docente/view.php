@@ -27,9 +27,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col">
                     <h2 class="page-title">
                         <?= Html::encode($this->title) ?>
+                        <?= $model->getTipoBadge() ?>
                     </h2>
                     <div class="text-muted mt-1">
                         <code><?= Html::encode($model->codice_fiscale) ?></code>
+                        <?= $model->getProvenienzaBadge() ?>
                         <?php if ($model->codice_fiscale_validato): ?>
                             <span class="badge bg-green text-green-fg ms-2"><i class="ti ti-check me-1"></i>CF Validato</span>
                         <?php else: ?>
@@ -163,6 +165,14 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <div class="datagrid-item">
                                     <div class="datagrid-title">Nome Completo</div>
                                     <div class="datagrid-content"><?= Html::encode($model->getNomeCompleto()) ?></div>
+                                </div>
+                                <div class="datagrid-item">
+                                    <div class="datagrid-title">Tipo</div>
+                                    <div class="datagrid-content"><?= $model->getTipoBadge() ?></div>
+                                </div>
+                                <div class="datagrid-item">
+                                    <div class="datagrid-title">Provenienza</div>
+                                    <div class="datagrid-content"><?= $model->getProvenienzaBadge() ?></div>
                                 </div>
                                 <div class="datagrid-item">
                                     <div class="datagrid-title">Data di Nascita</div>

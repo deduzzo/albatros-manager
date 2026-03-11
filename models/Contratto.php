@@ -23,6 +23,11 @@ use Yii;
  * @property float|null $ritenute
  * @property float|null $netto_docente
  * @property string|null $documento_path
+ * @property string|null $documento_generato_path
+ * @property string $firma_tipo
+ * @property int $firma_verificata
+ * @property string|null $firma_data
+ * @property string|null $firma_dettagli
  * @property string $status
  * @property string|null $note
  * @property string $created_at
@@ -34,9 +39,16 @@ use Yii;
  *
  * @property Assegnazione $assegnazione
  * @property Pagamento[] $pagamenti
+ * @property RichiestaFatturazione[] $richiesteFatturazione
  */
 class Contratto extends BaseActiveRecord
 {
+    // Costanti firma
+    const FIRMA_NESSUNA = 'nessuna';
+    const FIRMA_P7M = 'p7m';
+    const FIRMA_PDF_FIRMATO = 'pdf_firmato';
+    const FIRMA_OTP = 'otp';
+
     // Costanti tipo contratto
     const TIPO_COCOCO = 'cococo';
     const TIPO_PARTITA_IVA = 'partita_iva';
@@ -65,7 +77,11 @@ class Contratto extends BaseActiveRecord
             [['note'], 'string'],
             [['numero_contratto'], 'string', 'max' => 50],
             [['numero_contratto'], 'unique'],
-            [['documento_path'], 'string', 'max' => 500],
+            [['documento_path', 'documento_generato_path'], 'string', 'max' => 500],
+            [['firma_tipo'], 'in', 'range' => [self::FIRMA_NESSUNA, self::FIRMA_P7M, self::FIRMA_PDF_FIRMATO, self::FIRMA_OTP]],
+            [['firma_verificata'], 'boolean'],
+            [['firma_data'], 'safe'],
+            [['firma_dettagli'], 'string'],
             [['tipo'], 'in', 'range' => [self::TIPO_COCOCO, self::TIPO_PARTITA_IVA, self::TIPO_OCCASIONALE]],
             [['status'], 'in', 'range' => [self::STATUS_BOZZA, self::STATUS_FIRMATO, self::STATUS_ATTIVO, self::STATUS_SOSPESO, self::STATUS_CONCLUSO, self::STATUS_ANNULLATO]],
             // Validazioni date
@@ -98,6 +114,11 @@ class Contratto extends BaseActiveRecord
             'ritenute' => 'Ritenute (€)',
             'netto_docente' => 'Netto Docente (€)',
             'documento_path' => 'Documento',
+            'documento_generato_path' => 'Documento Generato',
+            'firma_tipo' => 'Tipo Firma',
+            'firma_verificata' => 'Firma Verificata',
+            'firma_data' => 'Data Firma',
+            'firma_dettagli' => 'Dettagli Firma',
             'status' => 'Stato',
             'note' => 'Note',
             'created_at' => 'Creato il',
@@ -113,6 +134,55 @@ class Contratto extends BaseActiveRecord
     public function getPagamenti()
     {
         return $this->hasMany(Pagamento::class, ['contratto_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRichiesteFatturazione()
+    {
+        return $this->hasMany(RichiestaFatturazione::class, ['contratto_id' => 'id']);
+    }
+
+    /**
+     * Restituisce le opzioni per il dropdown tipo firma
+     * @return array
+     */
+    public static function getFirmaTipoList()
+    {
+        return [
+            self::FIRMA_NESSUNA => 'Nessuna',
+            self::FIRMA_P7M => 'P7M (CAdES)',
+            self::FIRMA_PDF_FIRMATO => 'PDF Firmato (PAdES)',
+            self::FIRMA_OTP => 'OTP',
+        ];
+    }
+
+    /**
+     * Restituisce la label del tipo firma
+     * @return string
+     */
+    public function getFirmaTipoLabel()
+    {
+        return self::getFirmaTipoList()[$this->firma_tipo] ?? $this->firma_tipo;
+    }
+
+    /**
+     * Verifica se il contratto e' stato firmato
+     * @return bool
+     */
+    public function isFirmato()
+    {
+        return $this->firma_tipo !== self::FIRMA_NESSUNA && $this->firma_tipo !== null;
+    }
+
+    /**
+     * Verifica se il documento e' stato generato
+     * @return bool
+     */
+    public function hasDocumentoGenerato()
+    {
+        return !empty($this->documento_generato_path);
     }
 
     public static function getTipoList()

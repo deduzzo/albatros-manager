@@ -51,6 +51,11 @@ class Docente extends BaseActiveRecord
     const PROVENIENZA_TP = 'TP'; // Tipo Professionista (mondo del lavoro)
     const PROVENIENZA_RU = 'RU'; // Ricercatore Universitario
 
+    // Costanti per tipo docente
+    const TIPO_DOCENTE = 'docente';
+    const TIPO_COORDINATORE = 'coordinatore';
+    const TIPO_TUTOR = 'tutor';
+
     /**
      * @inheritdoc
      */
@@ -86,6 +91,7 @@ class Docente extends BaseActiveRecord
             [['partita_iva'], 'string', 'max' => 11],
             [['iban'], 'string', 'max' => 34],
             [['provenienza'], 'in', 'range' => [self::PROVENIENZA_TP, self::PROVENIENZA_RU]],
+            [['tipo'], 'in', 'range' => [self::TIPO_DOCENTE, self::TIPO_COORDINATORE, self::TIPO_TUTOR]],
             [['codice_fiscale'], 'unique'],
             [['codice_fiscale'], 'match', 'pattern' => '/^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/i', 'message' => 'Codice fiscale non valido'],
             [['email'], 'email'],
@@ -136,6 +142,7 @@ class Docente extends BaseActiveRecord
             'titolo_studio' => 'Titolo di Studio',
             'specializzazioni' => 'Specializzazioni',
             'provenienza' => 'Provenienza',
+            'tipo' => 'Tipo',
             'partita_iva' => 'Partita IVA',
             'iban' => 'IBAN',
             'note' => 'Note',
@@ -493,6 +500,67 @@ class Docente extends BaseActiveRecord
             return $this->provenienza === self::PROVENIENZA_RU ? 70 : 60;
         }
         return null;
+    }
+
+    /**
+     * Restituisce le opzioni per il dropdown tipo
+     * @return array
+     */
+    public static function getTipoList()
+    {
+        return [
+            self::TIPO_DOCENTE => 'Docente',
+            self::TIPO_COORDINATORE => 'Coordinatore',
+            self::TIPO_TUTOR => 'Tutor',
+        ];
+    }
+
+    /**
+     * Restituisce la label del tipo
+     * @return string|null
+     */
+    public function getTipoLabel()
+    {
+        return self::getTipoList()[$this->tipo] ?? null;
+    }
+
+    /**
+     * Restituisce il badge HTML per il tipo
+     * @return string
+     */
+    public function getTipoBadge()
+    {
+        if (!$this->tipo) {
+            return '<span class="badge bg-default text-default-fg">Non specificato</span>';
+        }
+
+        $class = match ($this->tipo) {
+            self::TIPO_DOCENTE => 'bg-blue text-blue-fg',
+            self::TIPO_COORDINATORE => 'bg-purple text-purple-fg',
+            self::TIPO_TUTOR => 'bg-teal text-teal-fg',
+            default => 'bg-default text-default-fg',
+        };
+        $label = $this->getTipoLabel();
+
+        return '<span class="badge ' . $class . '">' . $label . '</span>';
+    }
+
+    /**
+     * Verifica se il docente e' un coordinatore
+     * @return bool
+     */
+    public function isCoordinatore()
+    {
+        return $this->tipo === self::TIPO_COORDINATORE;
+    }
+
+    /**
+     * Verifica se il docente e' un tutor
+     * @return bool
+     */
+    public function isTutor()
+    {
+        return $this->tipo === self::TIPO_TUTOR;
     }
 
     /**
