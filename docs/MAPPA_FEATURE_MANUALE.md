@@ -31,3 +31,15 @@
 | Dati Fondazione (Configurazione) | Sez. 3 | - | - |
 | Subentro Docenti Idonei | Sez. 8 | - | - |
 | Graduatoria Docenti | Sez. 8 | - | - |
+| Contabilita e Bilancio (Dashboard, Voci, Movimenti) | Sez. 16 | - | - |
+| Tranche Finanziamento | Sez. 16 | - | - |
+| Quadro Economico (formato Regione) | Sez. 16 | - | - |
+| Fatturazione P.IVA e Cedolini CoCoCo | Sez. 17 | Sez. 13 | - |
+| Invio Massivo Richieste Fatturazione | Sez. 17 | - | - |
+| Rimborsi Spese | Sez. 18 | Sez. 11 | - |
+| Albo Docenti + Assegnazione Diretta | Sez. 19 | - | - |
+| Borse di Studio PNRR | Sez. 20 | - | - |
+| Verifica Firma Digitale (P7M/PDF) | Sez. 21 | - | - |
+| Generazione Contratti PDF (FSE/PNRR) | Sez. 22 | Sez. 12 | - |
+| Upload Contratto Firmato | Sez. 22 | Sez. 12 | - |
+| Coordinatori e Tutor | Sez. 23 | - | - |

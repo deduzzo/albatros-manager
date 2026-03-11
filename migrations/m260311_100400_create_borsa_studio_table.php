@@ -57,6 +57,9 @@ class m260311_100400_create_borsa_studio_table extends Migration
             'deleted_by' => $this->integer()->null(),
         ]);
 
+        // Allinea charset/collation della colonna FK con la tabella allievo
+        $this->execute("ALTER TABLE {{%borsa_studio}} MODIFY allievo_codice_fiscale CHAR(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL");
+
         $this->addForeignKey(
             'fk_borsa_studio_allievo',
             '{{%borsa_studio}}',

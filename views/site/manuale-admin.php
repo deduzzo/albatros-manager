@@ -234,6 +234,14 @@ $this->title = 'Manuale Amministratore';
             <a class="nav-link" href="#report"><i class="ti ti-chart-bar"></i> Report e Strumenti</a>
             <a class="nav-link" href="#import"><i class="ti ti-upload"></i> Import Dati</a>
             <a class="nav-link" href="#area-docenti"><i class="ti ti-door-enter"></i> Area Docenti</a>
+            <a class="nav-link" href="#bilancio"><i class="ti ti-report-money"></i> Contabilita e Bilancio</a>
+            <a class="nav-link" href="#fatturazione"><i class="ti ti-file-invoice"></i> Fatturazione e Cedolini</a>
+            <a class="nav-link" href="#rimborsi"><i class="ti ti-receipt-refund"></i> Rimborsi Spese</a>
+            <a class="nav-link" href="#albo-docenti"><i class="ti ti-address-book"></i> Albo Docenti</a>
+            <a class="nav-link" href="#borse-studio"><i class="ti ti-school"></i> Borse di Studio</a>
+            <a class="nav-link" href="#firma-digitale"><i class="ti ti-certificate"></i> Verifica Firma Digitale</a>
+            <a class="nav-link" href="#contratti-pdf"><i class="ti ti-file-type-pdf"></i> Generazione Contratti PDF</a>
+            <a class="nav-link" href="#coordinatori-tutor"><i class="ti ti-user-star"></i> Coordinatori e Tutor</a>
         </div>
 
         <div class="sidebar-heading mt-4">Altri manuali</div>
@@ -901,10 +909,458 @@ $this->title = 'Manuale Amministratore';
             <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
         </section>
 
+        <!-- 16. CONTABILITA E BILANCIO -->
+        <section id="bilancio">
+            <div class="section-card">
+                <div class="section-card-header bg-blue-lt">
+                    <i class="ti ti-report-money"></i> 16. Contabilita e Bilancio
+                </div>
+                <div class="section-card-body">
+                    <p>Il modulo di contabilita consente la gestione completa del bilancio dei progetti, dalle voci di spesa alle tranche di finanziamento, fino al quadro economico in formato Regione.</p>
+
+                    <h3>Dashboard Bilancio</h3>
+                    <p>Accedi alla dashboard bilancio dal menu <span class="menu-path">Contabilita > Bilancio</span> oppure direttamente all'indirizzo <code>/bilancio</code>.</p>
+                    <p>La dashboard mostra una panoramica finanziaria con:</p>
+                    <ul>
+                        <li>Totale finanziamenti ricevuti (tranche accreditate)</li>
+                        <li>Totale spese registrate (movimenti di spesa)</li>
+                        <li>Saldo disponibile con indicatore visivo</li>
+                        <li>Grafici di ripartizione per categoria di spesa</li>
+                        <li>Andamento temporale entrate/uscite</li>
+                    </ul>
+
+                    <h3>Voci di Spesa</h3>
+                    <p>Accedi da <span class="menu-path">Contabilita > Voci di Spesa</span> o da <code>/voce-spesa</code>.</p>
+                    <p>Le voci di spesa definiscono le categorie in cui si articola il bilancio del progetto. Il sistema supporta una struttura gerarchica:</p>
+                    <ul>
+                        <li><strong>Categorie principali</strong>: macro-aree di spesa (es. Personale, Attrezzature, Gestione)</li>
+                        <li><strong>Sotto-voci</strong>: dettaglio all'interno di ogni categoria (es. Docenti, Tutor, Coordinamento)</li>
+                    </ul>
+                    <p>Per ogni voce puoi configurare:</p>
+                    <table class="table campo-table">
+                        <thead><tr><th>Campo</th><th>Descrizione</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Codice</strong></td><td>Codice identificativo della voce (es. A1, B2.1)</td></tr>
+                            <tr><td><strong>Descrizione</strong></td><td>Nome della voce di spesa</td></tr>
+                            <tr><td><strong>Categoria padre</strong></td><td>La macro-categoria di appartenenza (vuoto se e una categoria principale)</td></tr>
+                            <tr><td><strong>Importo previsto</strong></td><td>Budget preventivato per questa voce</td></tr>
+                            <tr><td><strong>Progetto</strong></td><td>Progetto di riferimento</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Movimenti di Spesa</h3>
+                    <p>Accedi da <span class="menu-path">Contabilita > Movimenti Spesa</span> o da <code>/movimento-spesa</code>.</p>
+                    <p>I movimenti registrano le singole spese sostenute. Possono essere:</p>
+                    <ul>
+                        <li><strong>Manuali</strong>: inseriti direttamente dall'amministratore per spese generali, forniture, servizi</li>
+                        <li><strong>Automatici</strong>: generati dal sistema quando viene registrato un pagamento docente o un'erogazione borsa di studio</li>
+                    </ul>
+                    <p>Per inserire un nuovo movimento manuale:</p>
+                    <ol>
+                        <li>Clicca <strong>"Nuovo Movimento"</strong></li>
+                        <li>Seleziona il progetto e la voce di spesa</li>
+                        <li>Inserisci data, importo, descrizione e numero documento</li>
+                        <li>Opzionalmente allega il giustificativo (PDF/immagine)</li>
+                        <li>Clicca <strong>"Salva"</strong></li>
+                    </ol>
+
+                    <h3>Tranche di Finanziamento</h3>
+                    <p>Accedi da <span class="menu-path">Contabilita > Tranche Finanziamento</span> o da <code>/tranche-finanziamento</code>.</p>
+                    <p>Le tranche rappresentano gli accrediti ricevuti dall'ente finanziatore. Per ogni tranche registra:</p>
+                    <table class="table campo-table">
+                        <thead><tr><th>Campo</th><th>Descrizione</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Progetto</strong></td><td>Progetto finanziato</td></tr>
+                            <tr><td><strong>Numero tranche</strong></td><td>Progressivo (1a, 2a, 3a, ecc.)</td></tr>
+                            <tr><td><strong>Importo</strong></td><td>Importo accreditato</td></tr>
+                            <tr><td><strong>Data accredito</strong></td><td>Data di ricezione del finanziamento</td></tr>
+                            <tr><td><strong>Note</strong></td><td>Riferimento del mandato o estremi bonifico</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Quadro Economico</h3>
+                    <p>Accedi da <span class="menu-path">Contabilita > Quadro Economico</span> o da <code>/bilancio/quadro-economico</code>.</p>
+                    <p>Il quadro economico presenta il riepilogo finanziario del progetto nel formato richiesto dalla Regione, con:</p>
+                    <ul>
+                        <li>Voci di spesa con importo previsto, impegnato e liquidato</li>
+                        <li>Percentuali di utilizzo per voce</li>
+                        <li>Totali per macro-categoria</li>
+                        <li>Saldo complessivo e disponibilita residua</li>
+                    </ul>
+
+                    <h3>Export Excel</h3>
+                    <p>Tutte le sezioni contabili supportano l'export in formato Excel. Clicca il pulsante <strong><i class="ti ti-file-spreadsheet"></i> Export Excel</strong> presente nelle pagine di elenco per scaricare i dati filtrati in formato XLSX.</p>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 17. FATTURAZIONE E CEDOLINI -->
+        <section id="fatturazione">
+            <div class="section-card">
+                <div class="section-card-header bg-azure-lt">
+                    <i class="ti ti-file-invoice"></i> 17. Fatturazione e Cedolini
+                </div>
+                <div class="section-card-body">
+                    <p>Questa sezione gestisce la richiesta e la raccolta dei documenti fiscali (fatture e cedolini) necessari per la liquidazione dei compensi docenti.</p>
+
+                    <h3>Richiesta Fatturazione (Docenti con P.IVA)</h3>
+                    <p>Accedi da <span class="menu-path">Gestione > Richieste Fatturazione</span> o da <code>/richiesta-fatturazione</code>.</p>
+                    <p>Per i docenti con tipologia <strong>TP</strong> (Professionista), il compenso viene liquidato tramite fattura. Il workflow e il seguente:</p>
+                    <ol>
+                        <li>L'amministratore crea una richiesta di fatturazione selezionando il contratto e l'importo da fatturare</li>
+                        <li>Il sistema invia automaticamente un'email al docente con i dati per l'emissione della fattura (importo, CIG, CUP, dati intestatario)</li>
+                        <li>Il docente emette la fattura e la invia</li>
+                        <li>L'amministratore carica il documento ricevuto nel sistema (upload PDF)</li>
+                        <li>La richiesta passa dallo stato <span class="badge bg-orange text-orange-fg">in attesa</span> a <span class="badge bg-green text-green-fg">ricevuta</span></li>
+                    </ol>
+
+                    <h3>Richiesta Cedolini (Docenti CoCoCo)</h3>
+                    <p>Per i docenti con tipologia <strong>RU</strong> (Ricercatore/CoCoCo), il compenso viene liquidato tramite cedolino paga elaborato dal consulente del lavoro. Il workflow e analogo:</p>
+                    <ol>
+                        <li>Crea la richiesta di cedolino selezionando il contratto</li>
+                        <li>Il sistema invia email al consulente del lavoro con i dati necessari per l'elaborazione</li>
+                        <li>Il consulente elabora il cedolino e lo invia</li>
+                        <li>L'amministratore carica il cedolino nel sistema</li>
+                    </ol>
+
+                    <h3>Invio Email</h3>
+                    <p>Per ogni richiesta puoi inviare (o reinviare) l'email al destinatario cliccando il pulsante <strong><i class="ti ti-mail"></i> Invia Email</strong>. L'email contiene:</p>
+                    <ul>
+                        <li>Dati del contratto e del progetto</li>
+                        <li>Importo da fatturare/cedolinare</li>
+                        <li>Riferimenti CIG, CUP e codici progetto</li>
+                        <li>Dati dell'ente per l'intestazione</li>
+                    </ul>
+
+                    <h3>Upload Documento Ricevuto</h3>
+                    <p>Quando ricevi la fattura o il cedolino dal docente/consulente:</p>
+                    <ol>
+                        <li>Apri il dettaglio della richiesta</li>
+                        <li>Clicca <strong>"Carica Documento"</strong></li>
+                        <li>Seleziona il file PDF ricevuto</li>
+                        <li>Il sistema aggiorna automaticamente lo stato a "Ricevuta"</li>
+                    </ol>
+
+                    <h3>Invio Massivo</h3>
+                    <p>Per inviare piu richieste contemporaneamente:</p>
+                    <ol>
+                        <li>Dall'elenco delle richieste, seleziona le righe desiderate tramite le checkbox</li>
+                        <li>Clicca il pulsante <strong><i class="ti ti-mail-forward"></i> Invio Massivo</strong></li>
+                        <li>Conferma l'operazione: il sistema inviera un'email per ogni richiesta selezionata</li>
+                    </ol>
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Nota</strong>: I documenti caricati (fatture e cedolini) sono visibili anche dal docente nella propria area personale, nella sezione "Documenti".</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 18. RIMBORSI SPESE -->
+        <section id="rimborsi">
+            <div class="section-card">
+                <div class="section-card-header bg-blue-lt">
+                    <i class="ti ti-receipt-refund"></i> 18. Rimborsi Spese
+                </div>
+                <div class="section-card-body">
+                    <p>Il modulo rimborsi consente ai docenti di richiedere il rimborso di spese sostenute (viaggi, materiali, ecc.) e all'amministratore di approvarle o rifiutarle.</p>
+
+                    <h3>Panoramica</h3>
+                    <p>Accedi da <span class="menu-path">Gestione > Rimborsi Spese</span> o da <code>/rimborso-spesa</code>.</p>
+                    <p>L'elenco mostra tutti i rimborsi con filtri per stato, docente e progetto.</p>
+
+                    <h3>Workflow del rimborso</h3>
+                    <table class="table campo-table">
+                        <thead><tr><th>Stato</th><th>Descrizione</th><th>Azione</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-orange text-orange-fg">Richiesto</span></td>
+                                <td>Il docente ha presentato la richiesta di rimborso dall'area personale</td>
+                                <td>L'admin deve valutare</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-green text-green-fg">Approvato</span></td>
+                                <td>Il rimborso e stato approvato e sara liquidato</td>
+                                <td>Procedi con il pagamento</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-red text-red-fg">Rifiutato</span></td>
+                                <td>Il rimborso e stato rifiutato con motivazione</td>
+                                <td>Il docente viene notificato</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Approvare o rifiutare un rimborso</h3>
+                    <ol>
+                        <li>Clicca sulla richiesta per aprire il dettaglio</li>
+                        <li>Verifica i dati: tipo di spesa, importo, descrizione e allegato (ricevuta/scontrino)</li>
+                        <li>Clicca <strong><i class="ti ti-check"></i> Approva</strong> per approvare il rimborso</li>
+                        <li>Oppure clicca <strong><i class="ti ti-x"></i> Rifiuta</strong>: si apre un campo dove devi inserire obbligatoriamente il <strong>motivo del rifiuto</strong></li>
+                    </ol>
+                    <div class="alert-manuale bg-orange-lt">
+                        <i class="ti ti-alert-triangle text-orange"></i>
+                        <div><strong>Importante</strong>: Il motivo del rifiuto e obbligatorio e verra comunicato al docente. Inserisci una motivazione chiara e completa.</div>
+                    </div>
+
+                    <h3>Tipologie di rimborso</h3>
+                    <ul>
+                        <li><strong>Viaggio</strong>: spostamenti per raggiungere la sede del corso (km, pedaggi, trasporti pubblici)</li>
+                        <li><strong>Vitto e alloggio</strong>: pasti e pernottamento per trasferte</li>
+                        <li><strong>Materiale didattico</strong>: acquisto di materiali per le lezioni</li>
+                        <li><strong>Altro</strong>: altre spese documentate e giustificate</li>
+                    </ul>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 19. ALBO DOCENTI -->
+        <section id="albo-docenti">
+            <div class="section-card">
+                <div class="section-card-header bg-azure-lt">
+                    <i class="ti ti-address-book"></i> 19. Albo Docenti
+                </div>
+                <div class="section-card-body">
+                    <p>L'Albo Docenti e un registro consultabile di tutti i docenti presenti nel sistema, con i loro profili professionali, competenze e storico incarichi.</p>
+
+                    <h3>Accesso</h3>
+                    <p>Accedi da <span class="menu-path">Personale > Albo Docenti</span> o da <code>/docente/albo</code>.</p>
+
+                    <h3>Filtri avanzati</h3>
+                    <p>L'albo dispone di filtri avanzati per trovare rapidamente il docente adatto:</p>
+                    <table class="table campo-table">
+                        <thead><tr><th>Filtro</th><th>Descrizione</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Nome/Cognome</strong></td><td>Ricerca testuale per nome o cognome</td></tr>
+                            <tr><td><strong>Codice Fiscale</strong></td><td>Ricerca esatta per codice fiscale</td></tr>
+                            <tr><td><strong>Provenienza</strong></td><td>TP (Professionista) o RU (Ricercatore)</td></tr>
+                            <tr><td><strong>Competenze (Tag)</strong></td><td>Filtra per tag curriculum associati al profilo</td></tr>
+                            <tr><td><strong>Disponibilita</strong></td><td>Mostra solo docenti senza incarichi attivi</td></tr>
+                            <tr><td><strong>Provincia</strong></td><td>Filtra per zona geografica</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Assegnazione diretta da Albo</h3>
+                    <p>Dall'albo e possibile assegnare direttamente un docente a un modulo aperto:</p>
+                    <ol>
+                        <li>Trova il docente desiderato usando i filtri</li>
+                        <li>Clicca sul pulsante <strong><i class="ti ti-user-plus"></i> Assegna a Modulo</strong> nella riga del docente</li>
+                        <li>Seleziona il modulo tra quelli disponibili (non ancora assegnati)</li>
+                        <li>Conferma l'assegnazione</li>
+                    </ol>
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Nota</strong>: L'assegnazione diretta da albo crea automaticamente l'istanza di candidatura con esito "assegnato" e l'assegnazione corrispondente. Utilizzala per incarichi diretti che non richiedono bando pubblico.</div>
+                    </div>
+
+                    <h3>Scheda docente</h3>
+                    <p>Cliccando sul nome del docente si apre la scheda completa con: dati anagrafici, competenze (tag), storico incarichi, contratti attivi e valutazioni ricevute.</p>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 20. BORSE DI STUDIO -->
+        <section id="borse-studio">
+            <div class="section-card">
+                <div class="section-card-header bg-blue-lt">
+                    <i class="ti ti-school"></i> 20. Borse di Studio
+                </div>
+                <div class="section-card-body">
+                    <p>Il modulo Borse di Studio gestisce l'erogazione delle borse previste dai progetti PNRR per gli studenti frequentanti.</p>
+
+                    <h3>Accesso</h3>
+                    <p>Accedi da <span class="menu-path">Gestione > Borse di Studio</span> o da <code>/borsa-studio</code>.</p>
+
+                    <h3>Calcolo importi PNRR</h3>
+                    <p>Il sistema calcola automaticamente l'importo della borsa in base alle regole PNRR:</p>
+                    <ul>
+                        <li><strong>Importo base</strong>: calcolato in base alle ore del corso e alla tipologia di intervento</li>
+                        <li><strong>Maggiorazione disabilita</strong>: incremento percentuale per studenti con disabilita certificata</li>
+                        <li><strong>Maggiorazione residenza</strong>: incremento per studenti residenti fuori regione o in aree svantaggiate</li>
+                        <li><strong>Maggiorazione ISEE</strong>: incremento in base alla fascia ISEE</li>
+                    </ul>
+                    <p>L'importo finale viene calcolato sommando la base e le maggiorazioni applicabili.</p>
+
+                    <h3>Erogazione trimestrale</h3>
+                    <p>La borsa viene erogata in rate trimestrali proporzionali alla frequenza:</p>
+                    <ol>
+                        <li>Seleziona il progetto e il trimestre di riferimento</li>
+                        <li>Il sistema calcola automaticamente l'importo per ogni studente in base alle presenze registrate</li>
+                        <li>Verifica gli importi nella tabella riepilogativa</li>
+                        <li>Clicca <strong>"Genera Erogazioni"</strong> per creare le erogazioni trimestrali</li>
+                    </ol>
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Requisito</strong>: Per l'erogazione della borsa, lo studente deve aver frequentato almeno il 70% delle ore previste nel trimestre.</div>
+                    </div>
+
+                    <h3>Revoca borsa</h3>
+                    <p>E possibile revocare una borsa gia assegnata nei seguenti casi:</p>
+                    <ul>
+                        <li>Ritiro dello studente dal corso</li>
+                        <li>Frequenza inferiore alla soglia minima</li>
+                        <li>Mancato rispetto delle condizioni previste dal bando</li>
+                    </ul>
+                    <p>Per revocare: apri il dettaglio della borsa, clicca <strong><i class="ti ti-ban"></i> Revoca</strong> e inserisci la motivazione. Le erogazioni future vengono annullate.</p>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 21. VERIFICA FIRMA DIGITALE -->
+        <section id="firma-digitale">
+            <div class="section-card">
+                <div class="section-card-header bg-azure-lt">
+                    <i class="ti ti-certificate"></i> 21. Verifica Firma Digitale
+                </div>
+                <div class="section-card-body">
+                    <p>Questa funzionalita consente di verificare la validita della firma digitale su documenti ricevuti, senza dover utilizzare software esterno.</p>
+
+                    <h3>Accesso</h3>
+                    <p>Accedi da <span class="menu-path">Strumenti > Verifica Firma Digitale</span> o da <code>/firma-digitale</code>.</p>
+
+                    <h3>Formati supportati</h3>
+                    <table class="table campo-table">
+                        <thead><tr><th>Formato</th><th>Estensione</th><th>Descrizione</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>CAdES</strong></td><td>.p7m</td><td>Busta crittografica (il formato piu comune per documenti firmati digitalmente)</td></tr>
+                            <tr><td><strong>PAdES</strong></td><td>.pdf</td><td>PDF con firma digitale incorporata</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Come verificare un documento</h3>
+                    <ol>
+                        <li>Clicca <strong>"Carica Documento"</strong> o trascina il file nell'area di upload</li>
+                        <li>Seleziona il file .p7m o .pdf firmato</li>
+                        <li>Il sistema analizza il documento e mostra il risultato della verifica</li>
+                    </ol>
+
+                    <h3>Risultato della verifica</h3>
+                    <p>Per ogni firma trovata nel documento, il sistema mostra:</p>
+                    <ul>
+                        <li>Nome e cognome del firmatario</li>
+                        <li>Codice fiscale del firmatario</li>
+                        <li>Ente certificatore</li>
+                        <li>Data e ora della firma</li>
+                        <li>Esito: <span class="badge bg-green text-green-fg">Valida</span>, <span class="badge bg-orange text-orange-fg">Scaduta</span> o <span class="badge bg-red text-red-fg">Non valida</span></li>
+                    </ul>
+                    <div class="alert-manuale bg-orange-lt">
+                        <i class="ti ti-alert-triangle text-orange"></i>
+                        <div><strong>Attenzione</strong>: La verifica e indicativa e basata sui certificati disponibili. Per documenti con valore legale, si consiglia di utilizzare anche il servizio ufficiale di verifica dell'AgID.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 22. GENERAZIONE CONTRATTI PDF -->
+        <section id="contratti-pdf">
+            <div class="section-card">
+                <div class="section-card-header bg-blue-lt">
+                    <i class="ti ti-file-type-pdf"></i> 22. Generazione Contratti PDF
+                </div>
+                <div class="section-card-body">
+                    <p>Il sistema consente di generare automaticamente i contratti in formato PDF a partire dai template configurati, precompilati con i dati del docente e del progetto.</p>
+
+                    <h3>Generare un contratto PDF</h3>
+                    <p>Dalla vista dettaglio di un contratto (<span class="menu-path">Gestione > Contratti > Dettaglio</span>):</p>
+                    <ol>
+                        <li>Clicca il pulsante <strong><i class="ti ti-file-type-pdf"></i> Genera PDF</strong></li>
+                        <li>Il sistema genera il contratto utilizzando il template appropriato</li>
+                        <li>Il PDF si scarica automaticamente</li>
+                    </ol>
+
+                    <h3>Template disponibili</h3>
+                    <table class="table campo-table">
+                        <thead><tr><th>Template</th><th>Fonte</th><th>Contenuto</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Contratto FSE</strong></td><td>FSE</td><td>Incarico professionale con riferimenti al PO FSE, CIG, CUP</td></tr>
+                            <tr><td><strong>Contratto PNRR</strong></td><td>PNRR</td><td>Incarico con riferimenti al PNRR, Missione, Componente, Investimento</td></tr>
+                        </tbody>
+                    </table>
+                    <p>I template includono automaticamente:</p>
+                    <ul>
+                        <li>Dati anagrafici del docente (nome, CF, indirizzo, P.IVA/dati fiscali)</li>
+                        <li>Dati del progetto (titolo, codice, fonte di finanziamento, CIG, CUP)</li>
+                        <li>Dettaglio del modulo (titolo, ore, sede)</li>
+                        <li>Compenso orario e totale contrattualizzato</li>
+                        <li>Date di inizio e fine lezioni</li>
+                        <li>Clausole contrattuali standard</li>
+                        <li>Dati della fondazione (da Configurazione)</li>
+                    </ul>
+
+                    <h3>Upload contratto firmato</h3>
+                    <p>Dopo che il docente ha firmato il contratto e lo ha restituito:</p>
+                    <ol>
+                        <li>Apri il dettaglio del contratto</li>
+                        <li>Clicca <strong><i class="ti ti-upload"></i> Carica Firmato</strong></li>
+                        <li>Seleziona il file PDF firmato (o .p7m se firmato digitalmente)</li>
+                        <li>Il contratto passa allo stato <span class="badge bg-green text-green-fg">Firmato</span></li>
+                    </ol>
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Suggerimento</strong>: Puoi verificare la firma digitale del contratto ricevuto utilizzando la funzione <a href="#firma-digitale">Verifica Firma Digitale</a> (Sez. 21).</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 23. COORDINATORI E TUTOR -->
+        <section id="coordinatori-tutor">
+            <div class="section-card">
+                <div class="section-card-header bg-azure-lt">
+                    <i class="ti ti-user-star"></i> 23. Coordinatori e Tutor
+                </div>
+                <div class="section-card-body">
+                    <p>Oltre ai docenti incaricati per i singoli moduli formativi, il sistema gestisce anche le figure di <strong>Coordinatore</strong> e <strong>Tutor</strong> di progetto.</p>
+
+                    <h3>Tipi di docente</h3>
+                    <p>Il campo <strong>Tipo</strong> nell'anagrafica docenti distingue le diverse figure professionali:</p>
+                    <table class="table campo-table">
+                        <thead><tr><th>Tipo</th><th>Ruolo</th><th>Descrizione</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Docente</strong></td><td>Insegnamento</td><td>Svolge le lezioni nei moduli formativi assegnati</td></tr>
+                            <tr><td><strong>Coordinatore</strong></td><td>Coordinamento didattico</td><td>Coordina le attivita formative del progetto, supervisiona i docenti</td></tr>
+                            <tr><td><strong>Tutor</strong></td><td>Supporto formativo</td><td>Affianca i docenti, supporta gli studenti, gestisce le presenze</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Gestione dall'anagrafica</h3>
+                    <p>Per impostare il tipo di un docente:</p>
+                    <ol>
+                        <li>Vai su <span class="menu-path">Personale > Docenti</span></li>
+                        <li>Apri la scheda del docente</li>
+                        <li>Clicca <strong>"Modifica"</strong></li>
+                        <li>Seleziona il <strong>Tipo</strong> appropriato dal menu a tendina</li>
+                        <li>Salva le modifiche</li>
+                    </ol>
+
+                    <h3>Utilizzo nei progetti</h3>
+                    <p>Coordinatori e tutor possono essere:</p>
+                    <ul>
+                        <li>Assegnati a uno o piu progetti come figure di supporto</li>
+                        <li>Contrattualizzati con le stesse modalita dei docenti</li>
+                        <li>Inclusi nella rendicontazione ore con il medesimo workflow</li>
+                        <li>Filtrati nelle viste tramite il campo Tipo</li>
+                    </ul>
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Nota</strong>: Coordinatori e tutor accedono all'Area Docenti con le stesse credenziali e funzionalita dei docenti. La distinzione del tipo serve principalmente per la categorizzazione amministrativa e la rendicontazione.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
         <!-- Footer -->
         <div class="text-center text-secondary py-4" style="border-top: 1px solid var(--tblr-border-color); margin-top: 2rem;">
             <p class="mb-1">Albatros Manager - Manuale Amministratore</p>
-            <p class="mb-0 small">Versione 1.0 - Febbraio 2026</p>
+            <p class="mb-0 small">Versione 1.1 - Marzo 2026</p>
         </div>
     </div>
 </div>

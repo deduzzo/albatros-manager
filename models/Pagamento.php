@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use Yii;
 use app\components\base\BaseActiveRecord;
 
 /**
@@ -105,6 +106,133 @@ class Pagamento extends BaseActiveRecord
     public function getContratto()
     {
         return $this->hasOne(Contratto::class, ['id' => 'contratto_id']);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        // Auto-creazione MovimentoSpesa quando il pagamento diventa "pagato"
+        if (isset($changedAttributes['status']) && $this->status === self::STATUS_PAGATO) {
+            $this->creaMovimentoSpesaAutomatico();
+        }
+    }
+
+    /**
+     * Crea automaticamente un MovimentoSpesa collegato a questo pagamento.
+     * Non crea duplicati: verifica che non esista gia' un movimento per questo pagamento.
+     */
+    protected function creaMovimentoSpesaAutomatico()
+    {
+        try {
+            // Verifica che non esista gia' un movimento per questo pagamento
+            $esistente = MovimentoSpesa::find()
+                ->where([
+                    'riferimento_tipo' => MovimentoSpesa::RIFERIMENTO_PAGAMENTO,
+                    'riferimento_id' => $this->id,
+                ])
+                ->exists();
+
+            if ($esistente) {
+                Yii::debug("MovimentoSpesa gia' esistente per pagamento #{$this->id}", __METHOD__);
+                return;
+            }
+
+            // Risali la catena: contratto → assegnazione → modulo → avviso → progetto_id
+            $contratto = $this->contratto;
+            if (!$contratto) {
+                Yii::warning("Pagamento #{$this->id}: contratto non trovato, impossibile creare MovimentoSpesa", __METHOD__);
+                return;
+            }
+
+            $assegnazione = $contratto->assegnazione;
+            if (!$assegnazione) {
+                Yii::warning("Pagamento #{$this->id}: assegnazione non trovata, impossibile creare MovimentoSpesa", __METHOD__);
+                return;
+            }
+
+            $modulo = $assegnazione->modulo;
+            $docente = $assegnazione->docente;
+            $avviso = $modulo ? $modulo->avviso : null;
+            $progettoId = $avviso ? $avviso->progetto_id : null;
+
+            // Cerca la voce di spesa appropriata
+            $voceSpesaId = $this->trovaVoceSpesa();
+            if (!$voceSpesaId) {
+                Yii::warning("Pagamento #{$this->id}: nessuna voce di spesa trovata, impossibile creare MovimentoSpesa", __METHOD__);
+                return;
+            }
+
+            // Componi la descrizione
+            $nomeDocente = $docente ? $docente->getNomeCompleto() : 'N/D';
+            $nomeModulo = $modulo ? $modulo->titolo : 'N/D';
+            $descrizione = "Pagamento docente {$nomeDocente} - {$nomeModulo}";
+
+            // Crea il movimento
+            $movimento = new MovimentoSpesa();
+            $movimento->progetto_id = $progettoId;
+            $movimento->voce_spesa_id = $voceSpesaId;
+            $movimento->descrizione = $descrizione;
+            $movimento->importo = (float) $this->importo_lordo;
+            $movimento->data_movimento = $this->data_pagamento ?: date('Y-m-d');
+            $movimento->tipo = MovimentoSpesa::TIPO_SPESA;
+            $movimento->riferimento_tipo = MovimentoSpesa::RIFERIMENTO_PAGAMENTO;
+            $movimento->riferimento_id = $this->id;
+            $movimento->fornitore = $nomeDocente;
+
+            if (!$movimento->save()) {
+                Yii::error("Pagamento #{$this->id}: errore creazione MovimentoSpesa: " . implode(', ', $movimento->getFirstErrors()), __METHOD__);
+            } else {
+                Yii::info("MovimentoSpesa #{$movimento->id} creato automaticamente per pagamento #{$this->id}", __METHOD__);
+            }
+        } catch (\Throwable $e) {
+            Yii::error("Pagamento #{$this->id}: eccezione durante creazione MovimentoSpesa: " . $e->getMessage(), __METHOD__);
+        }
+    }
+
+    /**
+     * Trova la voce di spesa appropriata in base al tipo di pagamento.
+     * - Rimborso: cerca codice "B2.13" o simile
+     * - Docenza: cerca codice "B2.1"
+     * @return int|null ID della voce di spesa trovata
+     */
+    protected function trovaVoceSpesa()
+    {
+        if ($this->tipo === self::TIPO_RIMBORSO) {
+            // Cerca voce rimborsi (B2.13 o simile)
+            $voce = VoceSpesa::find()
+                ->where(['like', 'codice', 'B2.13'])
+                ->one();
+            if ($voce) {
+                return $voce->id;
+            }
+        }
+
+        // Cerca voce Docenza (B2.1 esatto, poi B2.1%)
+        $voce = VoceSpesa::find()
+            ->where(['codice' => 'B2.1'])
+            ->one();
+        if ($voce) {
+            return $voce->id;
+        }
+
+        // Cerca voce con codice che inizia con "B2.1"
+        $voce = VoceSpesa::find()
+            ->where(['like', 'codice', 'B2.1%', false])
+            ->one();
+        if ($voce) {
+            return $voce->id;
+        }
+
+        // Fallback: prima voce disponibile
+        $voce = VoceSpesa::find()
+            ->orderBy(['id' => SORT_ASC])
+            ->one();
+
+        return $voce ? $voce->id : null;
     }
 
     public static function getTipoLabels()

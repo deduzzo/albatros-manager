@@ -266,4 +266,53 @@ class RichiestaFatturazione extends BaseActiveRecord
     {
         return !empty($this->documento_ricevuto_path);
     }
+
+    /**
+     * Invia notifica email al docente quando il cedolino/fattura e' stato caricato.
+     * Non blocca il flusso in caso di errore.
+     * @return bool true se l'email e' stata inviata con successo
+     */
+    public function notificaDocumentoCaricato()
+    {
+        try {
+            $contratto = $this->contratto;
+            if (!$contratto) {
+                Yii::warning("RichiestaFatturazione #{$this->id}: contratto non trovato, notifica non inviata", __METHOD__);
+                return false;
+            }
+
+            $assegnazione = $contratto->assegnazione;
+            $docente = $assegnazione ? $assegnazione->docente : null;
+            if (!$docente || empty($docente->email)) {
+                Yii::warning("RichiestaFatturazione #{$this->id}: docente o email non trovata, notifica non inviata", __METHOD__);
+                return false;
+            }
+
+            $modulo = $assegnazione->modulo;
+            $fondazione = Configurazione::get('nome_fondazione') ?: 'Fondazione Albatros';
+            $tipoDoc = $this->tipo === self::TIPO_FATTURA ? 'fattura' : 'cedolino';
+
+            $oggetto = ucfirst($tipoDoc) . " disponibile - {$fondazione}";
+
+            $sent = Yii::$app->mailer->compose('notifica-documento-html', [
+                    'model' => $this,
+                    'docente' => $docente,
+                    'modulo' => $modulo,
+                    'fondazione' => $fondazione,
+                    'tipoDocumento' => $tipoDoc,
+                ])
+                ->setTo($docente->email)
+                ->setSubject($oggetto)
+                ->send();
+
+            if ($sent) {
+                Yii::info("Notifica documento caricato inviata al docente {$docente->email} per richiesta #{$this->id}", __METHOD__);
+            }
+
+            return (bool) $sent;
+        } catch (\Throwable $e) {
+            Yii::error("RichiestaFatturazione #{$this->id}: errore invio notifica documento: " . $e->getMessage(), __METHOD__);
+            return false;
+        }
+    }
 }

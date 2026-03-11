@@ -128,6 +128,24 @@ $currentAction = Yii::$app->controller->action->id;
                                 <span class="nav-link-title">Le Mie Ore</span>
                             </a>
                         </li>
+                        <li class="nav-item <?= in_array($currentAction, ['contratti', 'contratto-download']) ? 'active' : '' ?>">
+                            <a class="nav-link" href="<?= Url::to(['/docente-area/contratti']) ?>">
+                                <span class="nav-link-icon"><i class="ti ti-file-certificate"></i></span>
+                                <span class="nav-link-title">I Miei Contratti</span>
+                            </a>
+                        </li>
+                        <li class="nav-item <?= $currentAction == 'documenti' ? 'active' : '' ?>">
+                            <a class="nav-link" href="<?= Url::to(['/docente-area/documenti']) ?>">
+                                <span class="nav-link-icon"><i class="ti ti-file-invoice"></i></span>
+                                <span class="nav-link-title">Documenti</span>
+                            </a>
+                        </li>
+                        <li class="nav-item <?= in_array($currentAction, ['rimborsi', 'nuovo-rimborso', 'modifica-rimborso']) ? 'active' : '' ?>">
+                            <a class="nav-link" href="<?= Url::to(['/docente-area/rimborsi']) ?>">
+                                <span class="nav-link-icon"><i class="ti ti-receipt-refund"></i></span>
+                                <span class="nav-link-title">Rimborsi Spese</span>
+                            </a>
+                        </li>
                         <li class="nav-item <?= $currentAction == 'profilo' ? 'active' : '' ?>">
                             <a class="nav-link" href="<?= Url::to(['/docente-area/profilo']) ?>">
                                 <span class="nav-link-icon"><i class="ti ti-user"></i></span>

@@ -28,9 +28,9 @@ use app\models\MovimentoSpesa;
         <div class="row">
             <div class="col-md-4">
                 <?= $form->field($model, 'progetto_id')->dropDownList($progetti, [
-                    'prompt' => 'Seleziona un progetto...',
+                    'prompt' => '-- Nessun progetto (spesa generica) --',
                     'class' => 'form-select',
-                ])->label('Progetto <span class="text-red">*</span>') ?>
+                ])->label('Progetto') ?>
             </div>
             <div class="col-md-4">
                 <?= $form->field($model, 'voce_spesa_id')->dropDownList($vociSpesa, [

@@ -48,8 +48,9 @@ class MovimentoSpesa extends BaseActiveRecord
     public function rules()
     {
         return [
-            [['progetto_id', 'voce_spesa_id', 'descrizione', 'importo', 'data_movimento'], 'required'],
+            [['voce_spesa_id', 'descrizione', 'importo', 'data_movimento'], 'required'],
             [['progetto_id', 'voce_spesa_id', 'riferimento_id'], 'integer'],
+            [['progetto_id'], 'default', 'value' => null],
             [['importo'], 'number'],
             [['data_movimento', 'data_documento'], 'date', 'format' => 'php:Y-m-d'],
             [['descrizione'], 'string', 'max' => 500],

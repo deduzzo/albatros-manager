@@ -140,14 +140,14 @@ $this->params['breadcrumbs'][] = $model->codice;
                             <h3 class="card-title"><i class="ti ti-chart-bar me-2"></i>Statistiche</h3>
                         </div>
                         <div class="card-body">
-                            <div class="d-flex mb-2">
+                            <a href="<?= \yii\helpers\Url::to(['/istanza/index', 'IstanzaSearch[modulo_id]' => $model->id]) ?>" class="d-flex mb-2 text-decoration-none">
                                 <span class="me-auto">Candidature ricevute</span>
                                 <span class="badge bg-blue text-blue-fg"><?= $model->getIstanzeCount() ?></span>
-                            </div>
-                            <div class="d-flex mb-2">
+                            </a>
+                            <a href="<?= \yii\helpers\Url::to(['/assegnazione/index', 'AssegnazioneSearch[modulo_id]' => $model->id]) ?>" class="d-flex mb-2 text-decoration-none">
                                 <span class="me-auto">Assegnazioni</span>
                                 <span class="badge bg-green text-green-fg"><?= count($model->assegnazioni) ?></span>
-                            </div>
+                            </a>
                         </div>
                     </div>
 

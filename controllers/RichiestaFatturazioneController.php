@@ -251,6 +251,9 @@ class RichiestaFatturazioneController extends Controller
                     $model->status = RichiestaFatturazione::STATUS_RICEVUTA;
                     $model->save(false);
 
+                    // Notifica al docente che il documento e' disponibile
+                    $model->notificaDocumentoCaricato();
+
                     Yii::$app->session->setFlash('success', 'Documento ricevuto e caricato con successo.');
                     return $this->redirect(['view', 'id' => $model->id]);
                 } else {
@@ -343,11 +346,13 @@ class RichiestaFatturazioneController extends Controller
      */
     protected function getContrattiList()
     {
+        $contratti = Contratto::find()
+            ->with(['assegnazione.docente'])
+            ->orderBy(['id' => SORT_DESC])
+            ->all();
+
         return ArrayHelper::map(
-            Contratto::find()
-                ->joinWith(['assegnazione.docente'])
-                ->orderBy('contratto.id DESC')
-                ->all(),
+            $contratti,
             'id',
             function ($model) {
                 $docente = $model->assegnazione && $model->assegnazione->docente

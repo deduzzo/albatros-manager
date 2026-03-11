@@ -202,12 +202,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             'headerOptions' => ['style' => 'width: 110px;'],
                         ],
                         [
-                            'attribute' => 'valutazione_media',
                             'label' => 'Valutazione',
                             'format' => 'raw',
                             'content' => function($model) {
-                                $media = $model->valutazione_media;
-                                if ($media === null) {
+                                $media = $model->getMediaValutazioni();
+                                if ($media === null || $media == 0) {
                                     return '<span class="text-muted">-</span>';
                                 }
                                 $media = (float) $media;
@@ -224,22 +223,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                 return $html;
                             },
                             'headerOptions' => ['style' => 'width: 170px;'],
-                            'filter' => [1 => '1+', 2 => '2+', 3 => '3+', 4 => '4+', 5 => '5'],
-                        ],
-                        [
-                            'attribute' => 'num_contratti',
-                            'label' => 'Contratti',
-                            'format' => 'raw',
-                            'content' => function($model) {
-                                $count = (int) $model->num_contratti;
-                                if ($count === 0) {
-                                    return '<span class="text-muted">-</span>';
-                                }
-                                $badgeClass = $count >= 5 ? 'bg-green text-green-fg' : ($count >= 2 ? 'bg-azure text-azure-fg' : 'bg-default text-default-fg');
-                                return '<span class="badge ' . $badgeClass . '">' . $count . '</span>';
-                            },
-                            'headerOptions' => ['style' => 'width: 100px;'],
-                            'contentOptions' => ['class' => 'text-center'],
                         ],
                         ['class' => 'yii\grid\ActionColumn'],
                     ],

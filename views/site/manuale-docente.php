@@ -205,6 +205,9 @@ $this->title = 'Manuale Docente';
             <a class="nav-link" href="#inserire-ore"><i class="ti ti-clock"></i> Inserire le Ore</a>
             <a class="nav-link" href="#le-mie-ore"><i class="ti ti-clock-check"></i> Le Tue Ore</a>
             <a class="nav-link" href="#pagamenti"><i class="ti ti-currency-euro"></i> Pagamenti</a>
+            <a class="nav-link" href="#rimborsi-docente"><i class="ti ti-receipt-refund"></i> Rimborsi Spese</a>
+            <a class="nav-link" href="#contratti-docente"><i class="ti ti-file-text"></i> I Miei Contratti</a>
+            <a class="nav-link" href="#documenti-docente"><i class="ti ti-file-invoice"></i> Documenti</a>
         </div>
         <div class="sidebar-heading mt-4">Altri manuali</div>
         <div class="nav flex-column">
@@ -576,10 +579,132 @@ $this->title = 'Manuale Docente';
             <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
         </section>
 
+        <!-- 11. RIMBORSI SPESE -->
+        <section id="rimborsi-docente">
+            <div class="section-card">
+                <div class="section-card-header bg-green-lt">
+                    <i class="ti ti-receipt-refund"></i> 11. Rimborsi Spese
+                </div>
+                <div class="section-card-body">
+                    <p>Se hai sostenuto spese relative alla tua attivita formativa (viaggi, materiali, ecc.), puoi richiedere un rimborso direttamente dall'area docenti.</p>
+
+                    <h3>Come richiedere un rimborso</h3>
+                    <ol>
+                        <li>Vai su <strong>"Rimborsi Spese"</strong> nel menu di navigazione</li>
+                        <li>Clicca <strong>"Nuova Richiesta"</strong></li>
+                        <li>Compila il modulo con i dati della spesa:</li>
+                    </ol>
+                    <table class="table campo-table">
+                        <thead><tr><th>Campo</th><th>Descrizione</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Tipo di spesa</strong></td><td>Seleziona la categoria: Viaggio, Vitto e alloggio, Materiale didattico, Altro</td></tr>
+                            <tr><td><strong>Importo</strong></td><td>L'importo totale della spesa sostenuta</td></tr>
+                            <tr><td><strong>Data</strong></td><td>La data in cui hai sostenuto la spesa</td></tr>
+                            <tr><td><strong>Descrizione</strong></td><td>Descrivi brevemente la spesa (es: "Biglietto treno Roma-Napoli A/R per lezione del 15/03")</td></tr>
+                            <tr><td><strong>Allegato</strong></td><td>Carica la ricevuta, lo scontrino o la fattura (PDF, JPG, PNG)</td></tr>
+                        </tbody>
+                    </table>
+                    <ol start="4">
+                        <li>Clicca <strong>"Invia Richiesta"</strong></li>
+                    </ol>
+
+                    <h3>Stato della richiesta</h3>
+                    <p>Dopo l'invio, puoi monitorare lo stato dalla lista "Rimborsi Spese":</p>
+                    <table class="table campo-table">
+                        <thead><tr><th>Stato</th><th>Significato</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="badge bg-orange text-orange-fg">Richiesto</span></td><td>La richiesta e stata inviata e l'amministrazione la sta valutando</td></tr>
+                            <tr><td><span class="badge bg-green text-green-fg">Approvato</span></td><td>Il rimborso e stato approvato e sara liquidato</td></tr>
+                            <tr><td><span class="badge bg-red text-red-fg">Rifiutato</span></td><td>Il rimborso e stato rifiutato. Leggi il motivo nella scheda di dettaglio</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert-manuale bg-orange-lt">
+                        <i class="ti ti-alert-triangle text-orange"></i>
+                        <div><strong>Importante</strong>: Allega sempre un giustificativo di spesa (ricevuta, scontrino, fattura). Le richieste senza documentazione a supporto potrebbero essere rifiutate.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 12. I MIEI CONTRATTI -->
+        <section id="contratti-docente">
+            <div class="section-card">
+                <div class="section-card-header bg-azure-lt">
+                    <i class="ti ti-file-text"></i> 12. I Miei Contratti
+                </div>
+                <div class="section-card-body">
+                    <p>La sezione "I Miei Contratti" ti consente di consultare e scaricare i contratti relativi alle tue assegnazioni.</p>
+
+                    <h3>Accesso</h3>
+                    <p>Clicca su <strong>"I Miei Contratti"</strong> nel menu di navigazione oppure accedi dal dettaglio di un'assegnazione.</p>
+
+                    <h3>Informazioni disponibili</h3>
+                    <p>Per ogni contratto attivo puoi visualizzare:</p>
+                    <ul>
+                        <li>Progetto e modulo di riferimento</li>
+                        <li>Date di inizio e fine lezioni</li>
+                        <li>Ore contrattualizzate</li>
+                        <li>Compenso orario e totale</li>
+                        <li>Stato del contratto</li>
+                    </ul>
+
+                    <h3>Scaricare il contratto</h3>
+                    <p>Se l'amministrazione ha generato il contratto PDF, puoi scaricarlo cliccando il pulsante <strong><i class="ti ti-download"></i> Scarica PDF</strong> presente nel dettaglio del contratto.</p>
+
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Nota</strong>: Se il contratto richiede la tua firma, scarica il PDF, firmalo (digitalmente o a mano) e restituiscilo alla segreteria secondo le indicazioni ricevute via email.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 13. DOCUMENTI -->
+        <section id="documenti-docente">
+            <div class="section-card">
+                <div class="section-card-header bg-green-lt">
+                    <i class="ti ti-file-invoice"></i> 13. Documenti
+                </div>
+                <div class="section-card-body">
+                    <p>La sezione "Documenti" raccoglie tutti i documenti relativi ai tuoi incarichi: cedolini paga, fatture e altri documenti amministrativi.</p>
+
+                    <h3>Accesso</h3>
+                    <p>Clicca su <strong>"Documenti"</strong> nel menu di navigazione.</p>
+
+                    <h3>Tipologie di documenti</h3>
+                    <table class="table campo-table">
+                        <thead><tr><th>Tipo</th><th>Descrizione</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Cedolino paga</strong></td><td>Il cedolino elaborato dal consulente del lavoro per i compensi CoCoCo</td></tr>
+                            <tr><td><strong>Fattura</strong></td><td>La fattura emessa per i compensi con P.IVA, una volta caricata dall'amministrazione</td></tr>
+                            <tr><td><strong>Contratto</strong></td><td>La copia del contratto firmato</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Scaricare un documento</h3>
+                    <p>Per scaricare un documento:</p>
+                    <ol>
+                        <li>Individua il documento nell'elenco</li>
+                        <li>Clicca il pulsante <strong><i class="ti ti-download"></i> Scarica</strong></li>
+                        <li>Il file PDF si scarichera sul tuo dispositivo</li>
+                    </ol>
+
+                    <div class="alert-manuale bg-green-lt">
+                        <i class="ti ti-check text-green"></i>
+                        <div><strong>Suggerimento</strong>: I documenti vengono aggiunti automaticamente man mano che l'amministrazione li elabora. Se attendi un cedolino o una risposta a una fattura, controlla periodicamente questa sezione.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
         <!-- Footer -->
         <div class="text-center text-secondary py-4" style="border-top: 1px solid var(--tblr-border-color); margin-top: 2rem;">
             <p class="mb-1">Albatros Manager - Manuale Docente</p>
-            <p class="mb-0 small">Versione 1.0 - Febbraio 2026</p>
+            <p class="mb-0 small">Versione 1.1 - Marzo 2026</p>
         </div>
     </div>
 </div>

@@ -22,6 +22,7 @@ use app\models\IstanzaSnapshot;
 use app\models\TagCurriculum;
 use app\models\DocenteTag;
 use app\models\RimborsoSpesa;
+use app\models\RichiestaFatturazione;
 use app\models\forms\DocenteLoginForm;
 use app\models\forms\DocenteRegistrazioneForm;
 use app\models\forms\IscrizioneForm;
@@ -71,7 +72,7 @@ class DocenteAreaController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida', 'rimborsi', 'nuovo-rimborso', 'modifica-rimborso'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida', 'rimborsi', 'nuovo-rimborso', 'modifica-rimborso', 'contratti', 'contratto-download', 'documenti'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -709,6 +710,101 @@ class DocenteAreaController extends Controller
             'model' => $model,
             'assegnazione' => $assegnazione,
             'isModifica' => true,
+        ]);
+    }
+
+    // =========================================================================
+    // Contratti
+    // =========================================================================
+
+    /**
+     * Lista contratti del docente loggato
+     */
+    public function actionContratti()
+    {
+        $docente = $this->getDocenteLoggato();
+
+        $contratti = Contratto::find()
+            ->alias('c')
+            ->innerJoin('assegnazione a', 'a.id = c.assegnazione_id AND a.deleted_at IS NULL')
+            ->where(['a.docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['c.deleted_at' => null])
+            ->with(['assegnazione.modulo.avviso'])
+            ->orderBy(['c.data_stipula' => SORT_DESC])
+            ->all();
+
+        return $this->render('contratti', [
+            'contratti' => $contratti,
+            'docente' => $docente,
+        ]);
+    }
+
+    /**
+     * Download PDF del contratto (solo se appartiene al docente loggato)
+     * @param int $id
+     */
+    public function actionContrattoDownload($id)
+    {
+        $docente = $this->getDocenteLoggato();
+
+        $contratto = Contratto::find()
+            ->alias('c')
+            ->innerJoin('assegnazione a', 'a.id = c.assegnazione_id AND a.deleted_at IS NULL')
+            ->where(['c.id' => $id])
+            ->andWhere(['a.docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['c.deleted_at' => null])
+            ->one();
+
+        if (!$contratto) {
+            throw new NotFoundHttpException('Contratto non trovato.');
+        }
+
+        // Controlla quale documento scaricare (priorità: firmato > generato)
+        $tipo = Yii::$app->request->get('tipo', 'generato');
+        $filePath = null;
+        $fileName = 'contratto';
+
+        if ($tipo === 'firmato' && !empty($contratto->documento_path)) {
+            $filePath = Yii::getAlias('@webroot/' . $contratto->documento_path);
+            $fileName = 'contratto_firmato_' . $contratto->id;
+        } elseif (!empty($contratto->documento_generato_path)) {
+            $filePath = Yii::getAlias('@webroot/' . $contratto->documento_generato_path);
+            $fileName = 'contratto_' . $contratto->id;
+        }
+
+        if (!$filePath || !file_exists($filePath)) {
+            throw new NotFoundHttpException('Documento non disponibile.');
+        }
+
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+
+        return Yii::$app->response->sendFile($filePath, $fileName . '.' . $ext);
+    }
+
+    // =========================================================================
+    // Documenti (Fatture/Cedolini)
+    // =========================================================================
+
+    /**
+     * Lista documenti (richieste fatturazione/cedolini) del docente loggato
+     */
+    public function actionDocumenti()
+    {
+        $docente = $this->getDocenteLoggato();
+
+        $richieste = RichiestaFatturazione::find()
+            ->alias('rf')
+            ->innerJoin('contratto c', 'c.id = rf.contratto_id AND c.deleted_at IS NULL')
+            ->innerJoin('assegnazione a', 'a.id = c.assegnazione_id AND a.deleted_at IS NULL')
+            ->where(['a.docente_codice_fiscale' => $docente->codice_fiscale])
+            ->andWhere(['rf.deleted_at' => null])
+            ->with(['contratto.assegnazione.modulo'])
+            ->orderBy(['rf.data_richiesta' => SORT_DESC])
+            ->all();
+
+        return $this->render('documenti', [
+            'richieste' => $richieste,
+            'docente' => $docente,
         ]);
     }
 
