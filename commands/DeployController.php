@@ -65,14 +65,14 @@ class DeployController extends Controller
         $this->stdout("\n=== Deploy Status ===\n\n", Console::BOLD);
 
         $localCommit = $this->getLocalCommit();
-        $localBranch = trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
+        $localBranch = $this->exec('git rev-parse --abbrev-ref HEAD');
         $this->stdout("Branch locale: ", Console::BOLD);
         $this->stdout("$localBranch\n");
         $this->stdout("Commit locale: ", Console::BOLD);
         $this->stdout(substr($localCommit, 0, 8) . "\n");
 
         // Ultimo tag locale
-        $lastTag = trim(shell_exec('git describe --tags --abbrev=0 2>/dev/null') ?: '');
+        $lastTag = $this->exec('git describe --tags --abbrev=0 2>/dev/null');
         if ($lastTag) {
             $this->stdout("Ultimo tag:    ", Console::BOLD);
             $this->stdout("$lastTag\n");
@@ -152,13 +152,13 @@ class DeployController extends Controller
         }
 
         $commit = $this->getLocalCommit();
-        $lastTag = trim(shell_exec('git describe --tags --abbrev=0 2>/dev/null') ?: '');
+        $lastTag = $this->exec('git describe --tags --abbrev=0 2>/dev/null');
 
         $versionData = [
             'commit' => $commit,
             'tag' => $lastTag,
             'date' => date('Y-m-d H:i:s'),
-            'branch' => trim(shell_exec('git rev-parse --abbrev-ref HEAD')),
+            'branch' => $this->exec('git rev-parse --abbrev-ref HEAD'),
         ];
 
         if ($this->dryRun) {
@@ -187,14 +187,14 @@ class DeployController extends Controller
         $this->stdout("\n=== Deploy Update ===\n\n", Console::BOLD);
 
         // 1. Verifica che siamo su main
-        $branch = trim(shell_exec('git rev-parse --abbrev-ref HEAD'));
+        $branch = $this->exec('git rev-parse --abbrev-ref HEAD');
         if ($branch !== 'main') {
             $this->stderr("Errore: devi essere sul branch 'main' (sei su '$branch').\n", Console::FG_RED);
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
         // 2. Verifica working directory pulita
-        $status = trim(shell_exec('git status --porcelain'));
+        $status = $this->exec('git status --porcelain');
         if (!empty($status)) {
             $this->stderr("Errore: ci sono modifiche non committate.\n", Console::FG_RED);
             $this->stderr($status . "\n");
@@ -426,7 +426,7 @@ class DeployController extends Controller
             'commit' => $localCommit,
             'tag' => $tag ?: '',
             'date' => date('Y-m-d H:i:s'),
-            'branch' => trim(shell_exec('git rev-parse --abbrev-ref HEAD')),
+            'branch' => $this->exec('git rev-parse --abbrev-ref HEAD'),
         ];
         $this->writeRemoteVersion($ftp, $versionData);
         $this->writeLocalVersion($versionData);
@@ -525,11 +525,19 @@ class DeployController extends Controller
     }
 
     /**
+     * Esegue un comando shell e restituisce l'output trimmato (safe per PHP 8.4).
+     */
+    private function exec(string $cmd): string
+    {
+        return trim(shell_exec($cmd) ?? '');
+    }
+
+    /**
      * Restituisce il commit SHA corrente.
      */
     private function getLocalCommit(): string
     {
-        return trim(shell_exec('git rev-parse HEAD'));
+        return $this->exec('git rev-parse HEAD');
     }
 
     /**
@@ -615,7 +623,7 @@ class DeployController extends Controller
             escapeshellarg($fromCommit),
             escapeshellarg($toCommit)
         );
-        $output = trim(shell_exec($cmd));
+        $output = $this->exec($cmd);
         if (empty($output)) {
             return [];
         }
