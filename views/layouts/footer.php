@@ -10,6 +10,9 @@ $versionTitle = !empty($version['date']) ? 'Deploy: ' . $version['date'] : '';
                 <ul class="list-inline list-inline-dots mb-0">
                     <li class="list-inline-item"><a href="#" class="link-secondary">Documentazione</a></li>
                     <li class="list-inline-item"><a href="#" class="link-secondary">FAQ</a></li>
+                    <li class="list-inline-item">
+                        Sviluppato da <a href="mailto:albatros+info@robertodedomenico.it" class="link-secondary">Ing. Roberto De Domenico</a>
+                    </li>
                 </ul>
             </div>
             <div class="col-12 col-lg-auto mt-3 mt-lg-0">
