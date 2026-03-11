@@ -83,10 +83,10 @@ use yii\helpers\Url;
                     </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <a href="#" class="dropdown-item">
+                    <a href="<?= \yii\helpers\Url::to(['/site/profilo']) ?>" class="dropdown-item">
                         <i class="ti ti-user me-2"></i> Profilo
                     </a>
-                    <a href="#" class="dropdown-item">
+                    <a href="<?= \yii\helpers\Url::to(['/site/impostazioni']) ?>" class="dropdown-item">
                         <i class="ti ti-settings me-2"></i> Impostazioni
                     </a>
                     <div class="dropdown-divider"></div>

@@ -301,6 +301,44 @@ class SiteController extends Controller
     }
 
     /**
+     * Pagina profilo utente.
+     */
+    public function actionProfilo()
+    {
+        $user = Yii::$app->user->identity;
+        $model = new \app\models\forms\ProfiloForm($user);
+
+        if ($model->load(Yii::$app->request->post()) && $model->salva()) {
+            Yii::$app->session->setFlash('success', 'Profilo aggiornato con successo.');
+            return $this->redirect(['profilo']);
+        }
+
+        return $this->render('profilo', [
+            'model' => $model,
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * Pagina impostazioni (cambio password).
+     */
+    public function actionImpostazioni()
+    {
+        $user = Yii::$app->user->identity;
+        $model = new \app\models\forms\CambioPasswordForm($user);
+
+        if ($model->load(Yii::$app->request->post()) && $model->salva()) {
+            Yii::$app->session->setFlash('success', 'Password modificata con successo.');
+            return $this->redirect(['impostazioni']);
+        }
+
+        return $this->render('impostazioni', [
+            'model' => $model,
+            'user' => $user,
+        ]);
+    }
+
+    /**
      * Displays contact page.
      *
      * @return Response|string
