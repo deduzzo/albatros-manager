@@ -66,3 +66,7 @@ logs/security/
 
 # Production server credentials
 PRODUCTION_SERVER.md
+
+# FTP deploy config
+/config/ftp.php
+/config/version.php

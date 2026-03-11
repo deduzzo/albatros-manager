@@ -1,3 +1,8 @@
+<?php
+$version = \app\commands\DeployController::getVersion();
+$versionLabel = !empty($version['tag']) ? $version['tag'] : ('dev@' . substr($version['commit'], 0, 7));
+$versionTitle = !empty($version['date']) ? 'Deploy: ' . $version['date'] : '';
+?>
 <footer class="footer footer-transparent d-print-none">
     <div class="container-xl">
         <div class="row text-center align-items-center flex-row-reverse">
@@ -15,9 +20,9 @@
                         Tutti i diritti riservati.
                     </li>
                     <li class="list-inline-item">
-                        <a href="#" class="link-secondary" rel="noopener">
-                            v1.0.0
-                        </a>
+                        <span class="link-secondary" title="<?= $versionTitle ?>">
+                            <?= $versionLabel ?>
+                        </span>
                     </li>
                 </ul>
             </div>

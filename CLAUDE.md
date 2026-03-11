@@ -85,6 +85,13 @@ Dati: nome_fondazione, indirizzo, telefono, email, pec, partita_iva, codice_fisc
 Admin revoca assegnazione (con motivazione) → `StoricoEsito::ESITO_RINUNCIA` → se idonei disponibili → pagina subentro → scelta idoneo per punteggio → nuova assegnazione + `ESITO_SUBENTRO`.
 Model: `Modulo::getIstanzeIdonee()`, `getProssimoIdoneo()`, `getGraduatoria()`. Viste: `views/assegnazione/subentro.php`, `views/istanza/graduatoria.php`.
 
+## Server di Produzione
+
+Credenziali e configurazione in `PRODUCTION_SERVER.md` (nel `.gitignore`, NON committare).
+- **Dominio**: albatros.robertodedomenico.it
+- **DB**: MariaDB su server.robertodedomenico.it (utente: albatros)
+- **FTP**: server.robertodedomenico.it:21 (utente: albatros)
+
 ## Ambiente Docker
 
 ```bash
