@@ -165,7 +165,7 @@ class DeployController extends Controller
             $this->stdout("[DRY-RUN] Scriverei .deploy-version con commit " . substr($commit, 0, 8) . "\n", Console::FG_CYAN);
         } else {
             $this->writeRemoteVersion($ftp, $versionData);
-            $this->writeLocalVersion($versionData);
+            $this->writeLocalVersion($versionData, $ftp);
             $this->stdout("✓ Versione inizializzata: " . substr($commit, 0, 8), Console::FG_GREEN);
             if ($lastTag) {
                 $this->stdout(" ($lastTag)");
@@ -257,10 +257,10 @@ class DeployController extends Controller
         }
         $this->stdout("\n");
 
-        // 5. Tag e release GitHub
+        // 5. Auto-incremento versione
         $tag = $this->tag;
         if (empty($tag)) {
-            $tag = $this->prompt('Tag versione (es. v1.0.1, invio per saltare)');
+            $tag = $this->autoIncrementVersion($remoteVersion['tag'] ?? '');
         }
 
         if ($this->dryRun) {
@@ -336,7 +336,7 @@ class DeployController extends Controller
                 'branch' => $branch,
             ];
             $this->writeRemoteVersion($ftp, $versionData);
-            $this->writeLocalVersion($versionData);
+            $this->writeLocalVersion($versionData, $ftp);
 
             $this->stdout("\n✓ Deploy completato con successo!\n", Console::FG_GREEN, Console::BOLD);
             $this->stdout("  Commit: " . substr($localCommit, 0, 8));
@@ -371,16 +371,17 @@ class DeployController extends Controller
         }
 
         // Prendi tutti i file tracciati
-        $output = shell_exec('git ls-files');
-        $allFiles = array_filter(explode("\n", trim($output)));
+        $output = $this->exec('git ls-files');
+        $allFiles = array_filter(explode("\n", $output));
         $allFiles = $this->filterExclusions($allFiles);
 
         $this->stdout("File da uploadare: " . count($allFiles) . "\n\n");
 
-        // Tag
+        // Auto-incremento versione
+        $remoteVersion = $this->getRemoteVersion($ftp);
         $tag = $this->tag;
         if (empty($tag)) {
-            $tag = $this->prompt('Tag versione (es. v1.0.0, invio per saltare)');
+            $tag = $this->autoIncrementVersion($remoteVersion['tag'] ?? '');
         }
 
         if ($this->dryRun) {
@@ -429,7 +430,7 @@ class DeployController extends Controller
             'branch' => $this->exec('git rev-parse --abbrev-ref HEAD'),
         ];
         $this->writeRemoteVersion($ftp, $versionData);
-        $this->writeLocalVersion($versionData);
+        $this->writeLocalVersion($versionData, $ftp);
 
         ftp_close($ftp);
 
@@ -517,11 +518,69 @@ class DeployController extends Controller
     /**
      * Scrive il file versione locale per il footer.
      */
-    private function writeLocalVersion(array $data): void
+    /**
+     * Scrive il file versione locale e lo uploada via FTP.
+     */
+    private function writeLocalVersion(array $data, $ftp = null): void
     {
         $file = \Yii::getAlias('@app') . '/' . self::LOCAL_VERSION_FILE;
         $content = "<?php\n\n// File generato automaticamente dal deploy. Non modificare.\nreturn " . var_export($data, true) . ";\n";
         file_put_contents($file, $content);
+
+        // Upload anche su FTP per il footer in produzione
+        if ($ftp) {
+            $config = $this->getFtpConfig();
+            $remotePath = rtrim($config['remotePath'], '/');
+            @ftp_put($ftp, $remotePath . '/' . self::LOCAL_VERSION_FILE, $file, FTP_ASCII);
+        }
+    }
+
+    /**
+     * Auto-incrementa la versione semver, chiedendo il tipo di bump.
+     */
+    private function autoIncrementVersion(string $currentTag): string
+    {
+        // Parse versione corrente
+        $current = ltrim($currentTag, 'v');
+        if (!preg_match('/^(\d+)\.(\d+)\.(\d+)$/', $current, $m)) {
+            $current = '0.0.0';
+            $m = [0, 0, 0, 0];
+        }
+
+        $major = (int)$m[1];
+        $minor = (int)$m[2];
+        $patch = (int)$m[3];
+
+        // Calcola le 3 opzioni
+        $patchVersion = "$major.$minor." . ($patch + 1);
+        $minorVersion = "$major." . ($minor + 1) . ".0";
+        $majorVersion = ($major + 1) . ".0.0";
+
+        $this->stdout("Versione corrente: ", Console::BOLD);
+        $this->stdout("$currentTag\n\n");
+        $this->stdout("Tipo di incremento:\n");
+        $this->stdout("  [1] Patch  → v$patchVersion  (bugfix, piccole modifiche)\n");
+        $this->stdout("  [2] Minor  → v$minorVersion  (nuove funzionalita)\n");
+        $this->stdout("  [3] Major  → v$majorVersion  (breaking changes)\n");
+        $this->stdout("  [4] Custom → inserisci manualmente\n");
+        $this->stdout("  [0] Salta  → nessuna release GitHub\n\n");
+
+        $choice = $this->prompt('Scelta', ['default' => '1']);
+
+        switch ($choice) {
+            case '1':
+                return "v$patchVersion";
+            case '2':
+                return "v$minorVersion";
+            case '3':
+                return "v$majorVersion";
+            case '4':
+                return $this->prompt('Inserisci tag versione (es. v2.0.0-beta)');
+            case '0':
+                return '';
+            default:
+                return "v$patchVersion";
+        }
     }
 
     /**
