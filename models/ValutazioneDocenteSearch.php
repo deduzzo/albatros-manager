@@ -20,11 +20,21 @@ class ValutazioneDocenteSearch extends ValutazioneDocente
      */
     public $modulo_titolo;
 
+    /**
+     * @var string ricerca per nome studente
+     */
+    public $studente_nome;
+
+    /**
+     * @var string filtro per sorgente tipo
+     */
+    public $sorgente_tipo;
+
     public function rules()
     {
         return [
             [['id', 'modulo_id', 'punteggio_chiarezza', 'punteggio_competenza', 'punteggio_disponibilita', 'punteggio_materiali', 'punteggio_globale'], 'integer'],
-            [['docente_codice_fiscale', 'commento', 'data_valutazione', 'docente_nome', 'modulo_titolo'], 'safe'],
+            [['docente_codice_fiscale', 'commento', 'data_valutazione', 'docente_nome', 'modulo_titolo', 'studente_nome', 'sorgente_tipo'], 'safe'],
         ];
     }
 
@@ -56,6 +66,12 @@ class ValutazioneDocenteSearch extends ValutazioneDocente
                     'punteggio_globale',
                     'data_valutazione',
                     'created_at',
+                    'sorgente_tipo',
+                    'studente_nome' => [
+                        'asc' => ['v.studente_nome' => SORT_ASC],
+                        'desc' => ['v.studente_nome' => SORT_DESC],
+                        'label' => 'Studente',
+                    ],
                     'docente_nome' => [
                         'asc' => ['d.cognome' => SORT_ASC, 'd.nome' => SORT_ASC],
                         'desc' => ['d.cognome' => SORT_DESC, 'd.nome' => SORT_DESC],
@@ -108,6 +124,16 @@ class ValutazioneDocenteSearch extends ValutazioneDocente
         // Filtro per titolo modulo
         if (!empty($this->modulo_titolo)) {
             $query->andFilterWhere(['like', 'm.titolo', $this->modulo_titolo]);
+        }
+
+        // Filtro per nome studente
+        if (!empty($this->studente_nome)) {
+            $query->andFilterWhere(['like', 'v.studente_nome', $this->studente_nome]);
+        }
+
+        // Filtro per sorgente tipo
+        if (!empty($this->sorgente_tipo)) {
+            $query->andFilterWhere(['v.sorgente_tipo' => $this->sorgente_tipo]);
         }
 
         return $dataProvider;

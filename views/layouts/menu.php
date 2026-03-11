@@ -119,7 +119,7 @@ $isActive = function($controllers) use ($currentController) {
                     </li>
 
                     <!-- Gestione -->
-                    <li class="nav-item dropdown <?= $isActive(['istanza', 'assegnazione', 'contratto', 'calendario', 'presenza-allievo', 'iscrizione', 'valutazione-docente', 'rendicontazione-ore']) ?>">
+                    <li class="nav-item dropdown <?= $isActive(['istanza', 'assegnazione', 'contratto', 'calendario', 'presenza-allievo', 'iscrizione', 'valutazione-docente', 'criterio-valutazione-docente', 'rendicontazione-ore']) ?>">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-clipboard"></i>
@@ -159,6 +159,9 @@ $isActive = function($controllers) use ($currentController) {
                             </a>
                             <a class="dropdown-item <?= $currentController == 'valutazione-docente' ? 'active' : '' ?>" href="<?= Url::to(['/valutazione-docente/index']) ?>">
                                 <i class="ti ti-star me-2"></i> Valutazioni Docenti
+                            </a>
+                            <a class="dropdown-item <?= $currentController == 'criterio-valutazione-docente' ? 'active' : '' ?>" href="<?= Url::to(['/criterio-valutazione-docente/index']) ?>">
+                                <i class="ti ti-star-half-filled me-2"></i> Criteri Valutazione Docente
                             </a>
                         </div>
                     </li>

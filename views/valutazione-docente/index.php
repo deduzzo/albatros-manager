@@ -14,7 +14,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     <h2 class="page-title"><i class="ti ti-star me-2"></i><?= Html::encode($this->title) ?></h2>
                     <div class="text-muted mt-1">Valutazioni anonime dei docenti</div>
                 </div>
-                <div class="col-auto ms-auto">
+                <div class="col-auto ms-auto d-print-none">
+                    <?= Html::a('<i class="ti ti-star-half-filled me-1"></i> Gestisci Criteri', ['/criterio-valutazione-docente/index'], ['class' => 'btn btn-secondary me-2']) ?>
+                    <?= Html::a('<i class="ti ti-upload me-1"></i> Importa CSV', ['import'], ['class' => 'btn btn-warning me-2']) ?>
                     <?= Html::a('<i class="ti ti-plus me-1"></i> Nuova Valutazione', ['create'], ['class' => 'btn btn-success']) ?>
                 </div>
             </div>
@@ -32,9 +34,16 @@ $this->params['breadcrumbs'][] = $this->title;
                             'attribute' => 'docente_nome',
                             'label' => 'Docente',
                             'format' => 'raw',
-                            'content' => fn($model) => $model->docente
-                                ? Html::a(Html::encode($model->docente->cognome . ' ' . $model->docente->nome), ['/docente/view', 'id' => $model->docente_codice_fiscale])
-                                : '<span class="text-muted">-</span>',
+                            'content' => function($model) {
+                                if ($model->docente) {
+                                    return Html::a(Html::encode($model->docente->cognome . ' ' . $model->docente->nome), ['/docente/view', 'id' => $model->docente_codice_fiscale]);
+                                }
+                                if ($model->docente_nome) {
+                                    return '<span class="text-muted">' . Html::encode($model->docente_nome) . '</span>'
+                                        . ' <span class="badge bg-orange-lt" title="Docente non collegato"><i class="ti ti-unlink"></i></span>';
+                                }
+                                return '<span class="text-muted">-</span>';
+                            },
                         ],
                         [
                             'attribute' => 'modulo_titolo',
@@ -45,24 +54,43 @@ $this->params['breadcrumbs'][] = $this->title;
                                 : '<span class="text-muted">-</span>',
                         ],
                         [
-                            'attribute' => 'punteggio_globale',
+                            'label' => 'Media',
                             'format' => 'raw',
                             'headerOptions' => ['style' => 'width: 160px;'],
-                            'content' => fn($model) => ValutazioneDocente::getStarsHtml($model->punteggio_globale),
+                            'content' => function($model) {
+                                $media = $model->getMediaPunteggi();
+                                if ($media !== null) {
+                                    return ValutazioneDocente::getProgressBarHtml(round($media));
+                                }
+                                // Fallback al punteggio_globale vecchio
+                                if ($model->punteggio_globale) {
+                                    return ValutazioneDocente::getStarsHtml($model->punteggio_globale);
+                                }
+                                return '<span class="text-muted">-</span>';
+                            },
                         ],
                         [
-                            'attribute' => 'punteggio_chiarezza',
-                            'label' => 'Chiarezza',
+                            'attribute' => 'sorgente_tipo',
+                            'label' => 'Sorgente',
                             'format' => 'raw',
-                            'headerOptions' => ['style' => 'width: 50px;'],
-                            'content' => fn($model) => $model->punteggio_chiarezza ?: '-',
+                            'headerOptions' => ['style' => 'width: 130px;'],
+                            'filter' => [
+                                'manuale' => 'Manuale',
+                                'codice_monouso' => 'Codice Monouso',
+                                'import_csv' => 'Import CSV',
+                            ],
+                            'content' => fn($model) => $model->getSorgenteTipoBadge(),
                         ],
                         [
-                            'attribute' => 'punteggio_competenza',
-                            'label' => 'Compet.',
+                            'attribute' => 'studente_nome',
+                            'label' => 'Studente',
+                            'headerOptions' => ['style' => 'width: 150px;'],
+                            'content' => function($model) {
+                                return $model->studente_nome
+                                    ? Html::encode($model->studente_nome)
+                                    : '<span class="text-muted">-</span>';
+                            },
                             'format' => 'raw',
-                            'headerOptions' => ['style' => 'width: 50px;'],
-                            'content' => fn($model) => $model->punteggio_competenza ?: '-',
                         ],
                         [
                             'attribute' => 'data_valutazione',
