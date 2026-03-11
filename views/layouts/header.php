@@ -78,7 +78,7 @@ use yii\helpers\Url;
                 <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Account">
                     <span class="avatar avatar-sm bg-blue-lt"><?= strtoupper(substr(Yii::$app->user->identity->username, 0, 1)) ?></span>
                     <div class="d-none d-xl-block ps-2">
-                        <div><?= Html::encode(ucfirst(Yii::$app->user->identity->username)) ?></div>
+                        <div><?= Html::encode(Yii::$app->user->identity->nominativo ?: ucfirst(Yii::$app->user->identity->username)) ?></div>
                         <div class="mt-1 small text-secondary"><?= Html::encode(Yii::$app->user->identity->getRuoloLabel()) ?></div>
                     </div>
                 </a>

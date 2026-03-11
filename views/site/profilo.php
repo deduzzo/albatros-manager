@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <?= strtoupper(substr($user->username, 0, 2)) ?>
                                 </span>
                             </div>
-                            <h3 class="mb-1"><?= Html::encode(ucfirst($user->username)) ?></h3>
+                            <h3 class="mb-1"><?= Html::encode($user->nominativo ?: ucfirst($user->username)) ?></h3>
                             <p class="text-secondary mb-3"><?= Html::encode($user->getRuoloLabel()) ?></p>
                             <div class="text-start">
                                 <div class="d-flex mb-2">
@@ -72,10 +72,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     <div class="card-body">
                         <div class="row">
+                            <div class="col-md-12">
+                                <?= $form->field($model, 'nominativo')->textInput([
+                                    'maxlength' => true,
+                                    'autofocus' => true,
+                                    'placeholder' => 'Es: Mario Rossi',
+                                ])->label('Nome e Cognome') ?>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6">
                                 <?= $form->field($model, 'username')->textInput([
                                     'maxlength' => true,
-                                    'autofocus' => true,
                                 ]) ?>
                             </div>
                             <div class="col-md-6">

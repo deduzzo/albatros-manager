@@ -12,6 +12,7 @@ use app\models\User;
 class ProfiloForm extends Model
 {
     public $username;
+    public $nominativo;
     public $email;
 
     private $_user;
@@ -20,6 +21,7 @@ class ProfiloForm extends Model
     {
         $this->_user = $user;
         $this->username = $user->username;
+        $this->nominativo = $user->nominativo;
         $this->email = $user->email;
         parent::__construct($config);
     }
@@ -29,6 +31,7 @@ class ProfiloForm extends Model
         return [
             [['username', 'email'], 'required'],
             [['username'], 'string', 'max' => 50],
+            [['nominativo'], 'string', 'max' => 255],
             [['email'], 'email'],
             [['email'], 'string', 'max' => 100],
             [['username'], 'unique', 'targetClass' => User::class, 'filter' => ['!=', 'id', $this->_user->id],
@@ -42,6 +45,7 @@ class ProfiloForm extends Model
     {
         return [
             'username' => 'Username',
+            'nominativo' => 'Nome e Cognome',
             'email' => 'Email',
         ];
     }
@@ -53,6 +57,7 @@ class ProfiloForm extends Model
         }
 
         $this->_user->username = $this->username;
+        $this->_user->nominativo = $this->nominativo;
         $this->_user->email = $this->email;
 
         return $this->_user->save(false);

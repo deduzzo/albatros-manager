@@ -13,6 +13,7 @@ use yii\db\Expression;
  *
  * @property int $id
  * @property string $username
+ * @property string|null $nominativo
  * @property string $password_hash
  * @property string $email
  * @property string $ruolo
@@ -74,6 +75,7 @@ class User extends ActiveRecord implements IdentityInterface
             [['username', 'email'], 'unique'],
             ['email', 'email'],
             [['username'], 'string', 'max' => 50],
+            [['nominativo'], 'string', 'max' => 255],
             [['email'], 'string', 'max' => 100],
         ];
     }
@@ -86,6 +88,7 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             'id' => 'ID',
             'username' => 'Username',
+            'nominativo' => 'Nominativo',
             'password_hash' => 'Password',
             'email' => 'Email',
             'ruolo' => 'Ruolo',
