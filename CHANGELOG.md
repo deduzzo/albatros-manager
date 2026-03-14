@@ -4,15 +4,11 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
-## [v1.0.19] - 2026-03-14
-## [v1.0.18] - 2026-03-14
-## [v1.0.17] - 2026-03-14
-## [v1.0.16] - 2026-03-14
-## [v1.0.16] - 2026-03-14
-## [v1.0.15] - 2026-03-14
-## [v1.0.14] - 2026-03-14
-## [v1.0.13] - 2026-03-14
-## [v1.0.12] - 2026-03-14
+### Novità {admin}
+- Assegnazione docente d'ufficio dalla scheda modulo con ricerca nell'Albo Docenti
+- Storico docenti precedenti visibile nella scheda modulo (revoche e sostituzioni)
+- Pulsante "Revoca / Sostituisci" per docenti assegnati
+
 ### Novità {tutti}
 - Sistema notifiche in-app con campanella e badge nell'header
 - Pagina dedicata notifiche con stato letto/non letto
@@ -21,8 +17,8 @@ Tutte le modifiche al portale Albatros Manager.
 - Invio notifiche con editor HTML (Summernote) a singoli utenti, categorie o tutti
 - Invio email opzionale con le notifiche
 - Pannello gestione notifiche con dettaglio letture
+- Deploy automatico: composer install + migration via production.php (ephemeral)
 
-## [v1.0.11] - 2026-03-14
 ## [v1.0.10] - 2026-03-14
 
 ### Novità {tutti}
