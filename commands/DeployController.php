@@ -510,7 +510,7 @@ class DeployController extends Controller
         $config = $this->getFtpConfig();
         $url = $config['productionUrl'] ?? 'https://albatros.robertodedomenico.it/production.php';
         $httpAuth = null;
-        if (!empty($config['httpUser'])) {
+        if (($config['httpAuth'] ?? false) && !empty($config['httpUser'])) {
             $httpAuth = $config['httpUser'] . ':' . ($config['httpPassword'] ?? '');
         }
         $maxAttempts = 10;
