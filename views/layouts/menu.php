@@ -27,7 +27,7 @@ $isActive = function($controllers) use ($currentController) {
                     </li>
 
                     <!-- Configurazione -->
-                    <li class="nav-item dropdown <?= $isActive(['fonte-finanziamento', 'conto-corrente', 'sede', 'tipo-documento', 'configurazione', 'criterio-valutazione']) ?>">
+                    <li class="nav-item dropdown <?= $isActive(['fonte-finanziamento', 'conto-corrente', 'sede', 'tipo-documento', 'configurazione', 'criterio-valutazione', 'utente']) ?>">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-settings"></i>
@@ -54,6 +54,12 @@ $isActive = function($controllers) use ($currentController) {
                             <a class="dropdown-item <?= $currentController == 'criterio-valutazione' ? 'active' : '' ?>" href="<?= Url::to(['/criterio-valutazione/index']) ?>">
                                 <i class="ti ti-star me-2"></i> Criteri Valutazione
                             </a>
+                            <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->isAdmin()): ?>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item <?= $currentController == 'utente' ? 'active' : '' ?>" href="<?= Url::to(['/utente/index']) ?>">
+                                    <i class="ti ti-users-cog me-2"></i> Gestione Utenti
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </li>
 

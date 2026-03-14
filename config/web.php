@@ -82,6 +82,9 @@ $config = [
                 // Dashboard
                 '' => 'site/index',
 
+                // Gestione Utenti
+                'gestione-utenti' => 'utente/index',
+
                 // Area Docenti (priorità alta)
                 'area-docenti' => 'docente-area/index',
                 'area-docenti/login' => 'docente-area/login',
