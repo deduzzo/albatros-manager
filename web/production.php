@@ -76,16 +76,16 @@ if ($currentHash === $installedHash && is_dir($vendorDir . '/yiisoft')) {
         echo '<div class="info">PHP_BINARY: ' . htmlspecialchars($phpFpm) . '</div>';
         $allDone = false;
     } else {
-        // Cerca composer
-        if (file_exists($composerPhar)) {
-            $composerCmd = escapeshellarg($phpBinary) . ' ' . escapeshellarg($composerPhar);
-        } else {
-            $composerPaths = ['/usr/local/bin/composer', '/usr/bin/composer'];
-            foreach ($composerPaths as $path) {
-                if (file_exists($path)) {
-                    $composerCmd = escapeshellarg($phpBinary) . ' ' . escapeshellarg($path);
-                    break;
-                }
+        // Cerca composer.phar (non lo shell wrapper di Plesk)
+        $composerPharPaths = [
+            $composerPhar,                                      // progetto/composer.phar
+            '/opt/psa/var/modules/composer/composer.phar',      // Plesk
+            '/usr/local/share/composer/composer.phar',
+        ];
+        foreach ($composerPharPaths as $path) {
+            if (file_exists($path)) {
+                $composerCmd = escapeshellarg($phpBinary) . ' ' . escapeshellarg($path);
+                break;
             }
         }
     }
