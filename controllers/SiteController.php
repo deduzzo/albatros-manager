@@ -22,11 +22,13 @@ use app\models\forms\DocenteLoginForm;
 use app\models\forms\AllievoLoginForm;
 use app\components\traits\TwoFactorActionsTrait;
 use app\components\traits\ChangelogActionsTrait;
+use app\components\traits\NotificheActionsTrait;
 
 class SiteController extends Controller
 {
     use TwoFactorActionsTrait;
     use ChangelogActionsTrait;
+    use NotificheActionsTrait;
     /**
      * {@inheritdoc}
      */
@@ -492,6 +494,20 @@ class SiteController extends Controller
     protected function getChangelogIdentity()
     {
         return Yii::$app->user->identity;
+    }
+
+    // =========================================================================
+    // Metodi helper per NotificheActionsTrait
+    // =========================================================================
+
+    protected function getNotificheUserType(): string
+    {
+        return 'admin';
+    }
+
+    protected function getNotificheUserId(): string
+    {
+        return (string) Yii::$app->user->identity->id;
     }
 
     /**

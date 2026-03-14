@@ -17,6 +17,7 @@ use app\models\forms\AllievoLoginForm;
 use app\models\forms\AllievoRegistrazioneForm;
 use app\components\traits\TwoFactorActionsTrait;
 use app\components\traits\ChangelogActionsTrait;
+use app\components\traits\NotificheActionsTrait;
 
 /**
  * Controller per l'area studenti autenticata.
@@ -25,6 +26,7 @@ class StudenteAreaController extends Controller
 {
     use TwoFactorActionsTrait;
     use ChangelogActionsTrait;
+    use NotificheActionsTrait;
     public $layout = 'studente';
 
     /**
@@ -64,7 +66,7 @@ class StudenteAreaController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'candidatura', 'le-mie-candidature', 'candidatura-view', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password', 'changelog', 'changelog-modal', 'segna-changelog-letto'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'candidatura', 'le-mie-candidature', 'candidatura-view', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password', 'changelog', 'changelog-modal', 'segna-changelog-letto', 'notifiche', 'notifica-view', 'segna-letta', 'segna-tutte-lette'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -447,6 +449,20 @@ class StudenteAreaController extends Controller
     protected function getChangelogIdentity()
     {
         return Yii::$app->studenteUser->identity;
+    }
+
+    // =========================================================================
+    // Metodi helper per NotificheActionsTrait
+    // =========================================================================
+
+    protected function getNotificheUserType(): string
+    {
+        return 'studente';
+    }
+
+    protected function getNotificheUserId(): string
+    {
+        return Yii::$app->studenteUser->identity->allievo_codice_fiscale;
     }
 
     // =========================================================================

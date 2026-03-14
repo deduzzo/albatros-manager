@@ -28,6 +28,7 @@ use app\models\forms\DocenteRegistrazioneForm;
 use app\models\forms\IscrizioneForm;
 use app\components\traits\TwoFactorActionsTrait;
 use app\components\traits\ChangelogActionsTrait;
+use app\components\traits\NotificheActionsTrait;
 use yii\web\UploadedFile;
 
 /**
@@ -37,6 +38,7 @@ class DocenteAreaController extends Controller
 {
     use TwoFactorActionsTrait;
     use ChangelogActionsTrait;
+    use NotificheActionsTrait;
     public $layout = 'docente';
 
     /**
@@ -76,7 +78,7 @@ class DocenteAreaController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida', 'rimborsi', 'nuovo-rimborso', 'modifica-rimborso', 'contratti', 'contratto-download', 'documenti', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password', 'changelog', 'changelog-modal', 'segna-changelog-letto'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida', 'rimborsi', 'nuovo-rimborso', 'modifica-rimborso', 'contratti', 'contratto-download', 'documenti', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password', 'changelog', 'changelog-modal', 'segna-changelog-letto', 'notifiche', 'notifica-view', 'segna-letta', 'segna-tutte-lette'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -869,6 +871,20 @@ class DocenteAreaController extends Controller
     protected function getChangelogIdentity()
     {
         return Yii::$app->docenteUser->identity;
+    }
+
+    // =========================================================================
+    // Metodi helper per NotificheActionsTrait
+    // =========================================================================
+
+    protected function getNotificheUserType(): string
+    {
+        return 'docente';
+    }
+
+    protected function getNotificheUserId(): string
+    {
+        return Yii::$app->docenteUser->identity->docente_codice_fiscale;
     }
 
     // =========================================================================
