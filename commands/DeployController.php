@@ -41,6 +41,7 @@ class DeployController extends Controller
         'tests/',
         '.gitignore',
         '.git/',
+        'web/production.php',
     ];
 
     public function options($actionID)
@@ -359,8 +360,8 @@ class DeployController extends Controller
             $this->stdout("\n  File aggiornati: " . count($toUpload) . "\n");
             $this->stdout("  File eliminati: " . count($toDelete) . "\n\n");
 
-            // 10. Esegui migration remote
-            $this->runRemoteMigrations();
+            // 10. Upload production.php, esegui, poi cancella
+            $this->runProductionScript($ftp, $remotePath);
         } else {
             $this->stderr("\n⚠ Deploy completato con $errors errori. Versione NON aggiornata.\n", Console::FG_RED);
         }
@@ -448,14 +449,13 @@ class DeployController extends Controller
         $this->writeRemoteVersion($ftp, $versionData);
         $this->writeLocalVersion($versionData, $ftp);
 
-        ftp_close($ftp);
-
         $this->stdout("\n✓ Deploy full completato. $errors errori.\n\n", $errors ? Console::FG_YELLOW : Console::FG_GREEN);
 
         if ($errors === 0) {
-            $this->runRemoteMigrations();
+            $this->runProductionScript($ftp, $remotePath);
         }
 
+        ftp_close($ftp);
         return $errors === 0 ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
     }
 
@@ -501,11 +501,10 @@ class DeployController extends Controller
     }
 
     /**
-     * Chiama production.php sul server remoto ripetutamente finché non risponde "Tutto aggiornato".
-     * Esegue composer install + migration in un'unica chiamata.
-     * Max 10 tentativi (il primo fa composer + migration, i successivi verificano).
+     * Upload production.php → esegui → verifica → cancella dal server.
+     * Il file esiste sul server solo per i secondi necessari all'esecuzione.
      */
-    private function runRemoteMigrations(): void
+    private function runProductionScript($ftp, string $remotePath): void
     {
         $config = $this->getFtpConfig();
         $url = $config['productionUrl'] ?? 'https://albatros.robertodedomenico.it/production.php';
@@ -513,14 +512,26 @@ class DeployController extends Controller
         if (($config['httpAuth'] ?? false) && !empty($config['httpUser'])) {
             $httpAuth = $config['httpUser'] . ':' . ($config['httpPassword'] ?? '');
         }
-        $maxAttempts = 10;
 
-        $this->stdout("Esecuzione post-deploy remoto (composer + migration)...\n", Console::BOLD);
+        $localFile = \Yii::getAlias('@app/web/production.php');
+        $remoteFile = $remotePath . '/web/production.php';
+        $maxAttempts = 10;
+        $success = false;
+
+        // 1. Upload production.php
+        $this->stdout("\nPost-deploy: upload production.php...\n", Console::BOLD);
+        if (!@ftp_put($ftp, $remoteFile, $localFile, FTP_BINARY)) {
+            $this->stderr("  ✗ Upload production.php fallito.\n", Console::FG_RED);
+            return;
+        }
+        $this->stdout("  ✓ production.php uploadato\n", Console::FG_GREEN);
+
+        // 2. Esegui ripetutamente finché non è tutto OK
+        $this->stdout("  Esecuzione composer + migration...\n");
 
         for ($i = 1; $i <= $maxAttempts; $i++) {
-            $this->stdout("  [$i/$maxAttempts] Chiamata production.php ... ");
+            $this->stdout("  [$i/$maxAttempts] ");
 
-            // Usa curl per compatibilità SSL + basic auth
             $response = $this->httpGet($url, 120, $httpAuth);
 
             if ($response === false) {
@@ -531,16 +542,11 @@ class DeployController extends Controller
 
             $text = strip_tags($response);
 
-            // Tutto completato: composer ok + migration ok
-            if (str_contains($text, 'Tutto aggiornato') && str_contains($text, 'Composer e database sono allineati')) {
+            // Tutto completato
+            if (str_contains($text, 'Tutto aggiornato')) {
                 $this->stdout("✓ Composer + migration OK!\n", Console::FG_GREEN);
-                return;
-            }
-
-            // Tutto aggiornato ma senza la frase specifica (migration ok, composer era già ok)
-            if (str_contains($text, 'Tutto aggiornato') && str_contains($text, 'Nessuna migration in attesa')) {
-                $this->stdout("✓ Tutto aggiornato!\n", Console::FG_GREEN);
-                return;
+                $success = true;
+                break;
             }
 
             // Composer o migration eseguiti, potrebbe servire un altro giro
@@ -550,19 +556,32 @@ class DeployController extends Controller
                 continue;
             }
 
-            // Errore
-            if (str_contains($text, 'Errore') || str_contains($text, 'Completato con avvisi')) {
-                $this->stderr("⚠ Problema riscontrato. Verifica https://albatros.robertodedomenico.it/production.php\n", Console::FG_RED);
-                return;
+            // Errore ma non fatale — riprova
+            if (str_contains($text, 'Completato con avvisi')) {
+                $this->stdout("completato con avvisi, riprovo...\n", Console::FG_YELLOW);
+                sleep(2);
+                continue;
             }
 
             // Risposta inattesa
             $preview = mb_substr($text, 0, 150);
-            $this->stdout("risposta: $preview\n", Console::FG_YELLOW);
+            $this->stdout("$preview\n", Console::FG_YELLOW);
             sleep(2);
         }
 
-        $this->stderr("  ⚠ Raggiunto il limite di $maxAttempts tentativi. Verifica manualmente.\n", Console::FG_RED);
+        if (!$success) {
+            $this->stderr("  ⚠ Non tutto è andato a buon fine. Verifica manualmente.\n", Console::FG_RED);
+            $this->stderr("  ⚠ production.php NON cancellato dal server per debug.\n", Console::FG_YELLOW);
+            return;
+        }
+
+        // 3. Cancella production.php dal server (solo se tutto OK)
+        $this->stdout("  Rimozione production.php dal server... ");
+        if (@ftp_delete($ftp, $remoteFile)) {
+            $this->stdout("✓ rimosso\n", Console::FG_GREEN);
+        } else {
+            $this->stderr("✗ impossibile rimuovere — cancella manualmente!\n", Console::FG_RED);
+        }
     }
 
     /**
