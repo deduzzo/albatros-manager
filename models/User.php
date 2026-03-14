@@ -3,10 +3,8 @@
 namespace app\models;
 
 use Yii;
-use yii\db\ActiveRecord;
+use app\components\base\BaseActiveRecord;
 use yii\web\IdentityInterface;
-use yii\behaviors\TimestampBehavior;
-use yii\db\Expression;
 
 /**
  * Model per la tabella "utente".
@@ -18,6 +16,11 @@ use yii\db\Expression;
  * @property string $email
  * @property string $ruolo
  * @property int $status
+ * @property int $force_password_change
+ * @property string|null $totp_secret
+ * @property int $totp_enabled
+ * @property string|null $totp_enabled_at
+ * @property string|null $last_changelog_seen
  * @property string|null $auth_key
  * @property string|null $password_reset_token
  * @property string|null $created_at
@@ -27,7 +30,7 @@ use yii\db\Expression;
  * @property int|null $updated_by
  * @property int|null $deleted_by
  */
-class User extends ActiveRecord implements IdentityInterface
+class User extends BaseActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;
     const STATUS_INACTIVE = 9;
@@ -49,21 +52,6 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function behaviors()
-    {
-        return [
-            [
-                'class' => TimestampBehavior::class,
-                'createdAtAttribute' => 'created_at',
-                'updatedAtAttribute' => 'updated_at',
-                'value' => new Expression('NOW()'),
-            ],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function rules()
     {
         return [
@@ -77,6 +65,9 @@ class User extends ActiveRecord implements IdentityInterface
             [['username'], 'string', 'max' => 50],
             [['nominativo'], 'string', 'max' => 255],
             [['email'], 'string', 'max' => 100],
+            ['force_password_change', 'integer'],
+            ['totp_enabled', 'integer'],
+            [['totp_secret', 'totp_enabled_at', 'last_changelog_seen'], 'safe'],
         ];
     }
 
@@ -93,9 +84,22 @@ class User extends ActiveRecord implements IdentityInterface
             'email' => 'Email',
             'ruolo' => 'Ruolo',
             'status' => 'Stato',
+            'force_password_change' => 'Forza Cambio Password',
+            'totp_enabled' => '2FA Attivo',
+            'totp_enabled_at' => '2FA Attivato il',
+            'last_changelog_seen' => 'Ultimo Changelog Visto',
             'created_at' => 'Creato il',
             'updated_at' => 'Modificato il',
         ];
+    }
+
+    /**
+     * Attributi sensibili da mascherare nel audit log
+     * @return array
+     */
+    protected function auditMaskedAttributes()
+    {
+        return ['password_hash', 'auth_key', 'password_reset_token', 'totp_secret'];
     }
 
     /**
@@ -241,6 +245,19 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
+     * Reimposta la password con opzione di forzare il cambio al prossimo login.
+     *
+     * @param string $newPassword
+     * @param bool $forceChange
+     */
+    public function resetPassword(string $newPassword, bool $forceChange = true): void
+    {
+        $this->setPassword($newPassword);
+        $this->force_password_change = $forceChange ? 1 : 0;
+        $this->removePasswordResetToken();
+    }
+
+    /**
      * Verifica se l'utente è admin.
      *
      * @return bool
@@ -248,6 +265,58 @@ class User extends ActiveRecord implements IdentityInterface
     public function isAdmin()
     {
         return $this->ruolo === self::RUOLO_ADMIN;
+    }
+
+    /**
+     * Restituisce l'etichetta dello stato.
+     *
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return match ($this->status) {
+            self::STATUS_ACTIVE => 'Attivo',
+            self::STATUS_INACTIVE => 'Disabilitato',
+            self::STATUS_DELETED => 'Eliminato',
+            default => 'Sconosciuto',
+        };
+    }
+
+    /**
+     * Restituisce la classe CSS del badge per lo stato.
+     *
+     * @return string
+     */
+    public function getStatusBadgeClass(): string
+    {
+        return match ($this->status) {
+            self::STATUS_ACTIVE => 'badge bg-green text-green-fg',
+            self::STATUS_INACTIVE => 'badge bg-orange text-orange-fg',
+            self::STATUS_DELETED => 'badge bg-red text-red-fg',
+            default => 'badge bg-default',
+        };
+    }
+
+    /**
+     * Verifica se l'utente può essere eliminato dall'admin specificato.
+     *
+     * @param User $admin
+     * @return bool
+     */
+    public function canBeDeletedBy(User $admin): bool
+    {
+        return $this->id !== $admin->id;
+    }
+
+    /**
+     * Verifica se il ruolo può essere cambiato dall'admin specificato.
+     *
+     * @param User $admin
+     * @return bool
+     */
+    public function canChangeRoleBy(User $admin): bool
+    {
+        return $this->id !== $admin->id;
     }
 
     /**
