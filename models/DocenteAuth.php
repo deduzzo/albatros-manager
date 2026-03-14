@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\web\IdentityInterface;
 use app\components\base\BaseActiveRecord;
+use app\components\traits\TotpTrait;
 
 /**
  * Model per la tabella docente_auth.
@@ -27,6 +28,8 @@ use app\components\base\BaseActiveRecord;
  */
 class DocenteAuth extends BaseActiveRecord implements IdentityInterface
 {
+    use TotpTrait;
+
     const STATUS_PENDING = 'pending_verification';
     const STATUS_ACTIVE = 'active';
     const STATUS_SUSPENDED = 'suspended';
@@ -48,6 +51,9 @@ class DocenteAuth extends BaseActiveRecord implements IdentityInterface
             [['email_verified_at', 'last_login_at', 'created_at', 'updated_at', 'deleted_at'], 'safe'],
             [['docente_codice_fiscale'], 'unique'],
             [['created_by', 'updated_by', 'deleted_by'], 'integer'],
+            ['force_password_change', 'integer'],
+            ['totp_enabled', 'integer'],
+            [['totp_secret', 'totp_enabled_at', 'last_changelog_seen'], 'safe'],
         ];
     }
 
@@ -277,6 +283,16 @@ class DocenteAuth extends BaseActiveRecord implements IdentityInterface
      */
     protected function auditMaskedAttributes()
     {
-        return ['password_hash', 'auth_key', 'email_verify_token', 'password_reset_token'];
+        return ['password_hash', 'auth_key', 'email_verify_token', 'password_reset_token', 'totp_secret'];
+    }
+
+    /**
+     * Reimposta la password con opzione di forzare il cambio al prossimo login.
+     */
+    public function resetPassword(string $newPassword, bool $forceChange = true): void
+    {
+        $this->setPassword($newPassword);
+        $this->force_password_change = $forceChange ? 1 : 0;
+        $this->removePasswordResetToken();
     }
 }

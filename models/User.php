@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use app\components\base\BaseActiveRecord;
+use app\components\traits\TotpTrait;
 use yii\web\IdentityInterface;
 
 /**
@@ -32,6 +33,8 @@ use yii\web\IdentityInterface;
  */
 class User extends BaseActiveRecord implements IdentityInterface
 {
+    use TotpTrait;
+
     const STATUS_DELETED = 0;
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 1;
