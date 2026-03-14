@@ -493,44 +493,61 @@ class DeployController extends Controller
     }
 
     /**
-     * Chiama migrate.php sul server remoto ripetutamente finché non risponde "Tutto aggiornato".
-     * Max 20 tentativi (una migration per chiamata).
+     * Chiama production.php sul server remoto ripetutamente finché non risponde "Tutto aggiornato".
+     * Esegue composer install + migration in un'unica chiamata.
+     * Max 10 tentativi (il primo fa composer + migration, i successivi verificano).
      */
     private function runRemoteMigrations(): void
     {
-        $url = 'https://albatros.robertodedomenico.it/migrate.php';
-        $maxAttempts = 20;
+        $url = 'https://albatros.robertodedomenico.it/production.php';
+        $maxAttempts = 10;
 
-        $this->stdout("Esecuzione migration remote...\n", Console::BOLD);
+        $this->stdout("Esecuzione post-deploy remoto (composer + migration)...\n", Console::BOLD);
 
         for ($i = 1; $i <= $maxAttempts; $i++) {
-            $this->stdout("  [$i/$maxAttempts] Chiamata $url ... ");
+            $this->stdout("  [$i/$maxAttempts] Chiamata production.php ... ");
 
-            $response = @file_get_contents($url);
+            // Timeout più lungo per composer install
+            $ctx = stream_context_create(['http' => ['timeout' => 120]]);
+            $response = @file_get_contents($url, false, $ctx);
 
             if ($response === false) {
                 $this->stdout("ERRORE connessione\n", Console::FG_RED);
-                sleep(2);
+                sleep(3);
                 continue;
             }
 
-            // Cerca il testo che indica completamento
-            if (str_contains($response, 'Tutto aggiornato') || str_contains($response, 'Nessuna migration in attesa')) {
+            $text = strip_tags($response);
+
+            // Tutto completato: composer ok + migration ok
+            if (str_contains($text, 'Tutto aggiornato') && str_contains($text, 'Composer e database sono allineati')) {
+                $this->stdout("✓ Composer + migration OK!\n", Console::FG_GREEN);
+                return;
+            }
+
+            // Tutto aggiornato ma senza la frase specifica (migration ok, composer era già ok)
+            if (str_contains($text, 'Tutto aggiornato') && str_contains($text, 'Nessuna migration in attesa')) {
                 $this->stdout("✓ Tutto aggiornato!\n", Console::FG_GREEN);
                 return;
             }
 
-            // Migration eseguita, ne potrebbero esserci altre
-            if (str_contains($response, 'applicata') || str_contains($response, 'Migration')) {
-                $this->stdout("migration eseguita, verifico se ce ne sono altre...\n", Console::FG_YELLOW);
-                sleep(1);
+            // Composer o migration eseguiti, potrebbe servire un altro giro
+            if (str_contains($text, 'completato') || str_contains($text, 'applicata')) {
+                $this->stdout("operazione eseguita, verifico...\n", Console::FG_YELLOW);
+                sleep(2);
                 continue;
             }
 
+            // Errore
+            if (str_contains($text, 'Errore') || str_contains($text, 'Completato con avvisi')) {
+                $this->stderr("⚠ Problema riscontrato. Verifica https://albatros.robertodedomenico.it/production.php\n", Console::FG_RED);
+                return;
+            }
+
             // Risposta inattesa
-            $preview = mb_substr(strip_tags($response), 0, 100);
+            $preview = mb_substr($text, 0, 150);
             $this->stdout("risposta: $preview\n", Console::FG_YELLOW);
-            sleep(1);
+            sleep(2);
         }
 
         $this->stderr("  ⚠ Raggiunto il limite di $maxAttempts tentativi. Verifica manualmente.\n", Console::FG_RED);
