@@ -13,6 +13,7 @@ use app\models\Docente;
 /* @var $totaleTutor int */
 /* @var $conAssegnazioniAttive int */
 /* @var $progetti app\models\Progetto[] */
+/* @var $preselectedModulo app\models\Modulo|null */
 
 $this->title = 'Albo Docenti';
 $this->params['breadcrumbs'][] = ['label' => 'Docenti', 'url' => ['index']];
@@ -20,6 +21,20 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="docente-albo">
+    <?php if (isset($preselectedModulo) && $preselectedModulo): ?>
+    <div class="container-xl mt-3">
+        <div class="alert alert-info d-flex align-items-center">
+            <i class="ti ti-info-circle me-2" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong>Assegnazione d'ufficio</strong> — Cerca un docente da assegnare al modulo
+                <span class="badge bg-blue text-blue-fg ms-1"><?= Html::encode($preselectedModulo->codice) ?></span>
+                <span class="text-muted ms-1"><?= Html::encode($preselectedModulo->titolo) ?></span>
+                <br><small>Clicca il pulsante <i class="ti ti-link"></i> sul docente scelto per assegnarlo.</small>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="page-header d-print-none">
         <div class="container-xl">
             <div class="row align-items-center">

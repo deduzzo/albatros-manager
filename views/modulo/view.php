@@ -103,8 +103,18 @@ $this->params['breadcrumbs'][] = $model->codice;
                             <h3 class="card-title"><i class="ti ti-user-check me-2"></i>Docente Assegnato</h3>
                         </div>
                         <?php
-                            $assegnazione = $model->getAssegnazioni()->one();
+                            // Assegnazione attiva (non revocata)
+                            $assegnazione = $model->getAssegnazioni()
+                                ->andWhere(['!=', 'status', \app\models\Assegnazione::STATUS_REVOCATO])
+                                ->one();
                             $docenteAssegnato = $assegnazione ? $assegnazione->docente : null;
+
+                            // Storico completo (tutte le assegnazioni, incluse revocate)
+                            $tutteAssegnazioni = $model->getAssegnazioni()
+                                ->with(['docente'])
+                                ->orderBy(['data_assegnazione' => SORT_DESC])
+                                ->all();
+                            $assegnazioniRevocate = array_filter($tutteAssegnazioni, fn($a) => $a->status === \app\models\Assegnazione::STATUS_REVOCATO);
                         ?>
                         <?php if ($docenteAssegnato): ?>
                         <div class="card-body">
@@ -119,20 +129,78 @@ $this->params['breadcrumbs'][] = $model->codice;
                                 <span class="me-auto">Provenienza</span>
                                 <span class="badge bg-cyan-lt"><?= $docenteAssegnato->provenienza === 'RU' ? 'Ricercatore Univ.' : 'Professionista' ?></span>
                             </div>
+                            <div class="d-flex mb-1">
+                                <span class="me-auto">Data assegnazione</span>
+                                <span><?= Yii::$app->formatter->asDate($assegnazione->data_assegnazione) ?></span>
+                            </div>
+                            <div class="d-flex mb-1">
+                                <span class="me-auto">Stato</span>
+                                <span class="badge <?= $assegnazione->getStatusBadgeClass() ?>"><?= $assegnazione->getStatusLabel() ?></span>
+                            </div>
                             <?php if ($assegnazione->contratto): ?>
                             <div class="d-flex mb-1">
                                 <span class="me-auto">Contratto</span>
                                 <?= Html::a('<span class="badge bg-green-lt">' . Html::encode($assegnazione->contratto->numero_contratto ?: 'Visualizza') . '</span>', ['/contratto/view', 'id' => $assegnazione->contratto->id]) ?>
                             </div>
                             <?php endif; ?>
+                            <div class="mt-3 d-flex gap-2">
+                                <?= Html::a('<i class="ti ti-eye me-1"></i> Dettaglio', ['/assegnazione/view', 'id' => $assegnazione->id], ['class' => 'btn btn-sm btn-outline-blue']) ?>
+                                <?= Html::a('<i class="ti ti-user-minus me-1"></i> Revoca / Sostituisci', ['/assegnazione/view', 'id' => $assegnazione->id, '#' => 'revoca'], ['class' => 'btn btn-sm btn-outline-red']) ?>
+                            </div>
                         </div>
                         <?php else: ?>
-                        <div class="card-body text-muted text-center">
-                            <i class="ti ti-user-off mb-2" style="font-size: 2rem;"></i>
-                            <p>Nessun docente assegnato</p>
+                        <div class="card-body text-center">
+                            <i class="ti ti-user-off mb-3 text-muted" style="font-size: 2rem;"></i>
+                            <p class="text-muted mb-3">Nessun docente assegnato</p>
+                            <div class="d-flex flex-column gap-2">
+                                <?= Html::a(
+                                    '<i class="ti ti-search me-1"></i> Cerca nell\'Albo e Assegna',
+                                    ['/docente/albo', 'modulo_id' => $model->id],
+                                    ['class' => 'btn btn-primary']
+                                ) ?>
+                                <?= Html::a(
+                                    '<i class="ti ti-plus me-1"></i> Assegna direttamente',
+                                    ['/assegnazione/create', 'modulo_id' => $model->id],
+                                    ['class' => 'btn btn-outline-blue']
+                                ) ?>
+                            </div>
                         </div>
                         <?php endif; ?>
                     </div>
+
+                    <!-- Storico Assegnazioni -->
+                    <?php if (!empty($assegnazioniRevocate)): ?>
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-history me-2"></i>Storico Docenti Precedenti</h3>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <?php foreach ($assegnazioniRevocate as $assPrec): ?>
+                            <div class="list-group-item">
+                                <div class="d-flex align-items-center">
+                                    <span class="avatar avatar-sm bg-default me-2"><i class="ti ti-user"></i></span>
+                                    <div class="flex-fill">
+                                        <?php if ($assPrec->docente): ?>
+                                            <strong><?= Html::a(Html::encode($assPrec->docente->cognome . ' ' . $assPrec->docente->nome), ['/docente/view', 'id' => $assPrec->docente_codice_fiscale]) ?></strong>
+                                        <?php else: ?>
+                                            <strong><?= Html::encode($assPrec->docente_codice_fiscale) ?></strong>
+                                        <?php endif; ?>
+                                        <br>
+                                        <small class="text-muted">
+                                            <?= Yii::$app->formatter->asDate($assPrec->data_assegnazione) ?>
+                                            — <span class="badge bg-red-lt">Revocato</span>
+                                        </small>
+                                        <?php if ($assPrec->note): ?>
+                                            <br><small class="text-muted"><i class="ti ti-note me-1"></i><?= Html::encode($assPrec->note) ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?= Html::a('<i class="ti ti-eye"></i>', ['/assegnazione/view', 'id' => $assPrec->id], ['class' => 'btn btn-sm btn-outline-default', 'title' => 'Dettaglio']) ?>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
 
                     <!-- Statistiche -->
                     <div class="card mb-3">
@@ -236,7 +304,9 @@ $this->params['breadcrumbs'][] = $model->codice;
 
             <!-- Sezione Pagamenti -->
             <?php
-                $assegnazioneContratto = $model->getAssegnazioni()->one();
+                $assegnazioneContratto = $model->getAssegnazioni()
+                    ->andWhere(['!=', 'status', \app\models\Assegnazione::STATUS_REVOCATO])
+                    ->one();
                 $contrattoAttivo = $assegnazioneContratto ? $assegnazioneContratto->contratto : null;
             ?>
             <div class="card mt-3">

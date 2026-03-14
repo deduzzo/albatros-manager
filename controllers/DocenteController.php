@@ -306,6 +306,10 @@ class DocenteController extends Controller
             ->orderBy(['titolo' => SORT_ASC])
             ->all();
 
+        // Modulo preselezionato (da scheda modulo)
+        $preselectedModuloId = Yii::$app->request->get('modulo_id');
+        $preselectedModulo = $preselectedModuloId ? Modulo::findOne($preselectedModuloId) : null;
+
         return $this->render('albo', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
@@ -314,6 +318,7 @@ class DocenteController extends Controller
             'totaleTutor' => $totaleTutor,
             'conAssegnazioniAttive' => $conAssegnazioniAttive,
             'progetti' => $progetti,
+            'preselectedModulo' => $preselectedModulo,
         ]);
     }
 
