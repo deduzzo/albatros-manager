@@ -4,6 +4,15 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+### Novità {tutti}
+- Sistema notifiche in-app con campanella e badge nell'header
+- Pagina dedicata notifiche con stato letto/non letto
+
+### Novità {admin}
+- Invio notifiche con editor HTML (Summernote) a singoli utenti, categorie o tutti
+- Invio email opzionale con le notifiche
+- Pannello gestione notifiche con dettaglio letture
+
 ## [v1.0.11] - 2026-03-14
 ## [v1.0.10] - 2026-03-14
 

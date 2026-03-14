@@ -238,6 +238,13 @@ File `CHANGELOG.md` nel root, parsato e mostrato nel portale. Filtrato per tipo 
 
 > **REGOLA**: Ad ogni nuova feature, aggiornare `CHANGELOG.md` con le voci appropriate e i tag per tipo utente.
 
+### Sistema Notifiche
+Admin invia notifiche HTML (Summernote Lite) a tutti/categoria/singolo utente. Controller: `NotificaController` (admin CRUD), `NotificheActionsTrait` (tutti).
+Tabelle: `notifica` (BaseActiveRecord) + `notifica_lettura` (plain AR). Identificativo utenti: admin=`id` (int), docente/studente=`codice_fiscale` (CF).
+Campanella header con dropdown preview ultime 5 + badge (99+ se > 99). Pagina `/site/notifiche` (admin), `/area-docenti/notifiche`, `/area-studenti/notifiche`.
+Email opzionale con `Yii::$app->mailer`, template `mail/notifica-html.php` + `mail/notifica-text.php`. HTML sanitizzato con `HtmlPurifier::process()` in `beforeSave()`.
+Destinatario: `tutti`, `admin`, `docente`, `studente`, `singolo_admin`, `singolo_docente`, `singolo_studente`. `destinatario_id` = ID/CF per singoli.
+
 ## Manuali Utente
 
 3 manuali HTML navigabili e stampabili: Admin (`/site/manuale-admin`), Docente (`/site/manuale-docente`), Studente (`/site/manuale-studente`).
