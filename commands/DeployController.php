@@ -287,9 +287,17 @@ class DeployController extends Controller
             $this->updateChangelog($tag);
         }
 
-        // 7. Crea GitHub release (se tag specificato)
+        // 7. Push su remote (necessario per creare la release sul commit aggiornato)
         if ($tag) {
-            $this->stdout("\nCreazione GitHub Release...\n", Console::BOLD);
+            $this->stdout("\nPush su remote...\n", Console::BOLD);
+            $pushOutput = $this->exec('git push 2>&1');
+            $localCommit = $this->getLocalCommit(); // Aggiorna dopo il commit del changelog
+            $this->stdout("  $pushOutput\n");
+        }
+
+        // 8. Crea GitHub release (se tag specificato)
+        if ($tag) {
+            $this->stdout("Creazione GitHub Release...\n", Console::BOLD);
             if (!$this->createGitHubRelease($tag, $localCommit, $toUpload, $toDelete)) {
                 if (!$this->confirm('Release GitHub fallita. Continuare comunque con il deploy FTP?')) {
                     ftp_close($ftp);
@@ -507,9 +515,8 @@ class DeployController extends Controller
         for ($i = 1; $i <= $maxAttempts; $i++) {
             $this->stdout("  [$i/$maxAttempts] Chiamata production.php ... ");
 
-            // Timeout più lungo per composer install
-            $ctx = stream_context_create(['http' => ['timeout' => 120]]);
-            $response = @file_get_contents($url, false, $ctx);
+            // Usa curl per compatibilità SSL
+            $response = $this->httpGet($url, 120);
 
             if ($response === false) {
                 $this->stdout("ERRORE connessione\n", Console::FG_RED);
@@ -551,6 +558,38 @@ class DeployController extends Controller
         }
 
         $this->stderr("  ⚠ Raggiunto il limite di $maxAttempts tentativi. Verifica manualmente.\n", Console::FG_RED);
+    }
+
+    /**
+     * GET HTTP con fallback curl → file_get_contents.
+     */
+    private function httpGet(string $url, int $timeout = 30): string|false
+    {
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => $timeout,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_USERAGENT => 'AlbatrosManager-Deploy/1.0',
+            ]);
+            $response = curl_exec($ch);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($response === false) {
+                $this->stderr("curl error: $error\n", Console::FG_RED);
+            }
+            return $response;
+        }
+
+        // Fallback file_get_contents
+        $ctx = stream_context_create([
+            'http' => ['timeout' => $timeout],
+            'ssl' => ['verify_peer' => true],
+        ]);
+        return @file_get_contents($url, false, $ctx);
     }
 
     // === Helper Methods ===
