@@ -576,7 +576,10 @@ class DeployController extends Controller
             ]);
             $response = curl_exec($ch);
             $error = curl_error($ch);
-            curl_close($ch);
+            // curl_close è deprecato in PHP 8.5+ ma necessario per versioni precedenti
+            if (PHP_VERSION_ID < 80500) {
+                curl_close($ch);
+            }
 
             if ($response === false) {
                 $this->stderr("curl error: $error\n", Console::FG_RED);
