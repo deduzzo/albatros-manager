@@ -21,10 +21,12 @@ use app\models\Avviso;
 use app\models\forms\DocenteLoginForm;
 use app\models\forms\AllievoLoginForm;
 use app\components\traits\TwoFactorActionsTrait;
+use app\components\traits\ChangelogActionsTrait;
 
 class SiteController extends Controller
 {
     use TwoFactorActionsTrait;
+    use ChangelogActionsTrait;
     /**
      * {@inheritdoc}
      */
@@ -35,7 +37,7 @@ class SiteController extends Controller
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error', 'manuale-admin', 'manuale-docente', 'manuale-studente', 'guida-admin', 'guida-docente', 'supporto', 'verifica-2fa', 'cambia-password'],
+                        'actions' => ['login', 'error', 'manuale-admin', 'manuale-docente', 'manuale-studente', 'guida-admin', 'guida-docente', 'supporto', 'verifica-2fa', 'cambia-password', 'changelog', 'changelog-modal', 'segna-changelog-letto'],
                         'allow' => true,
                     ],
                     [
@@ -476,6 +478,20 @@ class SiteController extends Controller
     protected function getTwoFactorRedirectUrl(): array
     {
         return ['/site/index'];
+    }
+
+    // =========================================================================
+    // Metodi helper per ChangelogActionsTrait
+    // =========================================================================
+
+    protected function getChangelogUserType(): string
+    {
+        return 'admin';
+    }
+
+    protected function getChangelogIdentity()
+    {
+        return Yii::$app->user->identity;
     }
 
     /**

@@ -44,6 +44,20 @@ use yii\helpers\Url;
                         </a>
                     </div>
                 </div>
+                <?php if (!Yii::$app->user->isGuest): ?>
+                    <?php
+                    $changelogParser = new \app\components\ChangelogParser();
+                    $unreadCount = $changelogParser->countUnreadItems('admin', Yii::$app->user->identity->last_changelog_seen ?? null);
+                    ?>
+                    <div class="nav-item me-3">
+                        <a href="#" class="nav-link px-0" data-bs-toggle="modal" data-bs-target="#changelog-modal" id="changelog-trigger" title="Novità">
+                            <i class="ti ti-sparkles"></i>
+                            <?php if ($unreadCount > 0): ?>
+                                <span class="badge bg-green badge-notification badge-blink changelog-badge"><?= $unreadCount ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </div>
+                <?php endif; ?>
                 <div class="nav-item dropdown d-none d-md-flex me-3">
                     <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Notifiche">
                         <i class="ti ti-bell"></i>
@@ -100,3 +114,34 @@ use yii\helpers\Url;
         </div>
     </div>
 </header>
+
+<!-- Modal Changelog (admin) -->
+<?php if (!Yii::$app->user->isGuest): ?>
+<div class="modal modal-blur fade" id="changelog-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content" id="changelog-modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-blue" role="status"></div>
+                <p class="mt-2 text-secondary">Caricamento novità...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var changelogModal = document.getElementById('changelog-modal');
+    if (changelogModal) {
+        changelogModal.addEventListener('show.bs.modal', function() {
+            fetch('<?= Url::to(['/site/changelog-modal']) ?>')
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    document.getElementById('changelog-modal-content').innerHTML = html;
+                    // Rimuovi il badge
+                    var badge = document.querySelector('.changelog-badge');
+                    if (badge) badge.remove();
+                });
+        });
+    }
+});
+</script>
+<?php endif; ?>

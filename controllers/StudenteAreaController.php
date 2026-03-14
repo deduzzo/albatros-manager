@@ -16,6 +16,7 @@ use app\models\Iscrizione;
 use app\models\forms\AllievoLoginForm;
 use app\models\forms\AllievoRegistrazioneForm;
 use app\components\traits\TwoFactorActionsTrait;
+use app\components\traits\ChangelogActionsTrait;
 
 /**
  * Controller per l'area studenti autenticata.
@@ -23,6 +24,7 @@ use app\components\traits\TwoFactorActionsTrait;
 class StudenteAreaController extends Controller
 {
     use TwoFactorActionsTrait;
+    use ChangelogActionsTrait;
     public $layout = 'studente';
 
     /**
@@ -62,7 +64,7 @@ class StudenteAreaController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'candidatura', 'le-mie-candidature', 'candidatura-view', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'candidatura', 'le-mie-candidature', 'candidatura-view', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password', 'changelog', 'changelog-modal', 'segna-changelog-letto'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -431,6 +433,20 @@ class StudenteAreaController extends Controller
     protected function getTwoFactorRedirectUrl(): array
     {
         return ['/studente-area/index'];
+    }
+
+    // =========================================================================
+    // Metodi helper per ChangelogActionsTrait
+    // =========================================================================
+
+    protected function getChangelogUserType(): string
+    {
+        return 'studente';
+    }
+
+    protected function getChangelogIdentity()
+    {
+        return Yii::$app->studenteUser->identity;
     }
 
     // =========================================================================

@@ -103,6 +103,7 @@ $config = [
                 'area-docenti/le-mie-ore/<assegnazione_id:\d+>' => 'docente-area/le-mie-ore',
                 'area-docenti/modifica-ore/<id:\d+>' => 'docente-area/modifica-ore',
                 'area-docenti/elimina-ore/<id:\d+>' => 'docente-area/elimina-ore',
+                'area-docenti/changelog' => 'docente-area/changelog',
                 'area-docenti/guida' => 'docente-area/guida',
                 'area-docenti/contratti' => 'docente-area/contratti',
                 'area-docenti/contratto-download/<id:\d+>' => 'docente-area/contratto-download',
@@ -126,6 +127,7 @@ $config = [
                 'area-studenti/candidatura/<id:\d+>' => 'studente-area/candidatura',
                 'area-studenti/le-mie-candidature' => 'studente-area/le-mie-candidature',
                 'area-studenti/candidatura-view/<id:\d+>' => 'studente-area/candidatura-view',
+                'area-studenti/changelog' => 'studente-area/changelog',
                 'area-studenti/password-dimenticata' => 'studente-area/password-dimenticata',
 
                 // Area Studenti (pubblica)
