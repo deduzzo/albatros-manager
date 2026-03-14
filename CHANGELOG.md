@@ -4,6 +4,7 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.12] - 2026-03-14
 ### Novità {tutti}
 - Sistema notifiche in-app con campanella e badge nell'header
 - Pagina dedicata notifiche con stato letto/non letto
