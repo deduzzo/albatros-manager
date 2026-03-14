@@ -83,6 +83,15 @@ class AllievoLoginForm extends Model
         }
     }
 
+    /**
+     * Valida le credenziali senza effettuare il login.
+     * Usato per il flusso 2FA: prima si validano le credenziali, poi se serve il 2FA.
+     */
+    public function validateCredentials(): bool
+    {
+        return $this->validate();
+    }
+
     public function login()
     {
         if ($this->validate()) {

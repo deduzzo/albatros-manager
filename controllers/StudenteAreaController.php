@@ -15,12 +15,14 @@ use app\models\Modulo;
 use app\models\Iscrizione;
 use app\models\forms\AllievoLoginForm;
 use app\models\forms\AllievoRegistrazioneForm;
+use app\components\traits\TwoFactorActionsTrait;
 
 /**
  * Controller per l'area studenti autenticata.
  */
 class StudenteAreaController extends Controller
 {
+    use TwoFactorActionsTrait;
     public $layout = 'studente';
 
     /**
@@ -34,7 +36,7 @@ class StudenteAreaController extends Controller
         }
 
         // Solo per azioni protette (non login/registrazione)
-        $guestActions = ['login', 'registrazione', 'password-dimenticata'];
+        $guestActions = ['login', 'registrazione', 'password-dimenticata', 'verifica-2fa', 'cambia-password'];
         if (!in_array($action->id, $guestActions) && !Yii::$app->studenteUser->isGuest) {
             $auth = Yii::$app->studenteUser->identity;
             if (!$auth || !$auth->allievo) {
@@ -55,16 +57,28 @@ class StudenteAreaController extends Controller
                 'user' => 'studenteUser',
                 'rules' => [
                     [
-                        'actions' => ['login', 'registrazione', 'password-dimenticata'],
+                        'actions' => ['login', 'registrazione', 'password-dimenticata', 'verifica-2fa', 'cambia-password'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'candidatura', 'le-mie-candidature', 'candidatura-view'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'candidatura', 'le-mie-candidature', 'candidatura-view', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
                 ],
+            ],
+            'forcePasswordChange' => [
+                'class' => \app\components\behaviors\ForcePasswordChangeBehavior::class,
+                'changePasswordAction' => 'cambia-password',
+                'allowedActions' => ['login', 'logout', 'cambia-password', 'verifica-2fa', 'registrazione', 'password-dimenticata', 'error'],
+                'userComponent' => 'studenteUser',
+            ],
+            'totpPending' => [
+                'class' => \app\components\behaviors\TotpPendingBehavior::class,
+                'verifyAction' => 'verifica-2fa',
+                'allowedActions' => ['login', 'logout', 'verifica-2fa', 'registrazione', 'password-dimenticata', 'error'],
+                'userType' => 'studente',
             ],
         ];
     }
@@ -130,7 +144,7 @@ class StudenteAreaController extends Controller
     // =========================================================================
 
     /**
-     * Login studente
+     * Login studente con supporto 2FA
      */
     public function actionLogin()
     {
@@ -142,7 +156,16 @@ class StudenteAreaController extends Controller
 
         $model = new AllievoLoginForm();
 
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        if ($model->load(Yii::$app->request->post()) && $model->validateCredentials()) {
+            $auth = $model->getAuth();
+            if ($auth && $auth->isTotpEnabled()) {
+                // 2FA attivo: metti in stato pendente senza effettuare il login
+                Yii::$app->session->set('totp_pending_user_id', $auth->id);
+                Yii::$app->session->set('totp_pending_type', 'studente');
+                return $this->redirect(['verifica-2fa']);
+            }
+            // 2FA non attivo: login diretto
+            $model->login();
             Yii::$app->session->setFlash('success', 'Benvenuto nell\'area studenti!');
             return $this->redirect(['index']);
         }
@@ -384,6 +407,30 @@ class StudenteAreaController extends Controller
         return $this->render('candidatura-view', [
             'iscrizione' => $iscrizione,
         ]);
+    }
+
+    // =========================================================================
+    // Metodi helper per TwoFactorActionsTrait
+    // =========================================================================
+
+    protected function getTwoFactorIdentity()
+    {
+        return Yii::$app->studenteUser->identity;
+    }
+
+    protected function getTwoFactorUserComponent(): string
+    {
+        return 'studenteUser';
+    }
+
+    protected function getTwoFactorUserType(): string
+    {
+        return 'studente';
+    }
+
+    protected function getTwoFactorRedirectUrl(): array
+    {
+        return ['/studente-area/index'];
     }
 
     // =========================================================================
