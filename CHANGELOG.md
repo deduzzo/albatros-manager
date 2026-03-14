@@ -4,6 +4,7 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.21] - 2026-03-14
 ### Miglioramenti {admin}
 - Lista moduli: aggiunta colonna docente assegnato con link al profilo
 - Lista moduli: aggiunta colonna studenti iscritti con conteggio
