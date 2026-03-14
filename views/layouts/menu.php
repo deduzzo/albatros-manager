@@ -167,7 +167,7 @@ $isActive = function($controllers) use ($currentController) {
                                 <i class="ti ti-star me-2"></i> Valutazioni Docenti
                             </a>
                             <a class="dropdown-item <?= $currentController == 'criterio-valutazione-docente' ? 'active' : '' ?>" href="<?= Url::to(['/criterio-valutazione-docente/index']) ?>">
-                                <i class="ti ti-star-half-filled me-2"></i> Criteri Valutazione Docente
+                                <i class="ti ti-star-half me-2"></i> Criteri Valutazione Docente
                             </a>
                         </div>
                     </li>
