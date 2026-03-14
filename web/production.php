@@ -39,26 +39,35 @@ if ($currentHash === $installedHash && is_dir($vendorDir . '/yiisoft')) {
     echo '<pre>';
 
     $composerPhar = $basePath . '/composer.phar';
+    $phpBinary = PHP_BINARY ?: '/usr/bin/php';
     $composerCmd = null;
 
-    // Cerca composer disponibile
+    // Cerca composer disponibile — usa PHP_BINARY per evitare problemi di PATH
     if (file_exists($composerPhar)) {
-        $composerCmd = 'php ' . escapeshellarg($composerPhar);
+        $composerCmd = escapeshellarg($phpBinary) . ' ' . escapeshellarg($composerPhar);
     } else {
-        // Prova composer globale
-        $which = trim(shell_exec('which composer 2>/dev/null') ?? '');
-        if (!empty($which)) {
-            $composerCmd = escapeshellarg($which);
+        // Prova composer globale con path assoluto PHP
+        $composerPaths = ['/usr/local/bin/composer', '/usr/bin/composer'];
+        foreach ($composerPaths as $path) {
+            if (file_exists($path)) {
+                $composerCmd = escapeshellarg($phpBinary) . ' ' . escapeshellarg($path);
+                break;
+            }
         }
     }
 
     if ($composerCmd === null) {
         echo '</pre>';
-        echo '<div class="err">✗ Composer non trovato. Carica composer.phar nella root del progetto o installa composer globalmente.</div>';
+        echo '<div class="err">✗ Composer non trovato. Carica composer.phar nella root del progetto.</div>';
+        echo '<div class="info">PHP in uso: ' . htmlspecialchars($phpBinary) . '</div>';
         $allDone = false;
     } else {
+        echo 'PHP: ' . htmlspecialchars($phpBinary) . "\n";
+        echo 'Composer: ' . htmlspecialchars($composerCmd) . "\n\n";
+
         $cmd = sprintf(
-            'cd %s && %s install --no-dev --no-interaction --optimize-autoloader 2>&1',
+            'cd %s && HOME=%s %s install --no-dev --no-interaction --optimize-autoloader 2>&1',
+            escapeshellarg($basePath),
             escapeshellarg($basePath),
             $composerCmd
         );
