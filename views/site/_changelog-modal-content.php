@@ -30,7 +30,7 @@ $changelogUrl = match ($controllerId) {
         <?php foreach ($versions as $version): ?>
             <div class="mb-3">
                 <div class="d-flex align-items-center mb-2">
-                    <span class="badge bg-blue me-2">v<?= Html::encode($version['version']) ?></span>
+                    <span class="badge bg-blue text-blue-fg me-2">v<?= Html::encode($version['version']) ?></span>
                     <small class="text-secondary"><?= Html::encode($version['date']) ?></small>
                 </div>
                 <?php foreach ($version['sections'] as $section): ?>

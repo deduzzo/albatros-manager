@@ -59,11 +59,11 @@ $currentAction = Yii::$app->controller->action->id;
                     $changelogParser = new \app\components\ChangelogParser();
                     $unreadCount = $changelogParser->countUnreadItems('docente', $docenteUser->identity->last_changelog_seen ?? null);
                     ?>
-                    <div class="nav-item me-3">
+                    <div class="nav-item d-none d-md-flex me-3">
                         <a href="#" class="nav-link px-0" data-bs-toggle="modal" data-bs-target="#changelog-modal-docente" id="changelog-trigger-docente" title="Novità">
                             <i class="ti ti-sparkles"></i>
                             <?php if ($unreadCount > 0): ?>
-                                <span class="badge bg-green badge-notification badge-blink changelog-badge"><?= $unreadCount ?></span>
+                                <span class="badge bg-red text-red-fg badge-notification badge-blink changelog-badge"><?= $unreadCount ?></span>
                             <?php endif; ?>
                         </a>
                     </div>
