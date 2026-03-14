@@ -458,21 +458,29 @@ class DeployController extends Controller
         $content = file_get_contents($file);
         $date = date('Y-m-d');
 
-        // Rinomina [Unreleased] → [tag] - data
-        $newContent = str_replace(
-            '## [Unreleased]',
-            "## [Unreleased]\n\n## [$tag] - $date",
-            $content
-        );
+        // Trova la posizione di ## [Unreleased] e sostituisci con:
+        // ## [Unreleased] (vuoto) + ## [tag] - data + contenuto che c'era sotto Unreleased
+        $pattern = '/^(## \[Unreleased\])\s*\n/m';
+        if (preg_match($pattern, $content)) {
+            $newContent = preg_replace(
+                $pattern,
+                "## [Unreleased]\n\n## [$tag] - $date\n",
+                $content,
+                1
+            );
 
-        if ($newContent !== $content) {
-            file_put_contents($file, $newContent);
+            if ($newContent !== $content) {
+                file_put_contents($file, $newContent);
 
-            // Committa la modifica
-            $this->exec('git add CHANGELOG.md');
-            $this->exec("git commit -m \"docs: release $tag - aggiornamento changelog\"");
+                // Committa la modifica
+                $this->exec('git add CHANGELOG.md');
+                $this->exec(sprintf(
+                    'git commit -m %s',
+                    escapeshellarg("docs: release $tag - aggiornamento changelog")
+                ));
 
-            $this->stdout("  ✓ CHANGELOG.md aggiornato: [Unreleased] → [$tag] - $date\n", Console::FG_GREEN);
+                $this->stdout("  ✓ CHANGELOG.md aggiornato: [Unreleased] → [$tag] - $date\n", Console::FG_GREEN);
+            }
         }
     }
 
