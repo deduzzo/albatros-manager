@@ -26,7 +26,7 @@ class ModuloSearch extends Modulo
 
     public function search($params)
     {
-        $query = Modulo::find()->with(['avviso', 'sede']);
+        $query = Modulo::find()->with(['avviso', 'sede', 'assegnazioni', 'assegnazioni.docente', 'iscrizioni']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

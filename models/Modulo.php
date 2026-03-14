@@ -341,6 +341,34 @@ class Modulo extends BaseActiveRecord
         return (int) $query->count();
     }
 
+    /**
+     * Restituisce il totale ore approvate (rendicontate) per il modulo.
+     * @return float
+     */
+    public function getOreRendicontate()
+    {
+        $assegnazione = $this->getAssegnazioneAttiva();
+        if (!$assegnazione) {
+            return 0;
+        }
+        return RendicontazioneOre::getTotaleOreApprovate($assegnazione->id);
+    }
+
+    /**
+     * Restituisce il totale ore liquidate (coperte da pagamenti con status pagato).
+     * Calcolo: importo pagato / compenso orario del contratto.
+     * @return float
+     */
+    public function getOreLiquidate()
+    {
+        $contratto = $this->getContrattoAttivo();
+        if (!$contratto || !$contratto->compenso_orario || $contratto->compenso_orario <= 0) {
+            return 0;
+        }
+        $totalePagato = $contratto->getTotalePagato();
+        return round($totalePagato / $contratto->compenso_orario, 1);
+    }
+
     // --- Metodi di rendicontazione ---
 
     /**

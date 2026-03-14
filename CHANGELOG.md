@@ -4,6 +4,11 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+### Miglioramenti {admin}
+- Lista moduli: aggiunta colonna docente assegnato con link al profilo
+- Lista moduli: aggiunta colonna studenti iscritti con conteggio
+- Lista moduli: colonna ore mostra totali / rendicontate / liquidate con legenda e colori
+
 ## [v1.0.20] - 2026-03-14
 ### Novità {admin}
 - Assegnazione docente d'ufficio dalla scheda modulo con ricerca nell'Albo Docenti

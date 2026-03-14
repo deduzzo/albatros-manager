@@ -65,9 +65,55 @@ $this->params['breadcrumbs'][] = $this->title;
                             'headerOptions' => ['style' => 'width: 150px;'],
                         ],
                         [
-                            'attribute' => 'ore_totali',
+                            'label' => 'Docente',
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $docente = $model->getDocenteAssegnato();
+                                if ($docente) {
+                                    return '<i class="ti ti-user-check text-green me-1"></i>'
+                                        . Html::a(Html::encode($docente->getNomeCompleto()), ['/docente/view', 'id' => $docente->codice_fiscale]);
+                                }
+                                return '<span class="text-muted"><i class="ti ti-user-question me-1"></i>Da assegnare</span>';
+                            },
+                            'headerOptions' => ['style' => 'width: 180px;'],
+                        ],
+                        [
+                            'label' => 'Studenti',
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $iscritti = 0;
+                                foreach ($model->iscrizioni as $i) {
+                                    if (!in_array($i->status, ['ritirato', 'non_ammesso'])) {
+                                        $iscritti++;
+                                    }
+                                }
+                                $max = $model->max_allievi ?: '∞';
+                                $color = ($model->max_allievi && $iscritti >= $model->max_allievi) ? 'text-orange' : 'text-muted';
+                                return "<span class=\"{$color}\">{$iscritti}/{$max}</span>";
+                            },
                             'headerOptions' => ['style' => 'width: 80px;'],
-                            'contentOptions' => ['class' => 'text-end'],
+                            'contentOptions' => ['class' => 'text-center'],
+                        ],
+                        [
+                            'attribute' => 'ore_totali',
+                            'label' => 'Ore',
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $totali = $model->ore_totali ?: 0;
+                                $rendicontate = $model->getOreRendicontate();
+                                $liquidate = $model->getOreLiquidate();
+
+                                // Colori in base allo stato
+                                $colorRend = $rendicontate > 0 ? ($rendicontate >= $totali ? 'text-green' : 'text-azure') : 'text-muted';
+                                $colorLiq = $liquidate > 0 ? ($liquidate >= $totali ? 'text-green' : 'text-blue') : 'text-muted';
+
+                                return '<span class="d-flex flex-column lh-sm" style="font-size: 0.8rem;">'
+                                    . '<span title="Ore totali"><i class="ti ti-clock me-1"></i><strong>' . $totali . '</strong></span>'
+                                    . '<span class="' . $colorRend . '" title="Ore rendicontate (approvate)"><i class="ti ti-checkbox me-1"></i>' . $rendicontate . '</span>'
+                                    . '<span class="' . $colorLiq . '" title="Ore liquidate"><i class="ti ti-currency-euro me-1"></i>' . $liquidate . '</span>'
+                                    . '</span>';
+                            },
+                            'headerOptions' => ['style' => 'width: 100px;'],
                         ],
                         [
                             'attribute' => 'compenso_orario',
@@ -92,10 +138,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]); ?>
 
-                <div class="card-footer d-flex align-items-center">
+                <div class="card-footer d-flex align-items-center justify-content-between">
                     <p class="m-0 text-muted small">
                         Totale: <?= $dataProvider->totalCount ?> moduli
                     </p>
+                    <div class="d-flex gap-3 text-muted small">
+                        <span><i class="ti ti-clock me-1"></i>Totali</span>
+                        <span><i class="ti ti-checkbox me-1"></i>Rendicontate</span>
+                        <span><i class="ti ti-currency-euro me-1"></i>Liquidate</span>
+                    </div>
                 </div>
             </div>
         </div>
