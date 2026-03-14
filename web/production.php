@@ -39,30 +39,66 @@ if ($currentHash === $installedHash && is_dir($vendorDir . '/yiisoft')) {
     echo '<pre>';
 
     $composerPhar = $basePath . '/composer.phar';
-    $phpBinary = PHP_BINARY ?: '/usr/bin/php';
     $composerCmd = null;
 
-    // Cerca composer disponibile — usa PHP_BINARY per evitare problemi di PATH
-    if (file_exists($composerPhar)) {
-        $composerCmd = escapeshellarg($phpBinary) . ' ' . escapeshellarg($composerPhar);
-    } else {
-        // Prova composer globale con path assoluto PHP
-        $composerPaths = ['/usr/local/bin/composer', '/usr/bin/composer'];
-        foreach ($composerPaths as $path) {
+    // Trova il PHP CLI corretto — PHP_BINARY su Plesk è php-fpm, non utilizzabile per CLI
+    $phpBinary = null;
+    $phpFpm = PHP_BINARY ?: '';
+
+    // Su Plesk: /opt/plesk/php/8.3/sbin/php-fpm → /opt/plesk/php/8.3/bin/php
+    if (str_contains($phpFpm, '/sbin/php-fpm')) {
+        $phpCli = str_replace('/sbin/php-fpm', '/bin/php', $phpFpm);
+        if (file_exists($phpCli)) {
+            $phpBinary = $phpCli;
+        }
+    }
+
+    // Fallback: cerca PHP CLI in posizioni comuni
+    if ($phpBinary === null) {
+        $phpPaths = [
+            '/opt/plesk/php/8.3/bin/php',
+            '/opt/plesk/php/8.2/bin/php',
+            '/opt/plesk/php/8.1/bin/php',
+            '/usr/bin/php',
+            '/usr/local/bin/php',
+        ];
+        foreach ($phpPaths as $path) {
             if (file_exists($path)) {
-                $composerCmd = escapeshellarg($phpBinary) . ' ' . escapeshellarg($path);
+                $phpBinary = $path;
                 break;
             }
         }
     }
 
-    if ($composerCmd === null) {
+    if ($phpBinary === null) {
         echo '</pre>';
-        echo '<div class="err">✗ Composer non trovato. Carica composer.phar nella root del progetto.</div>';
-        echo '<div class="info">PHP in uso: ' . htmlspecialchars($phpBinary) . '</div>';
+        echo '<div class="err">✗ PHP CLI non trovato.</div>';
+        echo '<div class="info">PHP_BINARY: ' . htmlspecialchars($phpFpm) . '</div>';
         $allDone = false;
     } else {
-        echo 'PHP: ' . htmlspecialchars($phpBinary) . "\n";
+        // Cerca composer
+        if (file_exists($composerPhar)) {
+            $composerCmd = escapeshellarg($phpBinary) . ' ' . escapeshellarg($composerPhar);
+        } else {
+            $composerPaths = ['/usr/local/bin/composer', '/usr/bin/composer'];
+            foreach ($composerPaths as $path) {
+                if (file_exists($path)) {
+                    $composerCmd = escapeshellarg($phpBinary) . ' ' . escapeshellarg($path);
+                    break;
+                }
+            }
+        }
+    }
+
+    if ($composerCmd === null && $phpBinary !== null) {
+        echo '</pre>';
+        echo '<div class="err">✗ Composer non trovato. Carica composer.phar nella root del progetto.</div>';
+        echo '<div class="info">PHP CLI: ' . htmlspecialchars($phpBinary) . '</div>';
+        $allDone = false;
+    } elseif ($composerCmd === null) {
+        // phpBinary è null — già gestito sopra
+    } else {
+        echo 'PHP CLI: ' . htmlspecialchars($phpBinary) . "\n";
         echo 'Composer: ' . htmlspecialchars($composerCmd) . "\n\n";
 
         $cmd = sprintf(
