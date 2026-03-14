@@ -6,4 +6,6 @@ return [
     'senderName' => 'Example.com mailer',
     'demoMode' => true, // Mostra card debug con credenziali (docenti/studenti). Admin non mostra credenziali di prova.
     'demoModeAdmin' => false, // Mostra credenziali admin nella card demo.
+    'totpEncryptionKey' => getenv('TOTP_ENCRYPTION_KEY') ?: 'albatros-dev-totp-key-change-in-production',
+    'totpIssuer' => 'Albatros Manager',
 ];
