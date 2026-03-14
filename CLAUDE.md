@@ -89,8 +89,12 @@ Model: `Modulo::getIstanzeIdonee()`, `getProssimoIdoneo()`, `getGraduatoria()`. 
 
 Credenziali e configurazione in `PRODUCTION_SERVER.md` (nel `.gitignore`, NON committare).
 - **Dominio**: albatros.robertodedomenico.it
+- **PHP**: 8.4 (obbligatorio — i pacchetti Symfony nel composer.lock richiedono >= 8.4)
+- **Server**: Plesk, PHP CLI: `/opt/plesk/php/8.4/bin/php`
 - **DB**: MariaDB su server.robertodedomenico.it (utente: albatros)
 - **FTP**: server.robertodedomenico.it:21 (utente: albatros)
+- **Post-deploy**: `production.php` esegue `composer install --no-dev` + migration automaticamente
+- **Composer**: `/opt/psa/var/modules/composer/composer.phar` (Plesk built-in)
 
 ## Ambiente Docker
 
