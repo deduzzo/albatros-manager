@@ -69,7 +69,7 @@ function formatDateIT(string $date): string
                         <div class="card mb-4">
                             <div class="card-header">
                                 <div class="d-flex align-items-center w-100">
-                                    <span class="badge bg-blue text-blue-fg me-3">v<?= Html::encode($version['version']) ?></span>
+                                    <span class="badge bg-blue text-blue-fg me-3"><?= Html::encode($version['version']) ?></span>
                                     <h3 class="card-title mb-0">
                                         <?= formatDateIT($version['date']) ?>
                                     </h3>
