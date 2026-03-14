@@ -213,6 +213,31 @@ Tabella: `valutazione_codice`. Controller: `ValutazionePublicController`. Route:
 ### Rendicontazione Finanziaria
 Pattern: `getTotaleContrattualizzato()`, `getTotalePagato()`, `getTotaleInAttesa()`, `getRendicontoModuli()` su Progetto/Avviso/Modulo. Usare leftJoin con `AND deleted_at IS NULL`.
 
+### Gestione Utenti Admin
+Controller: `UtenteController` (`/utente/index`). Solo ruolo `admin`. Menu sotto "Configurazione".
+3 tab: Utenti Admin (CRUD completo), Docenti (gestione auth), Studenti (gestione auth).
+Azioni: create, update, delete (soft), toggle-status, reset-password, reset-2fa, force-change-password.
+Search models: `UserSearch`, `DocenteAuthSearch`, `AllievoAuthSearch`.
+
+### Autenticazione a Due Fattori (2FA TOTP)
+Opzionale per tutti e 3 i tipi di utente. Libreria: `robthree/twofactorauth`.
+- `TotpTrait` (`components/traits/`): encrypt/decrypt secret, generate QR, verify code. Usato da User, DocenteAuth, AllievoAuth.
+- `TwoFactorActionsTrait` (`components/traits/`): actions condivise attiva/disattiva/verifica 2FA + cambio password.
+- `ForcePasswordChangeBehavior` (`components/behaviors/`): intercetta navigazione se flag attivo.
+- `TotpPendingBehavior` (`components/behaviors/`): blocca navigazione in stato 2FA pendente.
+- `TotpAttempt` model: rate-limiting (5 tentativi, blocco 5 min). NON estende BaseActiveRecord.
+- Secret criptato con `Yii::$app->params['totpEncryptionKey']` (env: `TOTP_ENCRYPTION_KEY`).
+- Login flow: credenziali OK → se 2FA attivo → sessione pendente → verifica codice → login effettivo.
+
+### Changelog In-App
+File `CHANGELOG.md` nel root, parsato e mostrato nel portale. Filtrato per tipo utente con tag `{tutti}`, `{admin}`, `{docente}`, `{studente}`.
+- `ChangelogParser` (`components/`): parse, filter, count unread.
+- `ChangelogActionsTrait` (`components/traits/`): actions condivise pagina + modal + segna letto.
+- Badge novità nell'header di tutti e 3 i layout. Modal AJAX + pagina completa `/site/changelog`.
+- Tracking: campo `last_changelog_seen` su utente/docente_auth/allievo_auth.
+
+> **REGOLA**: Ad ogni nuova feature, aggiornare `CHANGELOG.md` con le voci appropriate e i tag per tipo utente.
+
 ## Manuali Utente
 
 3 manuali HTML navigabili e stampabili: Admin (`/site/manuale-admin`), Docente (`/site/manuale-docente`), Studente (`/site/manuale-studente`).
