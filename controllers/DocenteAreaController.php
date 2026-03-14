@@ -26,6 +26,7 @@ use app\models\RichiestaFatturazione;
 use app\models\forms\DocenteLoginForm;
 use app\models\forms\DocenteRegistrazioneForm;
 use app\models\forms\IscrizioneForm;
+use app\components\traits\TwoFactorActionsTrait;
 use yii\web\UploadedFile;
 
 /**
@@ -33,6 +34,7 @@ use yii\web\UploadedFile;
  */
 class DocenteAreaController extends Controller
 {
+    use TwoFactorActionsTrait;
     public $layout = 'docente';
 
     /**
@@ -45,8 +47,8 @@ class DocenteAreaController extends Controller
             return false;
         }
 
-        // Solo per azioni protette (non login/registrazione)
-        $guestActions = ['login', 'registrazione', 'verifica-email', 'password-dimenticata', 'reset-password'];
+        // Solo per azioni protette (non login/registrazione/2fa)
+        $guestActions = ['login', 'registrazione', 'verifica-email', 'password-dimenticata', 'reset-password', 'verifica-2fa', 'cambia-password'];
         if (!in_array($action->id, $guestActions) && !Yii::$app->docenteUser->isGuest) {
             $auth = Yii::$app->docenteUser->identity;
             if (!$auth || !$auth->docente) {
@@ -67,12 +69,12 @@ class DocenteAreaController extends Controller
                 'user' => 'docenteUser',
                 'rules' => [
                     [
-                        'actions' => ['login', 'registrazione', 'verifica-email', 'password-dimenticata', 'reset-password'],
+                        'actions' => ['login', 'registrazione', 'verifica-email', 'password-dimenticata', 'reset-password', 'verifica-2fa', 'cambia-password'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida', 'rimborsi', 'nuovo-rimborso', 'modifica-rimborso', 'contratti', 'contratto-download', 'documenti'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida', 'rimborsi', 'nuovo-rimborso', 'modifica-rimborso', 'contratti', 'contratto-download', 'documenti', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -83,6 +85,18 @@ class DocenteAreaController extends Controller
                 'actions' => [
                     'elimina-ore' => ['POST'],
                 ],
+            ],
+            'forcePasswordChange' => [
+                'class' => \app\components\behaviors\ForcePasswordChangeBehavior::class,
+                'changePasswordAction' => 'cambia-password',
+                'allowedActions' => ['login', 'logout', 'cambia-password', 'verifica-2fa', 'registrazione', 'verifica-email', 'password-dimenticata', 'reset-password', 'error'],
+                'userComponent' => 'docenteUser',
+            ],
+            'totpPending' => [
+                'class' => \app\components\behaviors\TotpPendingBehavior::class,
+                'verifyAction' => 'verifica-2fa',
+                'allowedActions' => ['login', 'logout', 'verifica-2fa', 'registrazione', 'verifica-email', 'password-dimenticata', 'reset-password', 'error'],
+                'userType' => 'docente',
             ],
         ];
     }
@@ -157,7 +171,7 @@ class DocenteAreaController extends Controller
     }
 
     /**
-     * Login docente
+     * Login docente con supporto 2FA
      */
     public function actionLogin()
     {
@@ -169,7 +183,16 @@ class DocenteAreaController extends Controller
 
         $model = new DocenteLoginForm();
 
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        if ($model->load(Yii::$app->request->post()) && $model->validateCredentials()) {
+            $auth = $model->getAuth();
+            if ($auth && $auth->isTotpEnabled()) {
+                // 2FA attivo: metti in stato pendente senza effettuare il login
+                Yii::$app->session->set('totp_pending_user_id', $auth->id);
+                Yii::$app->session->set('totp_pending_type', 'docente');
+                return $this->redirect(['verifica-2fa']);
+            }
+            // 2FA non attivo: login diretto
+            $model->login();
             Yii::$app->session->setFlash('success', 'Benvenuto nell\'area docenti!');
             return $this->redirect(['index']);
         }
@@ -806,6 +829,30 @@ class DocenteAreaController extends Controller
             'richieste' => $richieste,
             'docente' => $docente,
         ]);
+    }
+
+    // =========================================================================
+    // Metodi helper per TwoFactorActionsTrait
+    // =========================================================================
+
+    protected function getTwoFactorIdentity()
+    {
+        return Yii::$app->docenteUser->identity;
+    }
+
+    protected function getTwoFactorUserComponent(): string
+    {
+        return 'docenteUser';
+    }
+
+    protected function getTwoFactorUserType(): string
+    {
+        return 'docente';
+    }
+
+    protected function getTwoFactorRedirectUrl(): array
+    {
+        return ['/docente-area/index'];
     }
 
     // =========================================================================

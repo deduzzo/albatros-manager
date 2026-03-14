@@ -85,6 +85,15 @@ class DocenteLoginForm extends Model
     }
 
     /**
+     * Valida le credenziali senza effettuare il login.
+     * Usato per il flusso 2FA: prima si validano le credenziali, poi se serve il 2FA.
+     */
+    public function validateCredentials(): bool
+    {
+        return $this->validate();
+    }
+
+    /**
      * Effettua il login
      */
     public function login()
