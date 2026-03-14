@@ -4,6 +4,8 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.9] - 2026-03-14
+
 ### Novità {tutti}
 - Aggiunta autenticazione a due fattori (2FA) con Google Authenticator
 - Possibilità di cambiare password dal profilo
