@@ -125,7 +125,7 @@ $isActive = function($controllers) use ($currentController) {
                     </li>
 
                     <!-- Gestione -->
-                    <li class="nav-item dropdown <?= $isActive(['istanza', 'assegnazione', 'contratto', 'calendario', 'presenza-allievo', 'iscrizione', 'valutazione-docente', 'criterio-valutazione-docente', 'rendicontazione-ore']) ?>">
+                    <li class="nav-item dropdown <?= $isActive(['istanza', 'assegnazione', 'contratto', 'calendario', 'presenza-allievo', 'iscrizione', 'valutazione-docente', 'criterio-valutazione-docente', 'rendicontazione-ore', 'notifica']) ?>">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-clipboard"></i>
@@ -168,6 +168,10 @@ $isActive = function($controllers) use ($currentController) {
                             </a>
                             <a class="dropdown-item <?= $currentController == 'criterio-valutazione-docente' ? 'active' : '' ?>" href="<?= Url::to(['/criterio-valutazione-docente/index']) ?>">
                                 <i class="ti ti-star-half me-2"></i> Criteri Valutazione Docente
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item <?= $currentController == 'notifica' ? 'active' : '' ?>" href="<?= Url::to(['/notifica/index']) ?>">
+                                <i class="ti ti-bell-plus me-2"></i> Notifiche
                             </a>
                         </div>
                     </li>

@@ -111,6 +111,8 @@ $config = [
                 'area-docenti/rimborsi' => 'docente-area/rimborsi',
                 'area-docenti/nuovo-rimborso/<assegnazione_id:\d+>' => 'docente-area/nuovo-rimborso',
                 'area-docenti/modifica-rimborso/<id:\d+>' => 'docente-area/modifica-rimborso',
+                'area-docenti/notifiche' => 'docente-area/notifiche',
+                'area-docenti/notifica/<id:\d+>' => 'docente-area/notifica-view',
 
                 // Valutazione pubblica anonima
                 'valutazione/<codice:[A-Z0-9]{8}>' => 'valutazione-public/index',
@@ -129,6 +131,8 @@ $config = [
                 'area-studenti/candidatura-view/<id:\d+>' => 'studente-area/candidatura-view',
                 'area-studenti/changelog' => 'studente-area/changelog',
                 'area-studenti/password-dimenticata' => 'studente-area/password-dimenticata',
+                'area-studenti/notifiche' => 'studente-area/notifiche',
+                'area-studenti/notifica/<id:\d+>' => 'studente-area/notifica-view',
 
                 // Area Studenti (pubblica)
                 'studenti' => 'studenti/index',
