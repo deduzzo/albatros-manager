@@ -59,6 +59,40 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
 
+                <!-- Card Sicurezza -->
+                <div class="col-lg-4 mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-shield-lock me-2"></i>Sicurezza</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex mb-3">
+                                <span class="me-auto text-secondary">Autenticazione 2FA</span>
+                                <?php if ($user->isTotpEnabled()): ?>
+                                    <span class="badge bg-green text-green-fg"><i class="ti ti-shield-check me-1"></i>Attiva</span>
+                                <?php else: ?>
+                                    <span class="badge bg-default"><i class="ti ti-shield-off me-1"></i>Non attiva</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php if ($user->isTotpEnabled() && $user->totp_enabled_at): ?>
+                                <div class="d-flex mb-3">
+                                    <span class="me-auto text-secondary">Attivata il</span>
+                                    <span><?= Yii::$app->formatter->asDate($user->totp_enabled_at) ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="card-footer">
+                            <?php if ($user->isTotpEnabled()): ?>
+                                <?= Html::a('<i class="ti ti-shield-off me-1"></i> Disattiva 2FA', ['disattiva-2fa'], ['class' => 'btn btn-outline-danger w-100 mb-2']) ?>
+                            <?php else: ?>
+                                <?= Html::a('<i class="ti ti-shield-check me-1"></i> Attiva 2FA', ['attiva-2fa'], ['class' => 'btn btn-outline-primary w-100 mb-2']) ?>
+                            <?php endif; ?>
+                            <?= Html::a('<i class="ti ti-key me-1"></i> Cambia Password', ['cambia-password'], ['class' => 'btn btn-outline-secondary w-100']) ?>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Form modifica -->
                 <div class="col-lg-8">
                     <?php $form = AppActiveForm::begin([

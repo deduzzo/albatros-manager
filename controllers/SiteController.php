@@ -20,9 +20,11 @@ use app\models\AuditLog;
 use app\models\Avviso;
 use app\models\forms\DocenteLoginForm;
 use app\models\forms\AllievoLoginForm;
+use app\components\traits\TwoFactorActionsTrait;
 
 class SiteController extends Controller
 {
+    use TwoFactorActionsTrait;
     /**
      * {@inheritdoc}
      */
@@ -33,7 +35,7 @@ class SiteController extends Controller
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error', 'manuale-admin', 'manuale-docente', 'manuale-studente', 'guida-admin', 'guida-docente', 'supporto'],
+                        'actions' => ['login', 'error', 'manuale-admin', 'manuale-docente', 'manuale-studente', 'guida-admin', 'guida-docente', 'supporto', 'verifica-2fa', 'cambia-password'],
                         'allow' => true,
                     ],
                     [
@@ -47,6 +49,18 @@ class SiteController extends Controller
                 'actions' => [
                     'logout' => ['post'],
                 ],
+            ],
+            'forcePasswordChange' => [
+                'class' => \app\components\behaviors\ForcePasswordChangeBehavior::class,
+                'changePasswordAction' => 'cambia-password',
+                'allowedActions' => ['login', 'logout', 'cambia-password', 'verifica-2fa', 'error'],
+                'userComponent' => 'user',
+            ],
+            'totpPending' => [
+                'class' => \app\components\behaviors\TotpPendingBehavior::class,
+                'verifyAction' => 'verifica-2fa',
+                'allowedActions' => ['login', 'logout', 'verifica-2fa', 'error'],
+                'userType' => 'admin',
             ],
         ];
     }
@@ -227,20 +241,47 @@ class SiteController extends Controller
 
             if ($loginType === 'docente') {
                 $activeCard = 'docente';
-                if ($docenteLoginForm->load(Yii::$app->request->post()) && $docenteLoginForm->login()) {
+                if ($docenteLoginForm->load(Yii::$app->request->post()) && $docenteLoginForm->validateCredentials()) {
+                    $auth = $docenteLoginForm->getAuth();
+                    if ($auth && $auth->isTotpEnabled()) {
+                        // 2FA attivo: metti in stato pendente
+                        Yii::$app->session->set('totp_pending_user_id', $auth->id);
+                        Yii::$app->session->set('totp_pending_type', 'docente');
+                        return $this->redirect(['/docente-area/verifica-2fa']);
+                    }
+                    // 2FA non attivo: login diretto
+                    $docenteLoginForm->login();
                     Yii::$app->session->setFlash('success', 'Benvenuto nell\'area docenti!');
                     return $this->redirect(['/docente-area/index']);
                 }
                 $docenteError = true;
             } elseif ($loginType === 'studente') {
                 $activeCard = 'studente';
-                if ($studenteLoginForm->load(Yii::$app->request->post()) && $studenteLoginForm->login()) {
+                if ($studenteLoginForm->load(Yii::$app->request->post()) && $studenteLoginForm->validateCredentials()) {
+                    $auth = $studenteLoginForm->getAuth();
+                    if ($auth && $auth->isTotpEnabled()) {
+                        // 2FA attivo: metti in stato pendente
+                        Yii::$app->session->set('totp_pending_user_id', $auth->id);
+                        Yii::$app->session->set('totp_pending_type', 'studente');
+                        return $this->redirect(['/studente-area/verifica-2fa']);
+                    }
+                    // 2FA non attivo: login diretto
+                    $studenteLoginForm->login();
                     Yii::$app->session->setFlash('success', 'Benvenuto nell\'area studenti!');
                     return $this->redirect(['/studente-area/index']);
                 }
             } else {
                 $activeCard = 'admin';
-                if ($loginForm->load(Yii::$app->request->post()) && $loginForm->login()) {
+                if ($loginForm->load(Yii::$app->request->post()) && $loginForm->validateCredentials()) {
+                    $user = $loginForm->getUser();
+                    if ($user && $user->isTotpEnabled()) {
+                        // 2FA attivo: metti in stato pendente
+                        Yii::$app->session->set('totp_pending_user_id', $user->id);
+                        Yii::$app->session->set('totp_pending_type', 'admin');
+                        return $this->redirect(['verifica-2fa']);
+                    }
+                    // 2FA non attivo: login diretto
+                    $loginForm->login();
                     return $this->goBack();
                 }
                 $loginForm->password = '';
@@ -411,6 +452,30 @@ class SiteController extends Controller
     {
         $this->layout = 'login';
         return $this->render('guida-docente');
+    }
+
+    // =========================================================================
+    // Metodi helper per TwoFactorActionsTrait
+    // =========================================================================
+
+    protected function getTwoFactorIdentity()
+    {
+        return Yii::$app->user->identity;
+    }
+
+    protected function getTwoFactorUserComponent(): string
+    {
+        return 'user';
+    }
+
+    protected function getTwoFactorUserType(): string
+    {
+        return 'admin';
+    }
+
+    protected function getTwoFactorRedirectUrl(): array
+    {
+        return ['/site/index'];
     }
 
     /**
