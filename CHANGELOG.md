@@ -2,7 +2,7 @@
 
 Tutte le modifiche al portale Albatros Manager.
 
-## [1.5.0] - 2026-03-14
+## [Unreleased]
 
 ### Novità {tutti}
 - Aggiunta autenticazione a due fattori (2FA) con Google Authenticator
@@ -20,37 +20,62 @@ Tutte le modifiche al portale Albatros Manager.
 ### Novità {studente}
 - Sezione sicurezza nel profilo con attivazione 2FA
 
-## [1.4.0] - 2026-03-11
+## [v1.0.8] - 2026-03-11
 
 ### Novità {admin}
-- Deploy FTP integrato con gestione Git dal portale
+- Pulizia file dati reali dal repository
+
+## [v1.0.6] - 2026-03-11
+
+### Novità {admin}
+- Profilo utente e pagina impostazioni con cambio password
+- Deploy FTP integrato con gestione Git e GitHub Releases
+- Sistema borse di studio
+- Gestione movimenti spesa con progetto opzionale
+- Aggiornamento manuali utente
+
+### Novità {docente}
+- Sezione contratti e documenti nell'area docenti
+
+## [v1.0.4] - 2026-03-11
+
+### Correzioni {admin}
+- Fix visualizzazione versione nel footer
+
+## [v1.0.3] - 2026-03-11
+
+### Correzioni {admin}
+- Fix controller deploy FTP
+
+## [v1.0.2] - 2026-03-11
+
+### Novità {admin}
+- Deploy FTP con gestione versioni e GitHub Releases
 - Importazione utenti reali e disabilitazione account demo
 - Importazione 684 valutazioni docenti da CSV
-- Sistema valutazione docenti personalizzabile con importazione CSV
-- Profilo utente e pagina impostazioni
-- Pagina di deploy per pubblicazione su server di produzione
+- Sistema valutazione docenti personalizzabile
 
 ### Novità {tutti}
-- Miglioramenti generali di stabilità e completamento feature
+- Versione portale visualizzata nel footer
 
-## [1.3.0] - 2026-03-04
-
-### Novità {admin}
-- Aggiornamento .gitignore e manuali feature
-- Script importazione dati per Avviso 28
-
-## [1.2.0] - 2026-02-21
+## [v1.0.0] - 2026-02-22
 
 ### Novità {tutti}
+- Lancio del portale Albatros Manager
+- Dashboard con statistiche
 - Pagina di login unificata con 3 form (admin, docente, studente)
-- Manuali utente integrati (admin, docente, studente) navigabili e stampabili
-- Questionario anonimo valutazione docenti con codici monouso
+- Manuali utente integrati (admin, docente, studente)
 
 ### Novità {admin}
-- Sistema candidature studenti con criteri di valutazione pesati e graduatoria
+- Gestione completa progetti, avvisi, moduli (23 entità CRUD)
+- Importazione dati da Excel
+- Liquidazione massiva pagamenti
+- Rendicontazione finanziaria su Progetto, Avviso e Modulo
+- Questionario anonimo valutazione docenti con codici monouso
+- Candidature studenti con criteri pesati e graduatoria
 - Subentro docenti idonei con gestione rinunce
 - Configurazione dati fondazione
-- Quick link e registrazione studenti nella pagina di login
+- Soft delete e audit log su tutte le tabelle
 
 ### Novità {docente}
 - Area docenti con dashboard, bandi aperti, iscrizione moduli
@@ -59,37 +84,3 @@ Tutte le modifiche al portale Albatros Manager.
 ### Novità {studente}
 - Area studenti con candidatura ai corsi
 - Sezione "Le mie candidature" con dettaglio punteggi
-
-## [1.1.0] - 2026-02-17
-
-### Novità {admin}
-- Liquidazione massiva pagamenti con selezione multipla contratti
-- Rendicontazione finanziaria su Progetto, Avviso e Modulo
-- Completamento CRUD per tutte le 23 entità del sistema
-- Rendicontazione ore docenti con doppia approvazione e ore extra
-
-### Correzioni {admin}
-- Fix proprietà FonteFinanziamento
-- Fix conversione RichText in importazione Excel
-- Fix validazione CSRF per upload AJAX
-- Fix importazione dati con gestione errori migliorata
-
-## [1.0.0] - 2026-02-06
-
-### Novità {tutti}
-- Lancio del portale Albatros Manager
-- Dashboard con statistiche
-- Gestione progetti, avvisi, moduli con CRUD completo
-
-### Novità {admin}
-- Sistema importazione dati da Excel (progetti, moduli, docenti)
-- Soft delete e audit log su tutte le tabelle
-- Autenticazione DB con 4 ruoli (admin, segreteria, coordinatore, operatore)
-- Interfaccia Tabler Dashboard con tema chiaro/scuro
-
-## [0.1.0] - 2026-01-31
-
-### Novità {admin}
-- Commit iniziale: app Yii2 con Tabler Dashboard
-- Schema database con 36 tabelle
-- Sistema soft delete e audit logging

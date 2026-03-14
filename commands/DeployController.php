@@ -282,7 +282,12 @@ class DeployController extends Controller
             return ExitCode::OK;
         }
 
-        // 6. Crea GitHub release (se tag specificato)
+        // 6. Aggiorna CHANGELOG.md: rinomina [Unreleased] → [tag] - data
+        if ($tag) {
+            $this->updateChangelog($tag);
+        }
+
+        // 7. Crea GitHub release (se tag specificato)
         if ($tag) {
             $this->stdout("\nCreazione GitHub Release...\n", Console::BOLD);
             if (!$this->createGitHubRelease($tag, $localCommit, $toUpload, $toDelete)) {
@@ -436,6 +441,39 @@ class DeployController extends Controller
 
         $this->stdout("\n✓ Deploy full completato. $errors errori.\n\n", $errors ? Console::FG_YELLOW : Console::FG_GREEN);
         return $errors === 0 ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
+    }
+
+    /**
+     * Aggiorna CHANGELOG.md: rinomina [Unreleased] con il tag e la data corrente,
+     * poi aggiunge una nuova sezione [Unreleased] vuota in cima.
+     * Committa automaticamente la modifica.
+     */
+    private function updateChangelog(string $tag): void
+    {
+        $file = \Yii::getAlias('@app/CHANGELOG.md');
+        if (!file_exists($file)) {
+            return;
+        }
+
+        $content = file_get_contents($file);
+        $date = date('Y-m-d');
+
+        // Rinomina [Unreleased] → [tag] - data
+        $newContent = str_replace(
+            '## [Unreleased]',
+            "## [Unreleased]\n\n## [$tag] - $date",
+            $content
+        );
+
+        if ($newContent !== $content) {
+            file_put_contents($file, $newContent);
+
+            // Committa la modifica
+            $this->exec('git add CHANGELOG.md');
+            $this->exec("git commit -m \"docs: release $tag - aggiornamento changelog\"");
+
+            $this->stdout("  ✓ CHANGELOG.md aggiornato: [Unreleased] → [$tag] - $date\n", Console::FG_GREEN);
+        }
     }
 
     // === Helper Methods ===

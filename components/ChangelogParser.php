@@ -46,14 +46,14 @@ class ChangelogParser
         $currentSectionIndex = -1;
 
         foreach ($lines as $line) {
-            // Versione: ## [1.5.0] - 2026-03-14
-            if (preg_match('/^## \[(.+?)\] - (\d{4}-\d{2}-\d{2})/', $line, $m)) {
+            // Versione: ## [v1.0.9] - 2026-03-14  oppure  ## [Unreleased]
+            if (preg_match('/^## \[(.+?)\](?:\s*-\s*(\d{4}-\d{2}-\d{2}))?/', $line, $m)) {
                 if ($currentVersion !== null) {
                     $versions[] = $currentVersion;
                 }
                 $currentVersion = [
                     'version' => $m[1],
-                    'date' => $m[2],
+                    'date' => $m[2] ?? date('Y-m-d'),
                     'sections' => [],
                 ];
                 $currentSectionIndex = -1;
@@ -136,8 +136,14 @@ class ChangelogParser
         foreach ($versions as $version) {
             // Se lastSeen è null, tutte le versioni sono "non lette"
             // Se la versione è > lastSeen, è non letta
-            if ($lastSeen !== null && version_compare($version['version'], $lastSeen, '<=')) {
-                break;
+            // 'Unreleased' è sempre considerato non letto
+            if ($lastSeen !== null && $version['version'] !== 'Unreleased') {
+                // Confronta versioni normalizzate (senza prefisso 'v')
+                $v = ltrim($version['version'], 'v');
+                $ls = ltrim($lastSeen, 'v');
+                if (version_compare($v, $ls, '<=')) {
+                    break;
+                }
             }
             foreach ($version['sections'] as $section) {
                 $count += count($section['items']);
