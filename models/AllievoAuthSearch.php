@@ -34,8 +34,10 @@ class AllievoAuthSearch extends AllievoAuth
      */
     public function search($params)
     {
-        $query = AllievoAuth::find()
+        // Usare findWithDeleted() + filtro manuale per evitare conflitto alias con SoftDeleteTrait
+        $query = AllievoAuth::findWithDeleted()
             ->alias('aa')
+            ->andWhere(['aa.deleted_at' => null])
             ->leftJoin('allievo a', 'aa.allievo_codice_fiscale = a.codice_fiscale AND a.deleted_at IS NULL');
 
         $dataProvider = new ActiveDataProvider([

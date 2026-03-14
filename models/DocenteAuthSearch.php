@@ -34,8 +34,10 @@ class DocenteAuthSearch extends DocenteAuth
      */
     public function search($params)
     {
-        $query = DocenteAuth::find()
+        // Usare findWithDeleted() + filtro manuale per evitare conflitto alias con SoftDeleteTrait
+        $query = DocenteAuth::findWithDeleted()
             ->alias('da')
+            ->andWhere(['da.deleted_at' => null])
             ->leftJoin('docente d', 'da.docente_codice_fiscale = d.codice_fiscale AND d.deleted_at IS NULL');
 
         $dataProvider = new ActiveDataProvider([
