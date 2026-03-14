@@ -507,7 +507,12 @@ class DeployController extends Controller
      */
     private function runRemoteMigrations(): void
     {
-        $url = 'https://albatros.robertodedomenico.it/production.php';
+        $config = $this->getFtpConfig();
+        $url = $config['productionUrl'] ?? 'https://albatros.robertodedomenico.it/production.php';
+        $httpAuth = null;
+        if (!empty($config['httpUser'])) {
+            $httpAuth = $config['httpUser'] . ':' . ($config['httpPassword'] ?? '');
+        }
         $maxAttempts = 10;
 
         $this->stdout("Esecuzione post-deploy remoto (composer + migration)...\n", Console::BOLD);
@@ -515,8 +520,8 @@ class DeployController extends Controller
         for ($i = 1; $i <= $maxAttempts; $i++) {
             $this->stdout("  [$i/$maxAttempts] Chiamata production.php ... ");
 
-            // Usa curl per compatibilità SSL
-            $response = $this->httpGet($url, 120);
+            // Usa curl per compatibilità SSL + basic auth
+            $response = $this->httpGet($url, 120, $httpAuth);
 
             if ($response === false) {
                 $this->stdout("ERRORE connessione\n", Console::FG_RED);
@@ -563,7 +568,7 @@ class DeployController extends Controller
     /**
      * GET HTTP con fallback curl → file_get_contents.
      */
-    private function httpGet(string $url, int $timeout = 30): string|false
+    private function httpGet(string $url, int $timeout = 30, ?string $auth = null): string|false
     {
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
@@ -574,6 +579,10 @@ class DeployController extends Controller
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_USERAGENT => 'AlbatrosManager-Deploy/1.0',
             ]);
+            if ($auth !== null) {
+                curl_setopt($ch, CURLOPT_USERPWD, $auth);
+                curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            }
             $response = curl_exec($ch);
             $error = curl_error($ch);
             // curl_close è deprecato in PHP 8.5+ ma necessario per versioni precedenti
