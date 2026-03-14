@@ -24,7 +24,7 @@ class AllievoSearch extends Allievo
 
     public function search($params)
     {
-        $query = Allievo::find();
+        $query = Allievo::find()->with(['iscrizioni']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

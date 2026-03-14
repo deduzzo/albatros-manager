@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
+use app\models\Configurazione;
 
 /* @var $this yii\web\View */
 /* @var $bandiAperti app\models\Avviso[] */
@@ -283,17 +284,25 @@ $this->title = 'Bandi di Formazione Gratuiti';
         <?php endif; ?>
 
         <!-- CTA finale -->
+        <?php
+        $telefono = Configurazione::get('telefono', '');
+        $email = Configurazione::get('email', '');
+        ?>
         <div class="card text-center mt-4 bg-teal text-teal-fg">
             <div class="card-body py-5">
                 <h2 class="mb-3">Hai bisogno di aiuto?</h2>
                 <p class="mb-4">Contattaci per ricevere assistenza nella scelta del percorso formativo più adatto a te.</p>
                 <div class="d-flex justify-content-center gap-3">
-                    <a href="tel:+390212345678" class="btn btn-lg btn-light">
-                        <i class="ti ti-phone me-2"></i> 02 1234 5678
+                    <?php if ($telefono): ?>
+                    <a href="tel:<?= Html::encode($telefono) ?>" class="btn btn-lg btn-light">
+                        <i class="ti ti-phone me-2"></i> <?= Html::encode($telefono) ?>
                     </a>
-                    <a href="mailto:info@albatros.it" class="btn btn-lg btn-outline-light">
-                        <i class="ti ti-mail me-2"></i> info@albatros.it
+                    <?php endif; ?>
+                    <?php if ($email): ?>
+                    <a href="mailto:<?= Html::encode($email) ?>" class="btn btn-lg btn-outline-light">
+                        <i class="ti ti-mail me-2"></i> <?= Html::encode($email) ?>
                     </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

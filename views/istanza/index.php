@@ -77,9 +77,27 @@ $this->params['breadcrumbs'][] = $this->title;
                             'headerOptions' => ['style' => 'width: 130px;'],
                         ],
                         [
-                            'attribute' => 'punteggio_totale',
-                            'headerOptions' => ['style' => 'width: 100px;'],
+                            'attribute' => 'punteggio_titoli',
+                            'label' => 'P. Titoli',
+                            'headerOptions' => ['style' => 'width: 80px;'],
                             'contentOptions' => ['class' => 'text-end'],
+                            'value' => function($model) {
+                                return $model->punteggio_titoli !== null ? number_format($model->punteggio_titoli, 2) : '-';
+                            },
+                        ],
+                        [
+                            'attribute' => 'punteggio_esperienza',
+                            'label' => 'P. Esperienza',
+                            'headerOptions' => ['style' => 'width: 80px;'],
+                            'contentOptions' => ['class' => 'text-end'],
+                            'value' => function($model) {
+                                return $model->punteggio_esperienza !== null ? number_format($model->punteggio_esperienza, 2) : '-';
+                            },
+                        ],
+                        [
+                            'attribute' => 'punteggio_totale',
+                            'headerOptions' => ['style' => 'width: 90px;'],
+                            'contentOptions' => ['class' => 'text-end fw-bold'],
                             'value' => function($model) {
                                 return $model->punteggio_totale !== null ? number_format($model->punteggio_totale, 2) : '-';
                             },

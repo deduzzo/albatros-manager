@@ -4,6 +4,28 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+### Novità {tutti}
+- Template email HTML brandizzato con logo Fondazione Albatros
+- Invio email di reset password funzionante per docenti e studenti
+
+### Miglioramenti {admin}
+- Lista studenti: aggiunti data nascita, conteggio iscrizioni, status badge
+- Lista progetti: aggiunto stato finanziario con progress bar e conteggio studenti
+- Lista assegnazioni: aggiunti link a istanza, contratto e preview note
+- Lista contratti: aggiunte date lezioni, ore contrattualizzate e saldo rimanente
+- Lista avvisi: aggiunte data pubblicazione e conteggio candidature
+- Lista istanze: aggiunti punteggio titoli e punteggio esperienza
+- Validazione automatica transizioni di stato per contratti e iscrizioni
+- Auto-calcolo compenso totale contratto da compenso orario × ore
+- Codici voce spesa configurabili (non più hardcoded)
+- Contatti pagina studenti ora da Configurazione (non più hardcoded)
+- Deploy FTP: upload automatico config mail solo alla prima volta
+
+### Correzioni {admin}
+- Fix relazioni SoftDelete via() in RendicontazioneOre
+- Fix CSS inline in dashboard studenti (ora classi Tabler)
+- Rimozione directory vuote orfane (docente-bandi, docente-profilo, docente-site)
+
 ## [v1.0.21] - 2026-03-14
 ### Miglioramenti {admin}
 - Lista moduli: aggiunta colonna docente assegnato con link al profilo

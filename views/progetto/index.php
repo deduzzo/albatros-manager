@@ -75,6 +75,39 @@ $this->params['breadcrumbs'][] = $this->title;
                             'headerOptions' => ['style' => 'width: 110px;'],
                             'filter' => false,
                         ],
+                        [
+                            'label' => 'Studenti',
+                            'headerOptions' => ['style' => 'width: 100px;'],
+                            'contentOptions' => ['class' => 'text-center'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $iscritti = $model->getNumeroStudentiIscritti();
+                                $previsti = $model->numero_studenti ?: '-';
+                                $color = 'default';
+                                if ($model->numero_studenti && $iscritti > 0) {
+                                    $perc = ($iscritti / $model->numero_studenti) * 100;
+                                    $color = $perc >= 80 ? 'green' : ($perc >= 50 ? 'orange' : 'red');
+                                }
+                                return '<span class="badge bg-' . $color . '-lt">' . $iscritti . ' / ' . $previsti . '</span>';
+                            },
+                        ],
+                        [
+                            'label' => 'Stato Finanziario',
+                            'headerOptions' => ['style' => 'width: 160px;'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $contrattualizzato = $model->getTotaleContrattualizzato();
+                                $pagato = $model->getTotalePagato();
+                                $perc = $contrattualizzato > 0 ? round(($pagato / $contrattualizzato) * 100) : 0;
+                                $colorBar = $perc >= 80 ? 'bg-green' : ($perc >= 40 ? 'bg-azure' : 'bg-orange');
+                                return '<div class="small text-muted mb-1">'
+                                    . Yii::$app->formatter->asCurrency($pagato, 'EUR')
+                                    . ' / '
+                                    . Yii::$app->formatter->asCurrency($contrattualizzato, 'EUR')
+                                    . '</div>'
+                                    . '<div class="progress progress-sm"><div class="progress-bar ' . $colorBar . '" style="width: ' . $perc . '%"></div></div>';
+                            },
+                        ],
                         ['class' => 'yii\grid\ActionColumn'],
                     ],
                 ]); ?>

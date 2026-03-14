@@ -362,6 +362,9 @@ class DeployController extends Controller
 
             // 10. Upload production.php, esegui, poi cancella
             $this->runProductionScript($ftp, $remotePath);
+
+            // 11. Upload config gitignored (solo se non esistono già)
+            $this->uploadConfigIfMissing($ftp, $remotePath);
         } else {
             $this->stderr("\n⚠ Deploy completato con $errors errori. Versione NON aggiornata.\n", Console::FG_RED);
         }
@@ -453,6 +456,7 @@ class DeployController extends Controller
 
         if ($errors === 0) {
             $this->runProductionScript($ftp, $remotePath);
+            $this->uploadConfigIfMissing($ftp, $remotePath);
         }
 
         ftp_close($ftp);
@@ -581,6 +585,43 @@ class DeployController extends Controller
             $this->stdout("✓ rimosso\n", Console::FG_GREEN);
         } else {
             $this->stderr("✗ impossibile rimuovere — cancella manualmente!\n", Console::FG_RED);
+        }
+    }
+
+    /**
+     * Upload file di configurazione solo se non esistono già sul server.
+     * Utile per config gitignored (mail.php, etc.) da deployare una sola volta.
+     */
+    private function uploadConfigIfMissing($ftp, string $remotePath): void
+    {
+        $configFiles = [
+            'config/mail.php',
+        ];
+
+        foreach ($configFiles as $file) {
+            $localFile = \Yii::getAlias('@app') . '/' . $file;
+            $remoteFile = $remotePath . '/' . $file;
+
+            if (!file_exists($localFile)) {
+                continue;
+            }
+
+            // Verifica se esiste sul server (ftp_size ritorna -1 se non esiste)
+            $size = @ftp_size($ftp, $remoteFile);
+            if ($size !== -1) {
+                $this->stdout("  ⏭ $file già presente sul server, skip\n", Console::FG_CYAN);
+                continue;
+            }
+
+            // Upload
+            $dir = dirname($remoteFile);
+            $this->ftpMkdirRecursive($ftp, $dir);
+
+            if (@ftp_put($ftp, $remoteFile, $localFile, FTP_BINARY)) {
+                $this->stdout("  ✓ $file uploadato (prima volta)\n", Console::FG_GREEN);
+            } else {
+                $this->stderr("  ✗ $file upload fallito\n", Console::FG_RED);
+            }
         }
     }
 

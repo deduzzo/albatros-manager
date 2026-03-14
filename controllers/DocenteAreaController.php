@@ -423,7 +423,33 @@ class DocenteAreaController extends Controller
             if ($auth && $auth->isActive()) {
                 $auth->generatePasswordResetToken();
                 if ($auth->save(false)) {
-                    // TODO: Inviare email con link reset
+                    // Invio email con link reset
+                    $docente = $auth->docente;
+                    $email = $docente ? $docente->email : null;
+
+                    if ($email) {
+                        $resetLink = Yii::$app->urlManager->createAbsoluteUrl([
+                            'area-docenti/reset-password',
+                            'token' => $auth->password_reset_token,
+                        ]);
+
+                        try {
+                            Yii::$app->mailer->compose(
+                                ['html' => 'password-reset-html', 'text' => 'password-reset-text'],
+                                [
+                                    'nome' => $docente->getNomeCompleto(),
+                                    'resetLink' => $resetLink,
+                                    'expiry' => '24 ore',
+                                ]
+                            )
+                                ->setTo($email)
+                                ->setSubject('Reimposta la tua password - ' . (\app\models\Configurazione::get('nome_fondazione') ?: 'Fondazione Albatros'))
+                                ->send();
+                        } catch (\Throwable $e) {
+                            Yii::error('Errore invio email reset password docente: ' . $e->getMessage(), __METHOD__);
+                        }
+                    }
+
                     Yii::$app->session->setFlash('success', 'Ti abbiamo inviato un\'email con le istruzioni per reimpostare la password.');
                 }
             } else {

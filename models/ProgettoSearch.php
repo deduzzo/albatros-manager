@@ -26,7 +26,7 @@ class ProgettoSearch extends Progetto
 
     public function search($params)
     {
-        $query = Progetto::find();
+        $query = Progetto::find()->with(['fonteFinanziamento']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

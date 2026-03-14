@@ -136,6 +136,21 @@ class Progetto extends BaseActiveRecord
         return $this->getAvvisi()->count();
     }
 
+    /**
+     * Conta gli studenti iscritti (con iscrizione attiva) a questo progetto.
+     * @return int
+     */
+    public function getNumeroStudentiIscritti()
+    {
+        return (int) Iscrizione::find()
+            ->alias('i')
+            ->leftJoin('avviso a', 'a.id = i.avviso_id AND a.deleted_at IS NULL')
+            ->where(['a.progetto_id' => $this->id])
+            ->andWhere(['i.deleted_at' => null])
+            ->andWhere(['not', ['i.status' => [Iscrizione::STATUS_NON_AMMESSO, Iscrizione::STATUS_RITIRATO]]])
+            ->count();
+    }
+
     // --- Metodi di rendicontazione ---
 
     /**

@@ -43,6 +43,9 @@ class ContrattoSearch extends Contratto
             ->leftJoin('modulo m', 'a.modulo_id = m.id')
             ->andWhere(['c.deleted_at' => null]);
 
+        // Eager load relazioni per evitare N+1
+        $query->with(['assegnazione', 'assegnazione.docente', 'assegnazione.modulo', 'pagamenti']);
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [

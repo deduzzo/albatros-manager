@@ -98,6 +98,42 @@ $this->params['breadcrumbs'][] = $this->title;
                                 return '<span class="badge ' . $model->getStatusBadgeClass() . '">' . Html::encode($model->getStatusLabel()) . '</span>';
                             },
                         ],
+                        [
+                            'label' => 'Periodo Lezioni',
+                            'headerOptions' => ['style' => 'width: 140px;'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                if (!$model->data_inizio_lezioni && !$model->data_fine_lezioni) {
+                                    return '<span class="text-muted">-</span>';
+                                }
+                                $inizio = $model->data_inizio_lezioni ? Yii::$app->formatter->asDate($model->data_inizio_lezioni, 'php:d/m/y') : '?';
+                                $fine = $model->data_fine_lezioni ? Yii::$app->formatter->asDate($model->data_fine_lezioni, 'php:d/m/y') : '?';
+                                return '<span class="small">' . $inizio . ' - ' . $fine . '</span>';
+                            },
+                        ],
+                        [
+                            'attribute' => 'ore_contrattualizzate',
+                            'label' => 'Ore',
+                            'headerOptions' => ['style' => 'width: 70px;'],
+                            'contentOptions' => ['class' => 'text-center'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                return '<span class="badge bg-blue-lt">' . (int) $model->ore_contrattualizzate . 'h</span>';
+                            },
+                        ],
+                        [
+                            'label' => 'Saldo',
+                            'headerOptions' => ['style' => 'width: 110px;'],
+                            'contentOptions' => ['class' => 'text-end'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $saldo = $model->getSaldoRimanente();
+                                if (abs($saldo) < 0.01) {
+                                    return '<span class="badge bg-green-lt"><i class="ti ti-check me-1"></i>Saldato</span>';
+                                }
+                                return '<span class="text-orange fw-bold">' . Yii::$app->formatter->asCurrency($saldo, 'EUR') . '</span>';
+                            },
+                        ],
                         ['class' => 'yii\grid\ActionColumn'],
                     ],
                 ]); ?>

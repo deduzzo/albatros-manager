@@ -25,7 +25,7 @@ class AvvisoSearch extends Avviso
 
     public function search($params)
     {
-        $query = Avviso::find()->with(['progetto']);
+        $query = Avviso::find()->with(['progetto', 'istanze', 'moduli']);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

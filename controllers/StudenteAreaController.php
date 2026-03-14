@@ -40,7 +40,7 @@ class StudenteAreaController extends Controller
         }
 
         // Solo per azioni protette (non login/registrazione)
-        $guestActions = ['login', 'registrazione', 'password-dimenticata', 'verifica-2fa', 'cambia-password'];
+        $guestActions = ['login', 'registrazione', 'password-dimenticata', 'reset-password', 'verifica-2fa', 'cambia-password'];
         if (!in_array($action->id, $guestActions) && !Yii::$app->studenteUser->isGuest) {
             $auth = Yii::$app->studenteUser->identity;
             if (!$auth || !$auth->allievo) {
@@ -61,7 +61,7 @@ class StudenteAreaController extends Controller
                 'user' => 'studenteUser',
                 'rules' => [
                     [
-                        'actions' => ['login', 'registrazione', 'password-dimenticata', 'verifica-2fa', 'cambia-password'],
+                        'actions' => ['login', 'registrazione', 'password-dimenticata', 'reset-password', 'verifica-2fa', 'cambia-password'],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
@@ -75,13 +75,13 @@ class StudenteAreaController extends Controller
             'forcePasswordChange' => [
                 'class' => \app\components\behaviors\ForcePasswordChangeBehavior::class,
                 'changePasswordAction' => 'cambia-password',
-                'allowedActions' => ['login', 'logout', 'cambia-password', 'verifica-2fa', 'registrazione', 'password-dimenticata', 'error'],
+                'allowedActions' => ['login', 'logout', 'cambia-password', 'verifica-2fa', 'registrazione', 'password-dimenticata', 'reset-password', 'error'],
                 'userComponent' => 'studenteUser',
             ],
             'totpPending' => [
                 'class' => \app\components\behaviors\TotpPendingBehavior::class,
                 'verifyAction' => 'verifica-2fa',
-                'allowedActions' => ['login', 'logout', 'verifica-2fa', 'cambia-password', 'registrazione', 'password-dimenticata', 'error'],
+                'allowedActions' => ['login', 'logout', 'verifica-2fa', 'cambia-password', 'registrazione', 'password-dimenticata', 'reset-password', 'error'],
                 'userType' => 'studente',
             ],
         ];
@@ -225,7 +225,33 @@ class StudenteAreaController extends Controller
             if ($auth && $auth->isActive()) {
                 $auth->generatePasswordResetToken();
                 if ($auth->save(false)) {
-                    // TODO: Inviare email con link reset
+                    // Invio email con link reset
+                    $allievo = $auth->allievo;
+                    $email = $allievo ? $allievo->email : null;
+
+                    if ($email) {
+                        $resetLink = Yii::$app->urlManager->createAbsoluteUrl([
+                            'studente-area/reset-password',
+                            'token' => $auth->password_reset_token,
+                        ]);
+
+                        try {
+                            Yii::$app->mailer->compose(
+                                ['html' => 'password-reset-html', 'text' => 'password-reset-text'],
+                                [
+                                    'nome' => $allievo->cognome . ' ' . $allievo->nome,
+                                    'resetLink' => $resetLink,
+                                    'expiry' => '24 ore',
+                                ]
+                            )
+                                ->setTo($email)
+                                ->setSubject('Reimposta la tua password - ' . (\app\models\Configurazione::get('nome_fondazione') ?: 'Fondazione Albatros'))
+                                ->send();
+                        } catch (\Throwable $e) {
+                            Yii::error('Errore invio email reset password studente: ' . $e->getMessage(), __METHOD__);
+                        }
+                    }
+
                     Yii::$app->session->setFlash('success', 'Ti abbiamo inviato un\'email con le istruzioni per reimpostare la password.');
                 }
             } else {
@@ -237,6 +263,43 @@ class StudenteAreaController extends Controller
         }
 
         return $this->render('password-dimenticata');
+    }
+
+    /**
+     * Reset password con token
+     */
+    public function actionResetPassword($token)
+    {
+        $this->layout = 'login';
+
+        $auth = AllievoAuth::findByPasswordResetToken($token);
+
+        if (!$auth) {
+            Yii::$app->session->setFlash('error', 'Token non valido o scaduto.');
+            return $this->redirect(['login']);
+        }
+
+        if (Yii::$app->request->isPost) {
+            $password = Yii::$app->request->post('password');
+            $passwordConfirm = Yii::$app->request->post('password_confirm');
+
+            if (strlen($password) < 6) {
+                Yii::$app->session->setFlash('error', 'La password deve essere di almeno 6 caratteri.');
+            } elseif ($password !== $passwordConfirm) {
+                Yii::$app->session->setFlash('error', 'Le password non coincidono.');
+            } else {
+                $auth->setPassword($password);
+                $auth->removePasswordResetToken();
+                if ($auth->save(false)) {
+                    Yii::$app->session->setFlash('success', 'Password reimpostata con successo!');
+                    return $this->redirect(['login']);
+                }
+            }
+        }
+
+        return $this->render('reset-password', [
+            'token' => $token,
+        ]);
     }
 
     // =========================================================================

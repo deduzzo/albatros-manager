@@ -196,6 +196,28 @@ class Iscrizione extends BaseActiveRecord
         return $this->hasMany(StoricoIscrizione::class, ['iscrizione_id' => 'id'])->orderBy(['created_at' => SORT_ASC]);
     }
 
+    /**
+     * Verifica se la transizione di status e' consentita.
+     * @param string $newStatus
+     * @return bool
+     */
+    public function canTransitionTo($newStatus)
+    {
+        $allowedTransitions = [
+            self::STATUS_CANDIDATO => [self::STATUS_IN_VALUTAZIONE, self::STATUS_NON_AMMESSO, self::STATUS_RITIRATO],
+            self::STATUS_IN_VALUTAZIONE => [self::STATUS_AMMESSO, self::STATUS_AMMESSO_CON_RISERVA, self::STATUS_NON_AMMESSO],
+            self::STATUS_AMMESSO => [self::STATUS_FREQUENTANTE, self::STATUS_RITIRATO],
+            self::STATUS_AMMESSO_CON_RISERVA => [self::STATUS_FREQUENTANTE, self::STATUS_RITIRATO],
+            self::STATUS_FREQUENTANTE => [self::STATUS_COMPLETATO, self::STATUS_RITIRATO],
+            self::STATUS_COMPLETATO => [],
+            self::STATUS_RITIRATO => [],
+            self::STATUS_NON_AMMESSO => [],
+        ];
+
+        $allowed = $allowedTransitions[$this->status] ?? [];
+        return in_array($newStatus, $allowed);
+    }
+
     // --- Metodi candidatura ---
 
     /**

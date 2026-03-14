@@ -195,33 +195,35 @@ class Pagamento extends BaseActiveRecord
 
     /**
      * Trova la voce di spesa appropriata in base al tipo di pagamento.
-     * - Rimborso: cerca codice "B2.13" o simile
-     * - Docenza: cerca codice "B2.1"
+     * I codici delle voci di spesa sono configurabili tramite Configurazione.
      * @return int|null ID della voce di spesa trovata
      */
     protected function trovaVoceSpesa()
     {
+        $codiceRimborso = Configurazione::get('voce_spesa_rimborso_codice', 'B2.13');
+        $codiceDocenza = Configurazione::get('voce_spesa_docenti_codice', 'B2.1');
+
         if ($this->tipo === self::TIPO_RIMBORSO) {
-            // Cerca voce rimborsi (B2.13 o simile)
+            // Cerca voce rimborsi
             $voce = VoceSpesa::find()
-                ->where(['like', 'codice', 'B2.13'])
+                ->where(['like', 'codice', $codiceRimborso])
                 ->one();
             if ($voce) {
                 return $voce->id;
             }
         }
 
-        // Cerca voce Docenza (B2.1 esatto, poi B2.1%)
+        // Cerca voce Docenza (esatto, poi con wildcard)
         $voce = VoceSpesa::find()
-            ->where(['codice' => 'B2.1'])
+            ->where(['codice' => $codiceDocenza])
             ->one();
         if ($voce) {
             return $voce->id;
         }
 
-        // Cerca voce con codice che inizia con "B2.1"
+        // Cerca voce con codice che inizia con il codice configurato
         $voce = VoceSpesa::find()
-            ->where(['like', 'codice', 'B2.1%', false])
+            ->where(['like', 'codice', $codiceDocenza . '%', false])
             ->one();
         if ($voce) {
             return $voce->id;

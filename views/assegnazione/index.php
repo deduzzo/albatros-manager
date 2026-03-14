@@ -86,6 +86,52 @@ $this->params['breadcrumbs'][] = $this->title;
                                 return '<span class="badge ' . $model->getStatusBadgeClass() . '">' . Html::encode($model->getStatusLabel()) . '</span>';
                             },
                         ],
+                        [
+                            'label' => 'Istanza',
+                            'headerOptions' => ['style' => 'width: 80px;'],
+                            'contentOptions' => ['class' => 'text-center'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                if ($model->istanza) {
+                                    return Html::a(
+                                        '<i class="ti ti-file-text me-1"></i>#' . $model->istanza_id,
+                                        ['/istanza/view', 'id' => $model->istanza_id],
+                                        ['class' => 'badge bg-azure-lt']
+                                    );
+                                }
+                                return '<span class="text-muted">-</span>';
+                            },
+                        ],
+                        [
+                            'label' => 'Contratto',
+                            'headerOptions' => ['style' => 'width: 100px;'],
+                            'contentOptions' => ['class' => 'text-center'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                if ($model->contratto) {
+                                    $label = $model->contratto->numero_contratto ?: '#' . $model->contratto->id;
+                                    return Html::a(
+                                        '<i class="ti ti-file-check me-1"></i>' . Html::encode($label),
+                                        ['/contratto/view', 'id' => $model->contratto->id],
+                                        ['class' => 'badge bg-green-lt']
+                                    );
+                                }
+                                if ($model->status !== Assegnazione::STATUS_REVOCATO && $model->status !== Assegnazione::STATUS_RIFIUTATO) {
+                                    return '<span class="badge bg-orange-lt"><i class="ti ti-alert-triangle me-1"></i>Da creare</span>';
+                                }
+                                return '<span class="text-muted">-</span>';
+                            },
+                        ],
+                        [
+                            'attribute' => 'note',
+                            'headerOptions' => ['style' => 'width: 150px;'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                if (empty($model->note)) return '<span class="text-muted">-</span>';
+                                $preview = mb_strimwidth($model->note, 0, 50, '...');
+                                return '<span class="text-muted small" title="' . Html::encode($model->note) . '">' . Html::encode($preview) . '</span>';
+                            },
+                        ],
                         ['class' => 'yii\grid\ActionColumn'],
                     ],
                 ]); ?>

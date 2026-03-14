@@ -126,6 +126,39 @@ class Contratto extends BaseActiveRecord
         ];
     }
 
+    /**
+     * Auto-calcola compenso_totale da compenso_orario * ore_contrattualizzate se entrambi sono impostati.
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if (!empty($this->compenso_orario) && !empty($this->ore_contrattualizzate)) {
+                $this->compenso_totale = round($this->compenso_orario * $this->ore_contrattualizzate, 2);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Verifica se la transizione di status e' consentita.
+     * @param string $newStatus
+     * @return bool
+     */
+    public function canTransitionTo($newStatus)
+    {
+        $allowedTransitions = [
+            self::STATUS_BOZZA => [self::STATUS_FIRMATO, self::STATUS_ANNULLATO],
+            self::STATUS_FIRMATO => [self::STATUS_ATTIVO, self::STATUS_ANNULLATO],
+            self::STATUS_ATTIVO => [self::STATUS_CONCLUSO, self::STATUS_ANNULLATO],
+            self::STATUS_CONCLUSO => [],
+            self::STATUS_ANNULLATO => [],
+        ];
+
+        $allowed = $allowedTransitions[$this->status] ?? [];
+        return in_array($newStatus, $allowed);
+    }
+
     public function getAssegnazione()
     {
         return $this->hasOne(Assegnazione::class, ['id' => 'assegnazione_id']);

@@ -56,6 +56,12 @@ $this->params['breadcrumbs'][] = $this->title;
                             'headerOptions' => ['style' => 'width: 140px;'],
                         ],
                         [
+                            'attribute' => 'data_pubblicazione',
+                            'format' => ['date', 'php:d/m/Y'],
+                            'headerOptions' => ['style' => 'width: 110px;'],
+                            'filter' => false,
+                        ],
+                        [
                             'attribute' => 'data_scadenza',
                             'format' => ['date', 'php:d/m/Y'],
                             'headerOptions' => ['style' => 'width: 110px;'],
@@ -82,8 +88,25 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'label' => 'Moduli',
                             'headerOptions' => ['style' => 'width: 70px;'],
+                            'contentOptions' => ['class' => 'text-center'],
                             'content' => function($model) {
                                 return '<span class="badge bg-default text-default-fg">' . $model->getModuliCount() . '</span>';
+                            },
+                        ],
+                        [
+                            'label' => 'Candidature',
+                            'headerOptions' => ['style' => 'width: 90px;'],
+                            'contentOptions' => ['class' => 'text-center'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $count = $model->getIstanzeCount();
+                                if ($count === 0) {
+                                    return '<span class="text-muted">0</span>';
+                                }
+                                return Html::a(
+                                    '<span class="badge bg-azure-lt">' . $count . '</span>',
+                                    ['/istanza/index', 'IstanzaSearch[avviso_id]' => $model->id]
+                                );
                             },
                         ],
                         ['class' => 'yii\grid\ActionColumn'],

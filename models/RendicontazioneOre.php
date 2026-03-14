@@ -105,7 +105,9 @@ class RendicontazioneOre extends BaseActiveRecord
     public function getModulo()
     {
         return $this->hasOne(Modulo::class, ['id' => 'modulo_id'])
-            ->via('assegnazione');
+            ->via('assegnazione', function ($q) {
+                $q->andWhere(['assegnazione.deleted_at' => null]);
+            });
     }
 
     /**
@@ -114,7 +116,9 @@ class RendicontazioneOre extends BaseActiveRecord
     public function getDocente()
     {
         return $this->hasOne(Docente::class, ['codice_fiscale' => 'docente_codice_fiscale'])
-            ->via('assegnazione');
+            ->via('assegnazione', function ($q) {
+                $q->andWhere(['assegnazione.deleted_at' => null]);
+            });
     }
 
     // --- Status helpers ---

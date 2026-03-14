@@ -34,8 +34,7 @@ $this->title = 'Dashboard';
                 </div>
                 <div class="col-auto">
                     <?= Html::a('<i class="ti ti-file-text me-2"></i> Vedi Bandi Aperti', ['bandi'], [
-                        'class' => 'btn',
-                        'style' => 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;',
+                        'class' => 'btn bg-purple text-purple-fg',
                     ]) ?>
                 </div>
             </div>

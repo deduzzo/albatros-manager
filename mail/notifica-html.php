@@ -12,51 +12,23 @@ $linkUrl = null;
 if (!empty($notifica->link)) {
     $linkUrl = Url::to($notifica->link, true);
 }
+
+$this->title = Html::encode($notifica->titolo);
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title><?= Html::encode($notifica->titolo) ?></title>
-    <style>
-        body { font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #333; line-height: 1.6; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #206bc4; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-        .content { background: #f8f9fa; padding: 20px; border: 1px solid #e0e0e0; }
-        .footer { background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #999; border-radius: 0 0 8px 8px; }
-        .btn { display: inline-block; padding: 12px 24px; background: #206bc4; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 15px; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="header">
-        <h2 style="margin: 0;"><?= Html::encode($fondazione) ?></h2>
-        <p style="margin: 5px 0 0; opacity: 0.9;">Notifica</p>
-    </div>
 
-    <div class="content">
-        <h3 style="margin-top: 0;"><?= Html::encode($notifica->titolo) ?></h3>
+<h2 style="margin: 0 0 15px; font-size: 20px; color: #1a3a5c;"><?= Html::encode($notifica->titolo) ?></h2>
 
-        <div style="margin: 15px 0;">
-            <?= $notifica->contenuto ?>
-        </div>
-
-        <?php if ($linkUrl): ?>
-            <p style="text-align: center;">
-                <a href="<?= Html::encode($linkUrl) ?>" class="btn">Vai al dettaglio</a>
-            </p>
-        <?php endif; ?>
-
-        <p style="margin-bottom: 0; color: #666;">
-            Cordiali saluti,<br>
-            <?= Html::encode($fondazione) ?>
-        </p>
-    </div>
-
-    <div class="footer">
-        Questa email e' stata generata automaticamente dal sistema <?= Html::encode($fondazione) ?>.<br>
-        Non rispondere a questa email.
-    </div>
+<div style="margin: 15px 0;">
+    <?= $notifica->contenuto ?>
 </div>
-</body>
-</html>
+
+<?php if ($linkUrl): ?>
+    <p style="text-align: center; margin: 25px 0;">
+        <a href="<?= Html::encode($linkUrl) ?>" style="display: inline-block; padding: 12px 28px; background-color: #206bc4; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Vai al dettaglio</a>
+    </p>
+<?php endif; ?>
+
+<p style="margin: 20px 0 0; color: #666666;">
+    Cordiali saluti,<br>
+    <?= Html::encode($fondazione) ?>
+</p>

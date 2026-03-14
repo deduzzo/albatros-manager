@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use app\components\widgets\AppGridView;
+use app\models\Iscrizione;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\AllievoSearch */
@@ -68,12 +69,50 @@ $this->params['breadcrumbs'][] = $this->title;
                             'attribute' => 'telefono',
                         ],
                         [
+                            'attribute' => 'data_nascita',
+                            'format' => ['date', 'php:d/m/Y'],
+                            'headerOptions' => ['style' => 'width: 110px;'],
+                            'filter' => false,
+                        ],
+                        [
                             'attribute' => 'citta',
                             'format' => 'raw',
                             'content' => function($model) {
                                 if (!$model->citta) return '-';
                                 $prov = $model->provincia ? ' (' . $model->provincia . ')' : '';
                                 return Html::encode($model->citta) . $prov;
+                            },
+                        ],
+                        [
+                            'label' => 'Iscrizioni',
+                            'headerOptions' => ['style' => 'width: 90px;'],
+                            'contentOptions' => ['class' => 'text-center'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $count = count($model->iscrizioni);
+                                if ($count === 0) {
+                                    return '<span class="text-muted">0</span>';
+                                }
+                                return '<span class="badge bg-azure-lt">' . $count . '</span>';
+                            },
+                        ],
+                        [
+                            'label' => 'Stato Iscrizione',
+                            'headerOptions' => ['style' => 'width: 140px;'],
+                            'format' => 'raw',
+                            'content' => function($model) {
+                                $iscrizioni = $model->iscrizioni;
+                                if (empty($iscrizioni)) {
+                                    return '<span class="badge bg-muted-lt">Nessuna iscrizione</span>';
+                                }
+                                // Trova l'iscrizione più recente
+                                $ultima = $iscrizioni[0];
+                                foreach ($iscrizioni as $isc) {
+                                    if ($isc->created_at > $ultima->created_at) {
+                                        $ultima = $isc;
+                                    }
+                                }
+                                return '<span class="badge ' . $ultima->getStatusBadgeClass() . '">' . Html::encode($ultima->getStatusLabel()) . '</span>';
                             },
                         ],
                         ['class' => 'yii\grid\ActionColumn'],
