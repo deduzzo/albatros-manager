@@ -46,9 +46,13 @@ trait TwoFactorActionsTrait
                 }
             }
         } else {
-            // Genera nuovo secret
-            $secret = $identity->generateTotpSecret();
-            $identity->save(false, ['totp_secret']);
+            // Genera secret solo se non ne esiste uno (evita invalidazione su refresh)
+            if (empty($identity->totp_secret) || $identity->isTotpEnabled()) {
+                $secret = $identity->generateTotpSecret();
+                $identity->save(false, ['totp_secret']);
+            } else {
+                $secret = $identity->getDecryptedTotpSecret();
+            }
             $qrCodeUrl = $identity->getTotpQrCodeUrl($secret);
         }
 

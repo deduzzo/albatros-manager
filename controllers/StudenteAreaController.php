@@ -79,7 +79,7 @@ class StudenteAreaController extends Controller
             'totpPending' => [
                 'class' => \app\components\behaviors\TotpPendingBehavior::class,
                 'verifyAction' => 'verifica-2fa',
-                'allowedActions' => ['login', 'logout', 'verifica-2fa', 'registrazione', 'password-dimenticata', 'error'],
+                'allowedActions' => ['login', 'logout', 'verifica-2fa', 'cambia-password', 'registrazione', 'password-dimenticata', 'error'],
                 'userType' => 'studente',
             ],
         ];

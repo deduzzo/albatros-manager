@@ -180,7 +180,7 @@ class UtenteController extends Controller
 
         if (Yii::$app->request->isPost) {
             $password = Yii::$app->request->post('new_password');
-            $forceChange = (bool)Yii::$app->request->post('force_change', 1);
+            $forceChange = (bool)Yii::$app->request->post('force_change', 0);
 
             if (!empty($password)) {
                 $model->resetPassword($password, $forceChange);
@@ -230,7 +230,7 @@ class UtenteController extends Controller
 
         if (Yii::$app->request->isPost) {
             $password = Yii::$app->request->post('new_password');
-            $forceChange = (bool)Yii::$app->request->post('force_change', 1);
+            $forceChange = (bool)Yii::$app->request->post('force_change', 0);
 
             if (!empty($password)) {
                 $model->resetPassword($password, $forceChange);

@@ -51,8 +51,8 @@ class TotpPendingBehavior extends Behavior
             return;
         }
 
-        $controller = $event->action->controller;
         $event->isValid = false;
-        $controller->redirect([$this->verifyAction]);
+        Yii::$app->response->redirect([$this->verifyAction]);
+        Yii::$app->response->send();
     }
 }

@@ -132,13 +132,13 @@ trait TotpTrait
 
     private function encryptTotpSecret(string $secret): string
     {
-        $key = Yii::$app->params['totpEncryptionKey'] ?? 'default-key';
+        $key = Yii::$app->params['totpEncryptionKey'] ?? throw new \yii\base\InvalidConfigException('totpEncryptionKey non configurato in params.php');
         return base64_encode(Yii::$app->security->encryptByKey($secret, $key));
     }
 
     private function decryptTotpSecret(string $encrypted): ?string
     {
-        $key = Yii::$app->params['totpEncryptionKey'] ?? 'default-key';
+        $key = Yii::$app->params['totpEncryptionKey'] ?? throw new \yii\base\InvalidConfigException('totpEncryptionKey non configurato in params.php');
         $decrypted = Yii::$app->security->decryptByKey(base64_decode($encrypted), $key);
         return $decrypted === false ? null : $decrypted;
     }

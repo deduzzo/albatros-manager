@@ -57,9 +57,9 @@ class ForcePasswordChangeBehavior extends Behavior
             return;
         }
 
-        $controller = $event->action->controller;
         $event->isValid = false;
         Yii::$app->session->setFlash('warning', 'Devi cambiare la password prima di continuare.');
-        $controller->redirect([$this->changePasswordAction]);
+        Yii::$app->response->redirect([$this->changePasswordAction]);
+        Yii::$app->response->send();
     }
 }

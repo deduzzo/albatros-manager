@@ -61,7 +61,7 @@ class SiteController extends Controller
             'totpPending' => [
                 'class' => \app\components\behaviors\TotpPendingBehavior::class,
                 'verifyAction' => 'verifica-2fa',
-                'allowedActions' => ['login', 'logout', 'verifica-2fa', 'error'],
+                'allowedActions' => ['login', 'logout', 'verifica-2fa', 'cambia-password', 'error'],
                 'userType' => 'admin',
             ],
         ];
