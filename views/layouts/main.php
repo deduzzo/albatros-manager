@@ -140,6 +140,36 @@ TablerAsset::register($this);
 })();
 </script>
 
+<?php if (!Yii::$app->user->isGuest): ?>
+<!-- Modal Changelog (admin) - deve essere figlio diretto di body per z-index -->
+<div class="modal modal-blur fade" id="changelog-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-content" id="changelog-modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-blue" role="status"></div>
+                <p class="mt-2 text-secondary">Caricamento novità...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var changelogModal = document.getElementById('changelog-modal');
+    if (changelogModal) {
+        changelogModal.addEventListener('show.bs.modal', function() {
+            fetch('<?= \yii\helpers\Url::to(['/site/changelog-modal']) ?>')
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    document.getElementById('changelog-modal-content').innerHTML = html;
+                    var badge = document.querySelector('.changelog-badge');
+                    if (badge) badge.remove();
+                });
+        });
+    }
+});
+</script>
+<?php endif; ?>
+
 <?php $this->endBody() ?>
 </body>
 </html>
