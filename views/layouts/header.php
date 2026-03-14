@@ -58,34 +58,57 @@ use yii\helpers\Url;
                         </a>
                     </div>
                 <?php endif; ?>
+                <?php if (!Yii::$app->user->isGuest):
+                    $notificheCount = \app\models\Notifica::countNonLette('admin', (string) Yii::$app->user->identity->id);
+                    $ultimeNotifiche = \app\models\Notifica::getUltimeNonLette('admin', (string) Yii::$app->user->identity->id, 5);
+                ?>
                 <div class="nav-item dropdown d-none d-md-flex me-3">
                     <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Notifiche">
                         <i class="ti ti-bell"></i>
-                        <span class="badge bg-red badge-notification badge-blink"></span>
+                        <?php if ($notificheCount > 0): ?>
+                            <span class="badge bg-red text-red-fg badge-notification badge-blink"><?= $notificheCount > 99 ? '99+' : $notificheCount ?></span>
+                        <?php endif; ?>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card">
+                    <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" style="width: 380px;">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header d-flex align-items-center">
                                 <h3 class="card-title">Notifiche</h3>
+                                <?php if ($notificheCount > 0): ?>
+                                    <span class="badge bg-blue-lt ms-auto"><?= $notificheCount ?> nuove</span>
+                                <?php endif; ?>
                             </div>
-                            <div class="list-group list-group-flush list-group-hoverable">
-                                <div class="list-group-item">
-                                    <div class="row align-items-center">
-                                        <div class="col-auto">
-                                            <span class="status-dot status-dot-animated bg-green d-block"></span>
-                                        </div>
-                                        <div class="col text-truncate">
-                                            <a href="#" class="text-body d-block">Sistema</a>
-                                            <div class="d-block text-secondary text-truncate mt-n1">
-                                                Benvenuto in Albatros Manager
-                                            </div>
-                                        </div>
+                            <div class="list-group list-group-flush list-group-hoverable" style="max-height: 300px; overflow-y: auto;">
+                                <?php if (empty($ultimeNotifiche)): ?>
+                                    <div class="list-group-item text-center text-secondary py-3">
+                                        Nessuna nuova notifica
                                     </div>
-                                </div>
+                                <?php else: ?>
+                                    <?php foreach ($ultimeNotifiche as $n): ?>
+                                        <a href="<?= \yii\helpers\Url::to(['/site/notifica-view', 'id' => $n->id]) ?>" class="list-group-item list-group-item-action">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <span class="status-dot status-dot-animated bg-blue d-block"></span>
+                                                </div>
+                                                <div class="col text-truncate">
+                                                    <div class="text-body d-block fw-bold"><?= \yii\helpers\Html::encode(mb_substr($n->titolo, 0, 50)) ?></div>
+                                                    <div class="d-block text-secondary text-truncate mt-n1">
+                                                        <?= Yii::$app->formatter->asRelativeTime($n->created_at) ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                            <div class="card-footer text-center">
+                                <a href="<?= \yii\helpers\Url::to(['/site/notifiche']) ?>" class="text-decoration-none">
+                                    Vedi tutte le notifiche
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
             <?php if (!Yii::$app->user->isGuest): ?>
             <div class="nav-item dropdown">

@@ -86,6 +86,57 @@ $currentAction = Yii::$app->controller->action->id;
                             </a>
                         </div>
                     </div>
+                    <!-- Notifiche dropdown -->
+                    <?php
+                        $notificheCount = \app\models\Notifica::countNonLette('docente', $docenteUser->identity->docente_codice_fiscale);
+                        $ultimeNotifiche = \app\models\Notifica::getUltimeNonLette('docente', $docenteUser->identity->docente_codice_fiscale, 5);
+                    ?>
+                    <div class="nav-item dropdown d-none d-md-flex me-3">
+                        <a href="#" class="nav-link px-0" data-bs-toggle="dropdown" tabindex="-1" aria-label="Notifiche">
+                            <i class="ti ti-bell"></i>
+                            <?php if ($notificheCount > 0): ?>
+                                <span class="badge bg-red text-red-fg badge-notification badge-blink"><?= $notificheCount > 99 ? '99+' : $notificheCount ?></span>
+                            <?php endif; ?>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" style="width: 380px;">
+                            <div class="card">
+                                <div class="card-header d-flex align-items-center">
+                                    <h3 class="card-title">Notifiche</h3>
+                                    <?php if ($notificheCount > 0): ?>
+                                        <span class="badge bg-blue-lt ms-auto"><?= $notificheCount ?> nuove</span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="list-group list-group-flush list-group-hoverable" style="max-height: 300px; overflow-y: auto;">
+                                    <?php if (empty($ultimeNotifiche)): ?>
+                                        <div class="list-group-item text-center text-secondary py-3">
+                                            Nessuna nuova notifica
+                                        </div>
+                                    <?php else: ?>
+                                        <?php foreach ($ultimeNotifiche as $n): ?>
+                                            <a href="<?= Url::to(['/docente-area/notifica-view', 'id' => $n->id]) ?>" class="list-group-item list-group-item-action">
+                                                <div class="row align-items-center">
+                                                    <div class="col-auto">
+                                                        <span class="status-dot status-dot-animated bg-blue d-block"></span>
+                                                    </div>
+                                                    <div class="col text-truncate">
+                                                        <div class="text-body d-block fw-bold"><?= Html::encode(mb_substr($n->titolo, 0, 50)) ?></div>
+                                                        <div class="d-block text-secondary text-truncate mt-n1">
+                                                            <?= Yii::$app->formatter->asRelativeTime($n->created_at) ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="card-footer text-center">
+                                    <a href="<?= Url::to(['/docente-area/notifiche']) ?>" class="text-decoration-none">
+                                        Vedi tutte le notifiche
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown">
                             <span class="avatar avatar-sm bg-blue-lt">
