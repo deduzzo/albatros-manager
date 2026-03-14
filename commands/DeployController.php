@@ -350,6 +350,9 @@ class DeployController extends Controller
             }
             $this->stdout("\n  File aggiornati: " . count($toUpload) . "\n");
             $this->stdout("  File eliminati: " . count($toDelete) . "\n\n");
+
+            // 10. Esegui migration remote
+            $this->runRemoteMigrations();
         } else {
             $this->stderr("\n⚠ Deploy completato con $errors errori. Versione NON aggiornata.\n", Console::FG_RED);
         }
@@ -440,6 +443,11 @@ class DeployController extends Controller
         ftp_close($ftp);
 
         $this->stdout("\n✓ Deploy full completato. $errors errori.\n\n", $errors ? Console::FG_YELLOW : Console::FG_GREEN);
+
+        if ($errors === 0) {
+            $this->runRemoteMigrations();
+        }
+
         return $errors === 0 ? ExitCode::OK : ExitCode::UNSPECIFIED_ERROR;
     }
 
@@ -482,6 +490,50 @@ class DeployController extends Controller
                 $this->stdout("  ✓ CHANGELOG.md aggiornato: [Unreleased] → [$tag] - $date\n", Console::FG_GREEN);
             }
         }
+    }
+
+    /**
+     * Chiama migrate.php sul server remoto ripetutamente finché non risponde "Tutto aggiornato".
+     * Max 20 tentativi (una migration per chiamata).
+     */
+    private function runRemoteMigrations(): void
+    {
+        $url = 'https://albatros.robertodedomenico.it/migrate.php';
+        $maxAttempts = 20;
+
+        $this->stdout("Esecuzione migration remote...\n", Console::BOLD);
+
+        for ($i = 1; $i <= $maxAttempts; $i++) {
+            $this->stdout("  [$i/$maxAttempts] Chiamata $url ... ");
+
+            $response = @file_get_contents($url);
+
+            if ($response === false) {
+                $this->stdout("ERRORE connessione\n", Console::FG_RED);
+                sleep(2);
+                continue;
+            }
+
+            // Cerca il testo che indica completamento
+            if (str_contains($response, 'Tutto aggiornato') || str_contains($response, 'Nessuna migration in attesa')) {
+                $this->stdout("✓ Tutto aggiornato!\n", Console::FG_GREEN);
+                return;
+            }
+
+            // Migration eseguita, ne potrebbero esserci altre
+            if (str_contains($response, 'applicata') || str_contains($response, 'Migration')) {
+                $this->stdout("migration eseguita, verifico se ce ne sono altre...\n", Console::FG_YELLOW);
+                sleep(1);
+                continue;
+            }
+
+            // Risposta inattesa
+            $preview = mb_substr(strip_tags($response), 0, 100);
+            $this->stdout("risposta: $preview\n", Console::FG_YELLOW);
+            sleep(1);
+        }
+
+        $this->stderr("  ⚠ Raggiunto il limite di $maxAttempts tentativi. Verifica manualmente.\n", Console::FG_RED);
     }
 
     // === Helper Methods ===
