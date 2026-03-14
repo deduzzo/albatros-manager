@@ -193,8 +193,8 @@ class DeployController extends Controller
             return ExitCode::UNSPECIFIED_ERROR;
         }
 
-        // 2. Verifica working directory pulita
-        $status = $this->exec('git status --porcelain');
+        // 2. Verifica working directory pulita (ignora file non tracciati)
+        $status = $this->exec('git status --porcelain --untracked-files=no');
         if (!empty($status)) {
             $this->stderr("Errore: ci sono modifiche non committate.\n", Console::FG_RED);
             $this->stderr($status . "\n");
