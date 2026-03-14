@@ -57,7 +57,7 @@ $isActive = function($controllers) use ($currentController) {
                             <?php if (!Yii::$app->user->isGuest && Yii::$app->user->identity->isAdmin()): ?>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item <?= $currentController == 'utente' ? 'active' : '' ?>" href="<?= Url::to(['/utente/index']) ?>">
-                                    <i class="ti ti-users-cog me-2"></i> Gestione Utenti
+                                    <i class="ti ti-users-group me-2"></i> Gestione Utenti
                                 </a>
                             <?php endif; ?>
                         </div>
