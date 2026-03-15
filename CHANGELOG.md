@@ -4,6 +4,7 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.23] - 2026-03-15
 ### Miglioramenti {tutti}
 - Verifica firma digitale: estrazione completa dati (firmatario, tipologia, CA, certificato X.509, policy eIDAS)
 - Risultato verifica organizzato in 5 sezioni con layout a 2 colonne
