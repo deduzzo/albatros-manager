@@ -122,10 +122,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <div class="card-body">
                             <?php
-                            $transport = Yii::$app->mailer->transport ?? null;
-                            $dsn = $transport ? (string) $transport->getDsn() : 'Non configurato';
-                            // Maschera la password nel DSN
-                            $dsn = preg_replace('/:([^@]+)@/', ':****@', $dsn);
                             $from = Yii::$app->mailer->messageConfig['from'] ?? 'Non configurato';
                             if (is_array($from)) {
                                 $fromDisplay = key($from) . ' (' . current($from) . ')';
