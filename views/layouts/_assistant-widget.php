@@ -30,13 +30,15 @@ use yii\helpers\Url;
                 </div>
                 <div id="assistantModelSwitcher" class="assistant-model-switcher" style="display:none">
                     <select id="assistantModelQuickSelect" class="assistant-model-select">
-                        <optgroup label="Standard (keyword routing)">
-                            <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC">Qwen2.5 3B (~2GB)</option>
-                            <option value="Qwen2.5-7B-Instruct-q4f16_1-MLC">Qwen2.5 7B (~5GB)</option>
+                        <optgroup label="Leggeri (~2GB)">
+                            <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC">Qwen2.5 3B - Ottimo italiano</option>
+                            <option value="gemma-2-2b-it-q4f16_1-MLC">Gemma 2 2B - Veloce</option>
+                            <option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B</option>
                         </optgroup>
-                        <optgroup label="Avanzato (function calling)">
-                            <option value="Hermes-3-Llama-3.1-8B-q4f16_1-MLC">Hermes-3 8B (~5GB)</option>
-                            <option value="Hermes-2-Pro-Mistral-7B-q4f16_1-MLC">Hermes-2 Pro 7B (~5GB)</option>
+                        <optgroup label="Potenti (~5GB)">
+                            <option value="Qwen2.5-7B-Instruct-q4f16_1-MLC">Qwen2.5 7B - Miglior italiano</option>
+                            <option value="DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC">DeepSeek R1 7B - Ragionamento</option>
+                            <option value="Llama-3.1-8B-Instruct-q4f16_1-MLC">Llama 3.1 8B</option>
                         </optgroup>
                     </select>
                 </div>
@@ -119,17 +121,19 @@ use yii\helpers\Url;
                 <div class="mb-3">
                     <label class="form-label" style="color: var(--assistant-text-muted);">Modello AI</label>
                     <select id="assistantModelSelect" class="form-select" style="background: var(--assistant-bg-light); border-color: var(--assistant-border); color: var(--assistant-text);">
-                        <optgroup label="Standard (keyword routing)">
-                            <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC" selected>Qwen2.5 3B (~2GB) - Veloce</option>
-                            <option value="Qwen2.5-7B-Instruct-q4f16_1-MLC">Qwen2.5 7B (~5GB) - Migliore italiano</option>
+                        <optgroup label="Leggeri (~2GB)">
+                            <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC" selected>Qwen2.5 3B - Ottimo italiano</option>
+                            <option value="gemma-2-2b-it-q4f16_1-MLC">Gemma 2 2B - Veloce</option>
+                            <option value="Llama-3.2-3B-Instruct-q4f16_1-MLC">Llama 3.2 3B</option>
                         </optgroup>
-                        <optgroup label="Avanzato (function calling nativo)">
-                            <option value="Hermes-3-Llama-3.1-8B-q4f16_1-MLC">Hermes-3 8B (~5GB) - Function calling</option>
-                            <option value="Hermes-2-Pro-Mistral-7B-q4f16_1-MLC">Hermes-2 Pro 7B (~5GB) - Function calling</option>
+                        <optgroup label="Potenti (~5GB)">
+                            <option value="Qwen2.5-7B-Instruct-q4f16_1-MLC">Qwen2.5 7B - Miglior italiano</option>
+                            <option value="DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC">DeepSeek R1 7B - Ragionamento</option>
+                            <option value="Llama-3.1-8B-Instruct-q4f16_1-MLC">Llama 3.1 8B</option>
                         </optgroup>
                     </select>
                     <small class="form-hint mt-1" style="color: var(--assistant-text-muted);">
-                        I modelli "Standard" usano keyword matching per le query. I modelli "Avanzato" chiamano le API direttamente.
+                        Tutti usano keyword routing per le query e il modello per formattare le risposte.
                     </small>
                 </div>
             </div>

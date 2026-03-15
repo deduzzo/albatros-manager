@@ -6,20 +6,11 @@
  */
 
 import { AssistantChat } from './assistant-chat.js';
-import { toolDefinitions, executeToolCall, keywordRoute, extractParams } from './assistant-tools.js';
+import { executeToolCall, keywordRoute, extractParams } from './assistant-tools.js';
 
 const DEFAULT_MODEL = 'Qwen2.5-3B-Instruct-q4f16_1-MLC';
 const STORAGE_MODEL_KEY = 'assistant_selected_model';
 const GENERATION_TIMEOUT = 30000; // 30 secondi
-
-// Modelli che supportano function calling in WebLLM
-const FUNCTION_CALLING_MODELS = [
-    'Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC',
-    'Hermes-2-Pro-Llama-3-8B-q4f32_1-MLC',
-    'Hermes-2-Pro-Mistral-7B-q4f16_1-MLC',
-    'Hermes-3-Llama-3.1-8B-q4f32_1-MLC',
-    'Hermes-3-Llama-3.1-8B-q4f16_1-MLC',
-];
 
 class AssistantEngine {
     constructor() {
@@ -234,10 +225,6 @@ class AssistantEngine {
                     this._onToken(data);
                     break;
 
-                case 'tool_calls':
-                    this._onToolCalls(data);
-                    break;
-
                 case 'done':
                     this._onDone(data);
                     break;
@@ -440,13 +427,6 @@ class AssistantEngine {
         return prompt;
     }
 
-    // ── Model Capabilities ─────────────────────────────────────────────
-
-    _supportsToolCalling() {
-        const model = this._getSelectedModel();
-        return FUNCTION_CALLING_MODELS.some(m => model.includes(m) || m.includes(model));
-    }
-
     // ── User Message Handling ──────────────────────────────────────────
 
     async _onUserMessage(text) {
@@ -466,29 +446,15 @@ class AssistantEngine {
         // Aggiungi alla cronologia conversazione
         this.conversationHistory.push({ role: 'user', content: text });
 
-        if (this._supportsToolCalling()) {
-            // Hermes con function calling: NO system prompt custom (limitazione WebLLM)
-            const messages = [...this.conversationHistory];
-
-            this.worker.postMessage({
-                type: 'chat',
-                data: { messages, tools: toolDefinitions }
-            });
-        } else {
-            // Modello senza function calling (Qwen) → keyword routing + formattazione LLM
-            await this._handleWithKeywordFallback(text);
-            return;
-        }
-
-        // Avvia timer timeout
-        this._startGenerationTimeout();
+        // Keyword routing: cerca dati via API, poi formatta con LLM
+        await this._handleWithKeywordRouting(text);
     }
 
     /**
-     * Per modelli senza function calling: usa keyword routing per ottenere i dati,
-     * poi chiedi al modello di formattare la risposta in italiano.
+     * Keyword routing: analizza la domanda, chiama l'API giusta,
+     * passa i dati al modello per formattare la risposta.
      */
-    async _handleWithKeywordFallback(userText) {
+    async _handleWithKeywordRouting(userText) {
         const fn = keywordRoute(userText);
 
         if (fn) {
@@ -591,63 +557,6 @@ class AssistantEngine {
         this.isGenerating = false;
         this.chat.showTyping(false);
         this.chat.setInputEnabled(true);
-    }
-
-    // ── Tool Calls ─────────────────────────────────────────────────────
-
-    async _onToolCalls(toolCalls) {
-        this._clearGenerationTimeout();
-        this.chat.showTyping(true);
-
-        // Aggiungi la risposta del modello con tool_calls alla cronologia
-        this.conversationHistory.push({
-            role: 'assistant',
-            content: null,
-            tool_calls: toolCalls.map(tc => ({
-                id: tc.id,
-                type: 'function',
-                function: {
-                    name: tc.function.name,
-                    arguments: JSON.stringify(tc.function.arguments)
-                }
-            }))
-        });
-
-        // Esegui ogni tool call
-        for (const tc of toolCalls) {
-            const functionName = tc.function.name;
-            const args = tc.function.arguments || {};
-
-            try {
-                const result = await executeToolCall(functionName, args);
-
-                // Aggiungi il risultato alla cronologia
-                this.conversationHistory.push({
-                    role: 'tool',
-                    tool_call_id: tc.id,
-                    content: JSON.stringify(result)
-                });
-            } catch (error) {
-                this.conversationHistory.push({
-                    role: 'tool',
-                    tool_call_id: tc.id,
-                    content: JSON.stringify({ error: error.message })
-                });
-            }
-        }
-
-        // Re-invia al worker SENZA tools per ottenere la risposta finale
-        // Hermes: no system prompt (limitazione WebLLM)
-        const messages = this._supportsToolCalling()
-            ? [...this.conversationHistory]
-            : [{ role: 'system', content: this.systemPrompt }, ...this._getCleanHistory()];
-
-        this.worker.postMessage({
-            type: 'chat',
-            data: { messages, tools: [] }
-        });
-
-        this._startGenerationTimeout();
     }
 
     // ── Error Handling & Fallback ──────────────────────────────────────
