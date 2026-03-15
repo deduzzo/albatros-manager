@@ -4,8 +4,11 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+### Miglioramenti {tutti}
+- Verifica firma digitale: estrazione completa dati (firmatario, tipologia, CA, certificato X.509, policy eIDAS)
+- Risultato verifica organizzato in 5 sezioni con layout a 2 colonne
+
 ## [v1.0.22] - 2026-03-15
-## [v1.0.21] - 2026-03-15
 ### Novità {tutti}
 - Template email HTML brandizzato con logo Fondazione Albatros
 - Invio email di reset password funzionante per docenti e studenti
