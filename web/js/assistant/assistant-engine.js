@@ -31,7 +31,7 @@ class AssistantEngine {
         const hasWebGPU = await this._checkWebGPU();
 
         // Determina modalita (fullscreen o widget)
-        this.isFullscreen = !!document.getElementById('fullscreenMessages');
+        this.isFullscreen = !!document.querySelector('.assistant-fullscreen');
 
         if (!hasWebGPU) {
             this._showUnsupported();
@@ -79,14 +79,18 @@ class AssistantEngine {
     // ── Fullscreen Mode ────────────────────────────────────────────────
 
     _initFullscreen() {
+        // Usa gli stessi ID del widget (assistantMessages, assistantInput, ecc.)
         this.chat = new AssistantChat({
-            messagesId: 'fullscreenMessages',
-            inputId: 'fullscreenInput',
-            sendBtnId: 'fullscreenSend',
-            typingId: 'fullscreenTyping',
-            suggestionsId: 'fullscreenSuggestions',
+            messagesId: 'assistantMessages',
+            inputId: 'assistantInput',
+            sendBtnId: 'assistantSend',
+            typingId: 'assistantTyping',
+            suggestionsId: 'assistantSuggestions',
             onSendMessage: (text) => this._onUserMessage(text)
         });
+
+        // Bind stessi pulsanti del widget (refresh, clear, model switcher)
+        this._bindWidgetButtons();
     }
 
     // ── Widget Mode ────────────────────────────────────────────────────
@@ -259,17 +263,11 @@ class AssistantEngine {
         const percent = Math.round((progress || 0) * 100);
 
         // Aggiorna barra download
-        if (this.isFullscreen) {
-            this._updateElement('fullscreenDownloadText', text);
-            this._updateElement('fullscreenDownloadPercent', `${percent}%`);
-            const bar = document.getElementById('fullscreenDownloadBar');
-            if (bar) bar.style.width = `${percent}%`;
-        } else {
-            this._updateElement('assistantDownloadText', text);
-            this._updateElement('assistantDownloadPercent', `${percent}%`);
-            const bar = document.getElementById('assistantDownloadFill');
-            if (bar) bar.style.width = `${percent}%`;
-        }
+        // Stessi ID per widget e fullscreen
+        this._updateElement('assistantDownloadText', text);
+        this._updateElement('assistantDownloadPercent', `${percent}%`);
+        const bar = document.getElementById('assistantDownloadFill');
+        if (bar) bar.style.width = `${percent}%`;
     }
 
     _onStatus(status) {
@@ -359,32 +357,31 @@ class AssistantEngine {
     }
 
     _updateStatus(text, statusClass) {
-        if (this.isFullscreen) {
-            const badge = document.getElementById('fullscreenStatus');
-            if (badge) {
-                badge.textContent = text;
-                badge.className = `badge ${statusClass === 'ready' ? 'bg-green-lt' : statusClass === 'loading' ? 'bg-orange-lt' : 'bg-red-lt'}`;
-                if (statusClass === 'ready') {
-                    badge.innerHTML = `<span class="badge-dot badge-dot-animated bg-green"></span> ${text}`;
-                } else if (statusClass === 'loading') {
-                    badge.innerHTML = `<span class="badge-dot"></span> ${text}`;
-                }
-            }
-        } else {
-            const statusText = document.getElementById('assistantStatusText');
-            if (statusText) statusText.textContent = text;
+        // Header status text (sia widget che fullscreen)
+        const statusText = document.getElementById('assistantStatusText');
+        if (statusText) statusText.textContent = text;
 
-            const badge = document.getElementById('assistantStatusBadge');
-            if (badge) {
-                badge.className = `assistant-fab-badge status-${statusClass}`;
-                if (statusClass === 'loading') badge.classList.add('loading');
+        // FAB badge (solo widget)
+        const badge = document.getElementById('assistantStatusBadge');
+        if (badge) {
+            badge.className = `assistant-fab-badge status-${statusClass}`;
+            if (statusClass === 'loading') badge.classList.add('loading');
+        }
+
+        // Badge nella page header fullscreen
+        const fullscreenBadge = document.getElementById('fullscreenStatus');
+        if (fullscreenBadge) {
+            fullscreenBadge.className = `badge ${statusClass === 'ready' ? 'bg-green-lt' : statusClass === 'loading' ? 'bg-orange-lt' : 'bg-red-lt'}`;
+            if (statusClass === 'ready') {
+                fullscreenBadge.innerHTML = `<span class="badge-dot badge-dot-animated bg-green"></span> ${text}`;
+            } else if (statusClass === 'loading') {
+                fullscreenBadge.innerHTML = `<span class="badge-dot"></span> ${text}`;
             }
         }
     }
 
     _showDownloadProgress(show) {
-        const elId = this.isFullscreen ? 'fullscreenDownload' : 'assistantDownload';
-        const el = document.getElementById(elId);
+        const el = document.getElementById('assistantDownload');
         if (el) el.style.display = show ? 'block' : 'none';
     }
 
