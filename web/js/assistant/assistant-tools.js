@@ -36,10 +36,14 @@ export const toolDefinitions = [
         type: 'function',
         function: {
             name: 'cerca_docenti',
-            description: 'Cerca docenti per competenza/tag curriculum e valutazione minima opzionale.',
+            description: 'Cerca docenti per nome/cognome, competenza/tag curriculum e valutazione minima.',
             parameters: {
                 type: 'object',
                 properties: {
+                    nome: {
+                        type: 'string',
+                        description: 'Nome o cognome del docente da cercare (es. "Rossi", "Mario")'
+                    },
                     competenza: {
                         type: 'string',
                         description: 'Competenza o tag da cercare (es. "informatica", "inglese")'
@@ -199,6 +203,7 @@ export function keywordRoute(userMessage) {
         { keywords: ['liquidare', 'pagare', 'saldo'],                  fn: 'saldi_da_liquidare' },
         { keywords: ['manca', 'scopert', 'senza docente'],             fn: 'moduli_senza_docente' },
         { keywords: ['esperto', 'competenz', 'tag'],                   fn: 'cerca_docenti' },
+        { keywords: ['docente', 'cognome', 'chi è', 'chi e', 'chiamat', 'prof'], fn: 'cerca_docenti' },
         { keywords: ['valutazion', 'voto', 'stellin'],                 fn: 'valutazioni_docenti' },
         { keywords: ['ore', 'rendicont'],                              fn: 'ore_rendicontate' },
         { keywords: ['student', 'iscritt', 'posti'],                   fn: 'studenti_per_progetto' },
@@ -231,6 +236,28 @@ export function extractParams(userMessage, functionName) {
     const params = {};
 
     if (functionName === 'cerca_docenti') {
+        // Cerca pattern per nome/cognome:
+        // "docente Longo", "cognome Rossi", "chi è Longo", "il prof Rossi", "un docente chiamato Longo"
+        const nomeMatch = userMessage.match(
+            /(?:docente\s+|cognome\s+|chi\s+[eè]\s+|prof\.?\s+|chiamat[oa]?\s+|cercami\s+|trova\s+)([A-ZÀÈÉÌÒÙa-zàèéìòù]{2,}(?:\s+[A-ZÀÈÉÌÒÙa-zàèéìòù]{2,})?)/i
+        );
+        if (nomeMatch) {
+            params.nome = nomeMatch[1].trim();
+        }
+
+        // Se non ha trovato pattern specifici, cerca parole con iniziale maiuscola (probabili cognomi)
+        if (!params.nome && !params.competenza) {
+            const words = userMessage.split(/\s+/);
+            const possibleName = words.find(w =>
+                w.length >= 3 &&
+                /^[A-ZÀÈÉÌÒÙ]/.test(w) &&
+                !['Abbiamo', 'Come', 'Quale', 'Quali', 'Quanto', 'Quanti', 'Dove', 'Chi'].includes(w)
+            );
+            if (possibleName) {
+                params.nome = possibleName;
+            }
+        }
+
         // Cerca pattern "esperto di X", "competenza in X", "tag X"
         const competenzaMatch = userMessage.match(
             /(?:esperto\s+(?:di|in)\s+|competenz\w*\s+(?:in|di|su)?\s*|tag\s+)["']?([a-zA-ZàèéìòùÀÈÉÌÒÙ\s]+?)["']?(?:\s*[,.]|\s+con|\s+e\s|\s*$)/i

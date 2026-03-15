@@ -252,9 +252,9 @@ class AssistantApiController extends Controller
     }
 
     /**
-     * Cerca docenti per competenza (tag) e valutazione minima.
+     * Cerca docenti per nome, competenza (tag) e valutazione minima.
      */
-    public function actionCercaDocenti($competenza = null, $valutazione_minima = null)
+    public function actionCercaDocenti($nome = null, $competenza = null, $valutazione_minima = null)
     {
         $query = (new Query())
             ->select([
@@ -271,6 +271,16 @@ class AssistantApiController extends Controller
             ->leftJoin('valutazione_docente vd', 'vd.docente_codice_fiscale = d.codice_fiscale AND vd.deleted_at IS NULL')
             ->leftJoin('assegnazione ass', 'ass.docente_codice_fiscale = d.codice_fiscale AND ass.deleted_at IS NULL')
             ->where(['d.deleted_at' => null]);
+
+        // Filtro per nome/cognome
+        if ($nome !== null && $nome !== '') {
+            $query->andWhere(['OR',
+                ['LIKE', 'd.cognome', $nome],
+                ['LIKE', 'd.nome', $nome],
+                ['LIKE', "CONCAT(d.cognome, ' ', d.nome)", $nome],
+                ['LIKE', "CONCAT(d.nome, ' ', d.cognome)", $nome],
+            ]);
+        }
 
         // Filtro per competenza (tag curriculum)
         if ($competenza !== null && $competenza !== '') {
