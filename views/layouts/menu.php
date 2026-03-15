@@ -218,13 +218,21 @@ $isActive = function($controllers) use ($currentController) {
                     </li>
 
                     <!-- Strumenti -->
-                    <li class="nav-item <?= $isActive('firma-digitale') ?>">
-                        <a class="nav-link" href="<?= Url::to(['/firma-digitale/index']) ?>">
+                    <li class="nav-item dropdown <?= $isActive('firma-digitale') ?>">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                <i class="ti ti-certificate"></i>
+                                <i class="ti ti-tool"></i>
                             </span>
-                            <span class="nav-link-title">Firma Digitale</span>
+                            <span class="nav-link-title">Strumenti</span>
                         </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item <?= $currentController == 'firma-digitale' ? 'active' : '' ?>" href="<?= Url::to(['/firma-digitale/index']) ?>">
+                                <i class="ti ti-certificate me-2"></i> Firma Digitale
+                            </a>
+                            <a class="dropdown-item <?= ($currentController == 'site' && $currentAction == 'assistente') ? 'active' : '' ?>" href="<?= Url::to(['/site/assistente']) ?>">
+                                <i class="ti ti-robot me-2"></i> Assistente AI
+                            </a>
+                        </div>
                     </li>
 
                     <!-- Report -->

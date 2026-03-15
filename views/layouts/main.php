@@ -9,6 +9,7 @@ use yii\widgets\Breadcrumbs;
 use app\components\widgets\Alert;
 
 TablerAsset::register($this);
+\app\components\assets\WebLlmAsset::register($this);
 
 ?>
 <?php $this->beginPage() ?>
@@ -168,6 +169,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<?php endif; ?>
+
+<?php if (!Yii::$app->user->isGuest): ?>
+<?= $this->render('_assistant-widget') ?>
 <?php endif; ?>
 
 <?php $this->endBody() ?>

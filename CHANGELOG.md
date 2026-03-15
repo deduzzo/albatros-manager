@@ -4,6 +4,15 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.25] - 2026-03-15
+### Novità {admin}
+- **Assistente AI**: chat intelligente basata su LLM che risponde a domande su progetti, docenti, pagamenti e studenti
+- Il modello AI gira interamente nel browser (WebGPU) — zero costi server
+- Widget flottante disponibile su tutte le pagine + pagina full-screen (Strumenti → Assistente AI)
+- Suggerimenti rapidi: quadro generale, docenti da liquidare, moduli scoperti, scadenze
+- 10 endpoint API dedicati per interrogare il database in tempo reale
+- Fallback deterministico quando il modello non riesce a interpretare la domanda
+
 ## [v1.0.24] - 2026-03-15
 ## [v1.0.23] - 2026-03-15
 ### Miglioramenti {tutti}
