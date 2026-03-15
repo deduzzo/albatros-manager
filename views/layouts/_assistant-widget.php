@@ -24,7 +24,22 @@ use yii\helpers\Url;
             </div>
             <div class="assistant-header-info">
                 <h4>Assistente AI</h4>
-                <span id="assistantStatusText" class="assistant-header-status">Inizializzazione...</span>
+                <div class="assistant-header-status-row">
+                    <span id="assistantStatusText" class="assistant-header-status">Inizializzazione...</span>
+                    <span id="assistantModelLabel" class="assistant-model-label" style="display:none" title="Clicca per cambiare modello"></span>
+                </div>
+                <div id="assistantModelSwitcher" class="assistant-model-switcher" style="display:none">
+                    <select id="assistantModelQuickSelect" class="assistant-model-select">
+                        <optgroup label="Standard (keyword routing)">
+                            <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC">Qwen2.5 3B (~2GB)</option>
+                            <option value="Qwen2.5-7B-Instruct-q4f16_1-MLC">Qwen2.5 7B (~5GB)</option>
+                        </optgroup>
+                        <optgroup label="Avanzato (function calling)">
+                            <option value="Hermes-3-Llama-3.1-8B-q4f16_1-MLC">Hermes-3 8B (~5GB)</option>
+                            <option value="Hermes-2-Pro-Mistral-7B-q4f16_1-MLC">Hermes-2 Pro 7B (~5GB)</option>
+                        </optgroup>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="assistant-header-actions">
@@ -74,9 +89,6 @@ use yii\helpers\Url;
         <button class="assistant-suggestion-btn" data-query="Ci sono moduli senza docente assegnato?">Moduli scoperti</button>
         <button class="assistant-suggestion-btn" data-query="Quali sono le prossime scadenze di bandi e contratti?">Scadenze</button>
     </div>
-
-    <!-- Model Info -->
-    <div class="assistant-model-info" style="display:none"></div>
 
     <!-- Input Area -->
     <div class="assistant-input-area">

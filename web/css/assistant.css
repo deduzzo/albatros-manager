@@ -479,15 +479,63 @@
 }
 
 /* --------------------------------------------------------------------------
-   Model Info
+   Model Info (nell'header, accanto allo status)
    -------------------------------------------------------------------------- */
-.assistant-model-info {
-    text-align: center;
+.assistant-header-status-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.assistant-model-label {
     font-size: 10px;
     color: var(--assistant-text-dim);
-    padding: 4px 16px;
-    border-top: 1px solid var(--assistant-border-light);
-    letter-spacing: 0.3px;
+    cursor: pointer;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.assistant-model-label:hover {
+    color: var(--assistant-text-muted);
+    border-color: var(--assistant-border);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.assistant-model-switcher {
+    margin-top: 4px;
+}
+
+.assistant-model-select {
+    width: 100%;
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--assistant-border);
+    background: var(--assistant-bg);
+    color: var(--assistant-text);
+    cursor: pointer;
+    outline: none;
+}
+
+.assistant-model-select:focus {
+    border-color: var(--assistant-primary);
+}
+
+.assistant-model-select optgroup {
+    font-size: 11px;
+    color: var(--assistant-text-muted);
+}
+
+.assistant-model-select option {
+    background: var(--assistant-bg);
+    color: var(--assistant-text);
+    padding: 2px;
 }
 
 /* --------------------------------------------------------------------------

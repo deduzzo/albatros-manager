@@ -300,26 +300,75 @@ class AssistantEngine {
     }
 
     /**
-     * Mostra info modello nell'header del widget e nella pagina fullscreen
+     * Mostra info modello nell'header, accanto allo status
      */
     _showModelInfo() {
         const model = this._getSelectedModel();
-        // Nome leggibile: "Qwen2.5-3B-Instruct-q4f16_1-MLC" → "Qwen2.5 3B"
-        const shortName = model
+        const shortName = this._getModelShortName(model);
+
+        // Label cliccabile
+        const label = document.getElementById('assistantModelLabel');
+        if (label) {
+            label.textContent = shortName;
+            label.style.display = 'inline-block';
+
+            // Click toggle switcher
+            if (!label._bound) {
+                label.addEventListener('click', () => this._toggleModelSwitcher());
+                label._bound = true;
+            }
+        }
+
+        // Imposta valore corrente nel select
+        const select = document.getElementById('assistantModelQuickSelect');
+        if (select) {
+            select.value = model;
+            if (!select._bound) {
+                select.addEventListener('change', (e) => this._onModelQuickSwitch(e.target.value));
+                select._bound = true;
+            }
+        }
+    }
+
+    _getModelShortName(model) {
+        return model
             .replace(/-q4f\d+_\d+-MLC$/, '')
+            .replace(/-q4f\d+-MLC$/, '')
             .replace(/-Instruct$/, '')
             .replace(/-/g, ' ')
             .replace(/\s+/g, ' ')
             .trim();
+    }
 
-        const mode = this._supportsToolCalling() ? 'function calling' : 'keyword routing';
+    _toggleModelSwitcher() {
+        const switcher = document.getElementById('assistantModelSwitcher');
+        if (!switcher) return;
+        const visible = switcher.style.display !== 'none';
+        switcher.style.display = visible ? 'none' : 'block';
+        if (!visible) {
+            const select = document.getElementById('assistantModelQuickSelect');
+            if (select) select.focus();
+        }
+    }
 
-        // Aggiorna l'elemento info modello
-        const infoEls = document.querySelectorAll('.assistant-model-info');
-        infoEls.forEach(el => {
-            el.textContent = `${shortName} · ${mode}`;
-            el.style.display = 'block';
-        });
+    _onModelQuickSwitch(newModel) {
+        const currentModel = this._getSelectedModel();
+        if (newModel === currentModel) {
+            document.getElementById('assistantModelSwitcher').style.display = 'none';
+            return;
+        }
+
+        localStorage.setItem(STORAGE_MODEL_KEY, newModel);
+        document.getElementById('assistantModelSwitcher').style.display = 'none';
+
+        // Aggiorna label
+        const label = document.getElementById('assistantModelLabel');
+        if (label) label.textContent = this._getModelShortName(newModel);
+
+        // Ricarica modello
+        this.isReady = false;
+        this.chat.setInputEnabled(false);
+        this._loadModel();
     }
 
     _updateStatus(text, statusClass) {
