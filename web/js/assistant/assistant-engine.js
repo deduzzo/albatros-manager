@@ -12,6 +12,15 @@ const DEFAULT_MODEL = 'Qwen2.5-3B-Instruct-q4f16_1-MLC';
 const STORAGE_MODEL_KEY = 'assistant_selected_model';
 const GENERATION_TIMEOUT = 30000; // 30 secondi
 
+// Modelli che supportano function calling in WebLLM
+const FUNCTION_CALLING_MODELS = [
+    'Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC',
+    'Hermes-2-Pro-Llama-3-8B-q4f32_1-MLC',
+    'Hermes-2-Pro-Mistral-7B-q4f16_1-MLC',
+    'Hermes-3-Llama-3.1-8B-q4f32_1-MLC',
+    'Hermes-3-Llama-3.1-8B-q4f16_1-MLC',
+];
+
 class AssistantEngine {
     constructor() {
         this.worker = null;
@@ -373,9 +382,16 @@ Puoi aiutare con:
         return prompt;
     }
 
+    // ── Model Capabilities ─────────────────────────────────────────────
+
+    _supportsToolCalling() {
+        const model = this._getSelectedModel();
+        return FUNCTION_CALLING_MODELS.some(m => model.includes(m) || m.includes(model));
+    }
+
     // ── User Message Handling ──────────────────────────────────────────
 
-    _onUserMessage(text) {
+    async _onUserMessage(text) {
         if (!this.isReady) {
             this.chat.addMessage('assistant', 'Il modello non e ancora pronto. Attendi il completamento del caricamento.');
             return;
@@ -392,19 +408,82 @@ Puoi aiutare con:
         // Aggiungi alla cronologia conversazione
         this.conversationHistory.push({ role: 'user', content: text });
 
-        // Costruisci array messaggi
+        if (this._supportsToolCalling()) {
+            // Modello con function calling (Hermes) → invia tools
+            const messages = [
+                { role: 'system', content: this.systemPrompt },
+                ...this.conversationHistory
+            ];
+
+            this.worker.postMessage({
+                type: 'chat',
+                data: { messages, tools: toolDefinitions }
+            });
+        } else {
+            // Modello senza function calling (Qwen) → keyword routing + formattazione LLM
+            await this._handleWithKeywordFallback(text);
+            return;
+        }
+
+        // Avvia timer timeout
+        this._startGenerationTimeout();
+    }
+
+    /**
+     * Per modelli senza function calling: usa keyword routing per ottenere i dati,
+     * poi chiedi al modello di formattare la risposta in italiano.
+     */
+    async _handleWithKeywordFallback(userText) {
+        const fn = keywordRoute(userText);
+
+        if (fn) {
+            try {
+                const params = extractParams(userText, fn);
+                const result = await executeToolCall(fn, params);
+
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                // Chiedi al modello di formattare la risposta con i dati
+                const messages = [
+                    { role: 'system', content: this.systemPrompt },
+                    {
+                        role: 'user',
+                        content: `L'utente ha chiesto: "${userText}"\n\nEcco i dati dal database:\n${JSON.stringify(result, null, 2)}\n\nRispondi alla domanda dell'utente in italiano usando questi dati. Formatta in modo chiaro con tabelle o elenchi se utile.`
+                    }
+                ];
+
+                this.worker.postMessage({
+                    type: 'chat',
+                    data: { messages, tools: [] }
+                });
+
+                this._startGenerationTimeout();
+            } catch (e) {
+                // API fallita, rispondi con il riepilogo generale
+                this._respondWithRiepilogo(userText);
+            }
+        } else {
+            // Nessun match keyword → rispondi con il riepilogo nel system prompt
+            this._respondWithRiepilogo(userText);
+        }
+    }
+
+    /**
+     * Fallback finale: rispondi basandosi solo sul riepilogo gia nel system prompt
+     */
+    _respondWithRiepilogo(userText) {
         const messages = [
             { role: 'system', content: this.systemPrompt },
             ...this.conversationHistory
         ];
 
-        // Invia al worker con tools
         this.worker.postMessage({
             type: 'chat',
-            data: { messages, tools: toolDefinitions }
+            data: { messages, tools: [] }
         });
 
-        // Avvia timer timeout
         this._startGenerationTimeout();
     }
 

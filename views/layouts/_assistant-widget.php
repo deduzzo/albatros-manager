@@ -104,9 +104,18 @@ use yii\helpers\Url;
                 <div class="mb-3">
                     <label class="form-label" style="color: var(--assistant-text-muted);">Modello AI</label>
                     <select id="assistantModelSelect" class="form-select" style="background: var(--assistant-bg-light); border-color: var(--assistant-border); color: var(--assistant-text);">
-                        <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC" selected>Qwen2.5-3B-Instruct (Standard ~2GB)</option>
-                        <option value="Qwen2.5-7B-Instruct-q4f16_1-MLC">Qwen2.5-7B-Instruct (Avanzato ~5GB)</option>
+                        <optgroup label="Standard (keyword routing)">
+                            <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC" selected>Qwen2.5 3B (~2GB) - Veloce</option>
+                            <option value="Qwen2.5-7B-Instruct-q4f16_1-MLC">Qwen2.5 7B (~5GB) - Migliore italiano</option>
+                        </optgroup>
+                        <optgroup label="Avanzato (function calling nativo)">
+                            <option value="Hermes-3-Llama-3.1-8B-q4f16_1-MLC">Hermes-3 8B (~5GB) - Function calling</option>
+                            <option value="Hermes-2-Pro-Mistral-7B-q4f16_1-MLC">Hermes-2 Pro 7B (~5GB) - Function calling</option>
+                        </optgroup>
                     </select>
+                    <small class="form-hint mt-1" style="color: var(--assistant-text-muted);">
+                        I modelli "Standard" usano keyword matching per le query. I modelli "Avanzato" chiamano le API direttamente.
+                    </small>
                 </div>
             </div>
             <div class="modal-footer" style="border-top-color: var(--assistant-border);">
