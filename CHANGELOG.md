@@ -4,6 +4,7 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.22] - 2026-03-15
 ## [v1.0.21] - 2026-03-15
 ### Novità {tutti}
 - Template email HTML brandizzato con logo Fondazione Albatros
