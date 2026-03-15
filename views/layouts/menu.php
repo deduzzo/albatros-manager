@@ -59,6 +59,9 @@ $isActive = function($controllers) use ($currentController) {
                                 <a class="dropdown-item <?= $currentController == 'utente' ? 'active' : '' ?>" href="<?= Url::to(['/utente/index']) ?>">
                                     <i class="ti ti-users-group me-2"></i> Gestione Utenti
                                 </a>
+                                <a class="dropdown-item <?= ($currentController == 'site' && $currentAction == 'test-email') ? 'active' : '' ?>" href="<?= Url::to(['/site/test-email']) ?>">
+                                    <i class="ti ti-mail-check me-2"></i> Test Email
+                                </a>
                             <?php endif; ?>
                         </div>
                     </li>

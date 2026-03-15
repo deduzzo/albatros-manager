@@ -8,6 +8,9 @@ Tutte le modifiche al portale Albatros Manager.
 - Template email HTML brandizzato con logo Fondazione Albatros
 - Invio email di reset password funzionante per docenti e studenti
 
+### Novità {admin}
+- Pagina test email (Configurazione → Test Email) con 3 template selezionabili
+
 ### Miglioramenti {admin}
 - Lista studenti: aggiunti data nascita, conteggio iscrizioni, status badge
 - Lista progetti: aggiunto stato finanziario con progress bar e conteggio studenti

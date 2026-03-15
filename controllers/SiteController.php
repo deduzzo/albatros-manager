@@ -568,4 +568,91 @@ class SiteController extends Controller
             'email' => $email,
         ]);
     }
+
+    /**
+     * Pagina test invio email (solo admin autenticati)
+     */
+    public function actionTestEmail()
+    {
+        $risultato = null;
+        $errore = null;
+
+        if (Yii::$app->request->isPost) {
+            $destinatario = trim(Yii::$app->request->post('destinatario', ''));
+            $oggetto = trim(Yii::$app->request->post('oggetto', 'Test Email - Albatros Manager'));
+            $template = Yii::$app->request->post('template', 'generico');
+
+            if (empty($destinatario) || !filter_var($destinatario, FILTER_VALIDATE_EMAIL)) {
+                $errore = 'Inserisci un indirizzo email valido.';
+            } else {
+                try {
+                    $params = [];
+                    switch ($template) {
+                        case 'password-reset':
+                            $htmlBody = 'password-reset-html';
+                            $textBody = 'password-reset-text';
+                            $params = [
+                                'nome' => 'Mario Rossi (test)',
+                                'resetLink' => Yii::$app->request->hostInfo . '/area-docenti/reset-password?token=TEST_TOKEN_123',
+                                'expiry' => '24 ore',
+                            ];
+                            break;
+
+                        case 'notifica':
+                            $htmlBody = 'notifica-html';
+                            $textBody = 'notifica-text';
+                            $params = [
+                                'titolo' => 'Notifica di Test',
+                                'contenuto' => '<p>Questa è una <strong>notifica di test</strong> inviata dalla pagina di test email.</p><p>Se ricevi questa email, il sistema di notifiche funziona correttamente.</p>',
+                                'destinatarioNome' => 'Utente Test',
+                            ];
+                            break;
+
+                        default: // generico
+                            $htmlBody = null;
+                            $textBody = null;
+                            break;
+                    }
+
+                    if ($htmlBody) {
+                        $message = Yii::$app->mailer->compose(
+                            ['html' => $htmlBody, 'text' => $textBody],
+                            $params
+                        );
+                    } else {
+                        $message = Yii::$app->mailer->compose()
+                            ->setHtmlBody(
+                                Yii::$app->view->render('@app/mail/layouts/html', [
+                                    'content' => '<h2 style="color: #1e3a5f; margin: 0 0 15px;">Test Email</h2>'
+                                        . '<p>Se ricevi questa email, la configurazione SMTP funziona correttamente.</p>'
+                                        . '<table cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse; margin:15px 0;">'
+                                        . '<tr><td style="border:1px solid #e0e5ec; background:#f8f9fa; font-weight:bold;">Server SMTP</td><td style="border:1px solid #e0e5ec;">Configurato</td></tr>'
+                                        . '<tr><td style="border:1px solid #e0e5ec; background:#f8f9fa; font-weight:bold;">Data/Ora</td><td style="border:1px solid #e0e5ec;">' . date('d/m/Y H:i:s') . '</td></tr>'
+                                        . '<tr><td style="border:1px solid #e0e5ec; background:#f8f9fa; font-weight:bold;">Inviata da</td><td style="border:1px solid #e0e5ec;">' . (Yii::$app->user->identity->username ?? 'admin') . '</td></tr>'
+                                        . '</table>'
+                                        . '<p style="color: #6c757d; font-size: 13px;">Questa è un\'email di test generata automaticamente.</p>',
+                                ])
+                            )
+                            ->setTextBody('Test Email - Configurazione SMTP OK - ' . date('d/m/Y H:i:s'));
+                    }
+
+                    $sent = $message
+                        ->setTo($destinatario)
+                        ->setSubject($oggetto)
+                        ->send();
+
+                    $risultato = $sent
+                        ? "Email inviata con successo a <strong>{$destinatario}</strong>"
+                        : "Invio fallito. Controlla la configurazione SMTP.";
+                } catch (\Throwable $e) {
+                    $errore = 'Errore: ' . $e->getMessage();
+                }
+            }
+        }
+
+        return $this->render('test-email', [
+            'risultato' => $risultato,
+            'errore' => $errore,
+        ]);
+    }
 }
