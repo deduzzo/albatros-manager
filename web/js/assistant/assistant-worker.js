@@ -52,7 +52,7 @@ async function handleInit(data) {
                         progress: report.progress || 0
                     }
                 });
-            }
+            },
         });
 
         self.postMessage({ type: 'status', data: 'ready' });

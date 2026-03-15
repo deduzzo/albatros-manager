@@ -356,27 +356,12 @@ class AssistantEngine {
     }
 
     _buildSystemPrompt(riepilogoData) {
-        let prompt = `Sei l'assistente AI del gestionale "Albatros Manager", un sistema per la gestione di docenti e corsi finanziati da FSE, PNRR e MIM.
-
-Rispondi SEMPRE in italiano. Sei conciso, preciso e professionale.
-Quando ricevi dati da una funzione, presentali in modo chiaro e leggibile usando tabelle markdown, elenchi puntati o testo formattato.
-Non inventare dati: usa solo le informazioni fornite dalle funzioni.
-Se non hai dati sufficienti, chiedi all'utente di essere piu specifico.
-
-Puoi aiutare con:
-- Riepilogo generale della situazione (progetti, budget, docenti, studenti)
-- Lista progetti e stato avanzamento
-- Moduli senza docente assegnato
-- Ricerca docenti per competenza
-- Saldi da liquidare e pagamenti in attesa
-- Ore rendicontate e stato approvazione
-- Graduatorie docenti per modulo
-- Studenti iscritti ai progetti
-- Valutazioni docenti da questionari anonimi
-- Scadenze di bandi e contratti`;
+        let prompt = `Sei l'assistente AI di Albatros Manager (gestione docenti/corsi FSE-PNRR-MIM). Rispondi in italiano, conciso e preciso. Usa tabelle markdown ed elenchi. Non inventare dati.`;
 
         if (riepilogoData) {
-            prompt += `\n\nEcco la situazione attuale del sistema:\n${JSON.stringify(riepilogoData, null, 2)}`;
+            // Compatta il riepilogo per ridurre i token
+            const r = riepilogoData;
+            prompt += `\n\nDATI ATTUALI: ${r.progetti?.totale || 0} progetti (${r.progetti?.attivi || 0} attivi), ${r.docenti?.totale || 0} docenti (${r.docenti?.con_assegnazione || 0} assegnati), ${r.studenti?.totale || 0} studenti (${r.studenti?.frequentanti || 0} frequentanti), ${r.moduli?.totale || 0} moduli (${r.moduli?.senza_docente || 0} scoperti). Budget: ${r.finanziario?.budget_totale || 0}€, Pagato: ${r.finanziario?.pagato || 0}€, Da pagare: ${r.finanziario?.da_pagare || 0}€.`;
         }
 
         return prompt;
@@ -445,12 +430,16 @@ Puoi aiutare con:
                     throw new Error(result.error);
                 }
 
-                // Chiedi al modello di formattare la risposta con i dati
+                // Chiedi al modello di formattare la risposta con i dati (compatto)
+                const dataStr = JSON.stringify(result);
+                // Tronca a max 2000 caratteri per non eccedere il context
+                const truncatedData = dataStr.length > 2000 ? dataStr.substring(0, 2000) + '...(troncato)' : dataStr;
+
                 const messages = [
                     { role: 'system', content: this.systemPrompt },
                     {
                         role: 'user',
-                        content: `L'utente ha chiesto: "${userText}"\n\nEcco i dati dal database:\n${JSON.stringify(result, null, 2)}\n\nRispondi alla domanda dell'utente in italiano usando questi dati. Formatta in modo chiaro con tabelle o elenchi se utile.`
+                        content: `Domanda: "${userText}"\n\nDati:\n${truncatedData}\n\nRispondi in italiano usando questi dati.`
                     }
                 ];
 
@@ -613,11 +602,14 @@ Puoi aiutare con:
                     const result = await executeToolCall(fallbackFn, params);
 
                     // Crea messaggi freschi SENZA tool_calls (compatibile con tutti i modelli)
+                    const dataStr = JSON.stringify(result);
+                    const truncatedData = dataStr.length > 2000 ? dataStr.substring(0, 2000) + '...(troncato)' : dataStr;
+
                     const messages = [
                         { role: 'system', content: this.systemPrompt },
                         {
                             role: 'user',
-                            content: `L'utente ha chiesto: "${lastUserMsg.content}"\n\nEcco i dati dal database:\n${JSON.stringify(result, null, 2)}\n\nRispondi alla domanda in italiano. Formatta con tabelle o elenchi se utile.`
+                            content: `Domanda: "${lastUserMsg.content}"\n\nDati:\n${truncatedData}\n\nRispondi in italiano.`
                         }
                     ];
 
