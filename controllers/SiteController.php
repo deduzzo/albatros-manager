@@ -601,10 +601,12 @@ class SiteController extends Controller
                         case 'notifica':
                             $htmlBody = 'notifica-html';
                             $textBody = 'notifica-text';
+                            $notificaTest = new \app\models\Notifica();
+                            $notificaTest->titolo = 'Notifica di Test';
+                            $notificaTest->contenuto = '<p>Questa è una <strong>notifica di test</strong> inviata dalla pagina di test email.</p><p>Se ricevi questa email, il sistema di notifiche funziona correttamente.</p>';
+                            $notificaTest->link = null;
                             $params = [
-                                'titolo' => 'Notifica di Test',
-                                'contenuto' => '<p>Questa è una <strong>notifica di test</strong> inviata dalla pagina di test email.</p><p>Se ricevi questa email, il sistema di notifiche funziona correttamente.</p>',
-                                'destinatarioNome' => 'Utente Test',
+                                'notifica' => $notificaTest,
                             ];
                             break;
 
