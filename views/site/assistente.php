@@ -66,6 +66,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         <button class="assistant-suggestion-btn" data-query="Quante ore sono state rendicontate e quante approvate questo mese?">Ore rendicontate</button>
                     </div>
 
+                    <!-- Model Info -->
+                    <div class="assistant-model-info" style="display:none"></div>
+
                     <!-- Input Area -->
                     <div class="assistant-input-area">
                         <input id="fullscreenInput" type="text" class="assistant-input" placeholder="Scrivi un messaggio..." disabled>

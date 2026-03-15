@@ -479,6 +479,18 @@
 }
 
 /* --------------------------------------------------------------------------
+   Model Info
+   -------------------------------------------------------------------------- */
+.assistant-model-info {
+    text-align: center;
+    font-size: 10px;
+    color: var(--assistant-text-dim);
+    padding: 4px 16px;
+    border-top: 1px solid var(--assistant-border-light);
+    letter-spacing: 0.3px;
+}
+
+/* --------------------------------------------------------------------------
    Input Area
    -------------------------------------------------------------------------- */
 .assistant-input-area {

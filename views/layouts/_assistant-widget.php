@@ -75,6 +75,9 @@ use yii\helpers\Url;
         <button class="assistant-suggestion-btn" data-query="Quali sono le prossime scadenze di bandi e contratti?">Scadenze</button>
     </div>
 
+    <!-- Model Info -->
+    <div class="assistant-model-info" style="display:none"></div>
+
     <!-- Input Area -->
     <div class="assistant-input-area">
         <input id="assistantInput" type="text" class="assistant-input" placeholder="Scrivi un messaggio..." disabled>

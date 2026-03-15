@@ -290,12 +290,36 @@ class AssistantEngine {
             this.isReady = true;
             this._showDownloadProgress(false);
             this._updateStatus('Pronto', 'ready');
+            this._showModelInfo();
 
             // Abilita input
             if (this.chat) {
                 this.chat.setInputEnabled(true);
             }
         }
+    }
+
+    /**
+     * Mostra info modello nell'header del widget e nella pagina fullscreen
+     */
+    _showModelInfo() {
+        const model = this._getSelectedModel();
+        // Nome leggibile: "Qwen2.5-3B-Instruct-q4f16_1-MLC" → "Qwen2.5 3B"
+        const shortName = model
+            .replace(/-q4f\d+_\d+-MLC$/, '')
+            .replace(/-Instruct$/, '')
+            .replace(/-/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        const mode = this._supportsToolCalling() ? 'function calling' : 'keyword routing';
+
+        // Aggiorna l'elemento info modello
+        const infoEls = document.querySelectorAll('.assistant-model-info');
+        infoEls.forEach(el => {
+            el.textContent = `${shortName} · ${mode}`;
+            el.style.display = 'block';
+        });
     }
 
     _updateStatus(text, statusClass) {
