@@ -570,6 +570,14 @@ class SiteController extends Controller
     }
 
     /**
+     * Pagina assistente AI (fullscreen).
+     */
+    public function actionAssistente()
+    {
+        return $this->render('assistente');
+    }
+
+    /**
      * Pagina test invio email (solo admin autenticati)
      */
     public function actionTestEmail()
