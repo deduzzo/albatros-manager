@@ -467,11 +467,8 @@ class AssistantEngine {
         this.conversationHistory.push({ role: 'user', content: text });
 
         if (this._supportsToolCalling()) {
-            // Modello con function calling (Hermes) → invia tools
-            const messages = [
-                { role: 'system', content: this.systemPrompt },
-                ...this.conversationHistory
-            ];
+            // Hermes con function calling: NO system prompt custom (limitazione WebLLM)
+            const messages = [...this.conversationHistory];
 
             this.worker.postMessage({
                 type: 'chat',
@@ -640,10 +637,10 @@ class AssistantEngine {
         }
 
         // Re-invia al worker SENZA tools per ottenere la risposta finale
-        const messages = [
-            { role: 'system', content: this.systemPrompt },
-            ...this.conversationHistory
-        ];
+        // Hermes: no system prompt (limitazione WebLLM)
+        const messages = this._supportsToolCalling()
+            ? [...this.conversationHistory]
+            : [{ role: 'system', content: this.systemPrompt }, ...this._getCleanHistory()];
 
         this.worker.postMessage({
             type: 'chat',
