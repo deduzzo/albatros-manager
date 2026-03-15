@@ -476,7 +476,7 @@ Puoi aiutare con:
     _respondWithRiepilogo(userText) {
         const messages = [
             { role: 'system', content: this.systemPrompt },
-            ...this.conversationHistory
+            ...this._getCleanHistory()
         ];
 
         this.worker.postMessage({
@@ -485,6 +485,17 @@ Puoi aiutare con:
         });
 
         this._startGenerationTimeout();
+    }
+
+    /**
+     * Restituisce la cronologia filtrata: solo messaggi con content stringa.
+     * Rimuove messaggi tool_calls/tool che Qwen non sa gestire.
+     */
+    _getCleanHistory() {
+        return this.conversationHistory.filter(m =>
+            typeof m.content === 'string' && m.content.length > 0 &&
+            (m.role === 'user' || m.role === 'assistant')
+        );
     }
 
     // ── Token Streaming ────────────────────────────────────────────────
@@ -587,9 +598,9 @@ Puoi aiutare con:
 
         console.warn('Errore assistente:', errorMessage);
 
-        // Prova fallback con keyword routing
+        // Prova fallback con keyword routing (senza inquinare la history)
         const lastUserMsg = this.conversationHistory
-            .filter(m => m.role === 'user')
+            .filter(m => m.role === 'user' && typeof m.content === 'string')
             .pop();
 
         if (lastUserMsg) {
@@ -601,30 +612,13 @@ Puoi aiutare con:
                     const params = extractParams(lastUserMsg.content, fallbackFn);
                     const result = await executeToolCall(fallbackFn, params);
 
-                    // Aggiungi il risultato come contesto e chiedi al modello di formattarlo
-                    this.conversationHistory.push({
-                        role: 'assistant',
-                        content: null,
-                        tool_calls: [{
-                            id: 'fallback_1',
-                            type: 'function',
-                            function: {
-                                name: fallbackFn,
-                                arguments: JSON.stringify(params)
-                            }
-                        }]
-                    });
-
-                    this.conversationHistory.push({
-                        role: 'tool',
-                        tool_call_id: 'fallback_1',
-                        content: JSON.stringify(result)
-                    });
-
-                    // Re-invia al worker per formattare
+                    // Crea messaggi freschi SENZA tool_calls (compatibile con tutti i modelli)
                     const messages = [
                         { role: 'system', content: this.systemPrompt },
-                        ...this.conversationHistory
+                        {
+                            role: 'user',
+                            content: `L'utente ha chiesto: "${lastUserMsg.content}"\n\nEcco i dati dal database:\n${JSON.stringify(result, null, 2)}\n\nRispondi alla domanda in italiano. Formatta con tabelle o elenchi se utile.`
+                        }
                     ];
 
                     this.worker.postMessage({
