@@ -4,12 +4,14 @@
 /* @var $content string */
 
 use app\components\assets\TablerAsset;
+use app\components\assets\TomSelectAsset;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 use app\components\widgets\Alert;
 
 TablerAsset::register($this);
+TomSelectAsset::register($this);
 
 $docenteUser = Yii::$app->docenteUser;
 $docente = ($docenteUser->isGuest || !$docenteUser->identity) ? null : $docenteUser->identity->docente;

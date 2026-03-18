@@ -29,8 +29,7 @@ class RimborsoSpesaSearch extends RimborsoSpesa
     {
         return [
             [['id', 'assegnazione_id', 'approvato_da', 'progetto_id'], 'integer'],
-            [['tipo', 'descrizione', 'data_spesa', 'status', 'note', 'docente_nome', 'modulo_nome'], 'safe'],
-            [['importo'], 'number'],
+            [['descrizione', 'data_spesa', 'status', 'note', 'docente_nome', 'modulo_nome'], 'safe'],
         ];
     }
 
@@ -56,8 +55,6 @@ class RimborsoSpesaSearch extends RimborsoSpesa
                 'defaultOrder' => ['id' => SORT_DESC],
                 'attributes' => [
                     'id',
-                    'tipo',
-                    'importo',
                     'data_spesa',
                     'status',
                     'created_at',
@@ -87,7 +84,6 @@ class RimborsoSpesaSearch extends RimborsoSpesa
         $query->andFilterWhere([
             'rs.id' => $this->id,
             'rs.assegnazione_id' => $this->assegnazione_id,
-            'rs.tipo' => $this->tipo,
             'rs.status' => $this->status,
         ]);
 

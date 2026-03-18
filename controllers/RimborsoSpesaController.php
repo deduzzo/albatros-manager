@@ -5,8 +5,11 @@ namespace app\controllers;
 use Yii;
 use app\models\RimborsoSpesa;
 use app\models\RimborsoSpesaSearch;
+use app\models\Assegnazione;
+use app\models\VoceSpesa;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
@@ -64,8 +67,102 @@ class RimborsoSpesaController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+        $model->populateRelation('dettagli', $model->getDettagli()->all());
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Crea un nuovo rimborso spesa (admin).
+     * @return mixed
+     */
+    public function actionCreate()
+    {
+        $model = new RimborsoSpesa();
+        $model->status = RimborsoSpesa::STATUS_RICHIESTO;
+        $model->data_spesa = date('Y-m-d');
+
+        if ($model->load(Yii::$app->request->post())) {
+            // Upload allegato
+            $file = UploadedFile::getInstanceByName('allegato');
+            if ($file) {
+                $uploadPath = Yii::getAlias('@webroot/uploads/rimborsi');
+                if (!is_dir($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                $fileName = 'rimborso_admin_' . time() . '.' . $file->extension;
+                if ($file->saveAs($uploadPath . '/' . $fileName)) {
+                    $model->allegato_path = 'uploads/rimborsi/' . $fileName;
+                }
+            }
+
+            if ($model->save()) {
+                // Salva dettagli
+                $dettagliData = Yii::$app->request->post('Dettagli', []);
+                if (!empty($dettagliData)) {
+                    $model->salvaDettagli($dettagliData);
+                }
+                Yii::$app->session->setFlash('success', 'Rimborso spesa creato con successo.');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+
+        // Lista assegnazioni per dropdown
+        $assegnazioni = $this->getAssegnazioniList();
+        $vociSpesa = VoceSpesa::getListGrouped();
+
+        return $this->render('create', [
+            'model' => $model,
+            'assegnazioni' => $assegnazioni,
+            'vociSpesa' => $vociSpesa,
+        ]);
+    }
+
+    /**
+     * Modifica un rimborso spesa esistente (admin).
+     * @param int $id
+     * @return mixed
+     * @throws NotFoundHttpException
+     */
+    public function actionUpdate($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post())) {
+            // Upload allegato
+            $file = UploadedFile::getInstanceByName('allegato');
+            if ($file) {
+                $uploadPath = Yii::getAlias('@webroot/uploads/rimborsi');
+                if (!is_dir($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                $fileName = 'rimborso_admin_' . time() . '.' . $file->extension;
+                if ($file->saveAs($uploadPath . '/' . $fileName)) {
+                    $model->allegato_path = 'uploads/rimborsi/' . $fileName;
+                }
+            }
+
+            if ($model->save()) {
+                // Salva dettagli
+                $dettagliData = Yii::$app->request->post('Dettagli', []);
+                if (!empty($dettagliData)) {
+                    $model->salvaDettagli($dettagliData);
+                }
+                Yii::$app->session->setFlash('success', 'Rimborso spesa aggiornato con successo.');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+
+        $assegnazioni = $this->getAssegnazioniList();
+        $vociSpesa = VoceSpesa::getListGrouped();
+
+        return $this->render('update', [
+            'model' => $model,
+            'assegnazioni' => $assegnazioni,
+            'vociSpesa' => $vociSpesa,
         ]);
     }
 
@@ -152,5 +249,31 @@ class RimborsoSpesaController extends Controller
         }
 
         throw new NotFoundHttpException('Il rimborso spesa richiesto non esiste.');
+    }
+
+    /**
+     * Restituisce la lista delle assegnazioni per dropdown admin
+     * @return array [id => "Docente - Modulo"]
+     */
+    private function getAssegnazioniList()
+    {
+        $assegnazioni = Assegnazione::findWithDeleted()
+            ->alias('a')
+            ->leftJoin('docente d', 'a.docente_codice_fiscale = d.codice_fiscale')
+            ->leftJoin('modulo m', 'a.modulo_id = m.id')
+            ->andWhere(['a.deleted_at' => null])
+            ->select([
+                'a.id',
+                "CONCAT(d.cognome, ' ', d.nome, ' - ', COALESCE(m.codice, ''), ' ', COALESCE(m.titolo, '')) as label",
+            ])
+            ->orderBy(['d.cognome' => SORT_ASC, 'd.nome' => SORT_ASC])
+            ->asArray()
+            ->all();
+
+        $result = [];
+        foreach ($assegnazioni as $a) {
+            $result[$a['id']] = $a['label'];
+        }
+        return $result;
     }
 }

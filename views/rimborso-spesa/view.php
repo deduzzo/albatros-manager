@@ -9,6 +9,8 @@ $assegnazione = $model->assegnazione;
 $docente = $assegnazione ? $assegnazione->docente : null;
 $modulo = $assegnazione ? $assegnazione->modulo : null;
 $docenteNome = $docente ? $docente->cognome . ' ' . $docente->nome : 'N/D';
+$dettagli = $model->dettagli;
+$totale = $model->getTotaleImporto();
 
 $this->title = 'Rimborso Spesa #' . $model->id;
 $this->params['breadcrumbs'][] = ['label' => 'Rimborsi Spesa', 'url' => ['index']];
@@ -26,10 +28,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     </h2>
                     <div class="text-muted mt-1">
                         <?= Html::encode($docenteNome) ?>
-                        &mdash; <?= $model->getTipoBadge() ?>
                     </div>
                 </div>
                 <div class="col-auto ms-auto">
+                    <?= Html::a('<i class="ti ti-edit me-1"></i> Modifica', ['update', 'id' => $model->id], ['class' => 'btn btn-primary me-1']) ?>
                     <?php if ($model->status === \app\models\RimborsoSpesa::STATUS_RICHIESTO): ?>
                         <?= Html::a('<i class="ti ti-check me-1"></i> Approva', ['approva', 'id' => $model->id], [
                             'class' => 'btn btn-green me-1',
@@ -58,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="container-xl">
             <div class="row row-deck row-cards">
                 <!-- Stat Cards -->
-                <div class="col-sm-6 col-lg-3">
+                <div class="col-sm-6 col-lg-4">
                     <div class="card">
                         <div class="card-body">
                             <div class="subheader">Stato</div>
@@ -66,23 +68,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6 col-lg-3">
+                <div class="col-sm-6 col-lg-4">
                     <div class="card">
                         <div class="card-body">
-                            <div class="subheader">Tipo</div>
-                            <div class="h1 mb-0 mt-2"><?= $model->getTipoBadge() ?></div>
+                            <div class="subheader">Totale Importo</div>
+                            <div class="h1 mb-0 mt-2"><?= Yii::$app->formatter->asCurrency($totale, 'EUR') ?></div>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="subheader">Importo</div>
-                            <div class="h1 mb-0 mt-2"><?= Yii::$app->formatter->asCurrency($model->importo, 'EUR') ?></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-3">
+                <div class="col-sm-6 col-lg-4">
                     <div class="card">
                         <div class="card-body">
                             <div class="subheader">Data Spesa</div>
@@ -91,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
 
-                <!-- Dettagli -->
+                <!-- Dettagli Rimborso -->
                 <div class="col-lg-6">
                     <div class="card">
                         <div class="card-header">
@@ -167,8 +161,60 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
 
-                <!-- Allegato -->
+                <!-- Voci di Spesa + Allegato -->
                 <div class="col-lg-6">
+                    <!-- Voci di spesa dettaglio -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-list-details me-2"></i> Voci di Spesa</h3>
+                        </div>
+                        <?php if (!empty($dettagli)): ?>
+                            <div class="table-responsive">
+                                <table class="table table-vcenter card-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Voce</th>
+                                            <th>Descrizione</th>
+                                            <th class="text-end">Importo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($dettagli as $dettaglio): ?>
+                                            <tr>
+                                                <td>
+                                                    <?php if ($dettaglio->voceSpesa): ?>
+                                                        <span class="badge bg-blue-lt"><?= Html::encode($dettaglio->voceSpesa->getLabel()) ?></span>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">-</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?= Html::encode($dettaglio->descrizione) ?>
+                                                    <?php if ($dettaglio->note): ?>
+                                                        <br><small class="text-muted"><?= Html::encode($dettaglio->note) ?></small>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="text-end"><?= Yii::$app->formatter->asCurrency($dettaglio->importo, 'EUR') ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="fw-bold">
+                                            <td colspan="2" class="text-end">Totale</td>
+                                            <td class="text-end"><?= Yii::$app->formatter->asCurrency($totale, 'EUR') ?></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="card-body text-center text-muted">
+                                <i class="ti ti-receipt-off" style="font-size: 2rem;"></i>
+                                <p class="mt-2">Nessuna voce di spesa registrata.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Allegato -->
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title"><i class="ti ti-paperclip me-2"></i> Allegato</h3>

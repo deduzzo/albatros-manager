@@ -711,6 +711,11 @@ class DocenteAreaController extends Controller
             }
 
             if ($model->save()) {
+                // Salva dettagli voci di spesa
+                $dettagliData = Yii::$app->request->post('Dettagli', []);
+                if (!empty($dettagliData)) {
+                    $model->salvaDettagli($dettagliData);
+                }
                 Yii::$app->session->setFlash('success', 'Richiesta di rimborso inviata con successo.');
                 return $this->redirect(['rimborsi']);
             }
@@ -754,6 +759,11 @@ class DocenteAreaController extends Controller
             }
 
             if ($model->save()) {
+                // Salva dettagli voci di spesa
+                $dettagliData = Yii::$app->request->post('Dettagli', []);
+                if (!empty($dettagliData)) {
+                    $model->salvaDettagli($dettagliData);
+                }
                 Yii::$app->session->setFlash('success', 'Rimborso aggiornato con successo.');
                 return $this->redirect(['rimborsi']);
             }

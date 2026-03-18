@@ -12,10 +12,11 @@ $this->params['breadcrumbs'][] = $this->title;
 $totaleRichiesto = 0;
 $totaleApprovato = 0;
 foreach ($rimborsi as $r) {
+    $importo = $r->getTotaleImporto();
     if ($r->status === 'approvato') {
-        $totaleApprovato += $r->importo;
+        $totaleApprovato += $importo;
     }
-    $totaleRichiesto += $r->importo;
+    $totaleRichiesto += $importo;
 }
 ?>
 
@@ -103,9 +104,9 @@ foreach ($rimborsi as $r) {
                             <tr>
                                 <th>Data</th>
                                 <th>Modulo</th>
-                                <th>Tipo</th>
+                                <th>Voci</th>
                                 <th>Descrizione</th>
-                                <th class="text-end">Importo</th>
+                                <th class="text-end">Totale</th>
                                 <th>Stato</th>
                                 <th></th>
                             </tr>
@@ -122,13 +123,13 @@ foreach ($rimborsi as $r) {
                                             -
                                         <?php endif; ?>
                                     </td>
-                                    <td><?= $rimborso->getTipoBadge() ?></td>
+                                    <td><?= $rimborso->getDettagliRiepilogo() ?></td>
                                     <td>
                                         <div class="text-truncate" style="max-width: 200px;">
                                             <?= Html::encode($rimborso->descrizione) ?>
                                         </div>
                                     </td>
-                                    <td class="text-end"><?= Yii::$app->formatter->asCurrency($rimborso->importo, 'EUR') ?></td>
+                                    <td class="text-end fw-bold"><?= Yii::$app->formatter->asCurrency($rimborso->getTotaleImporto(), 'EUR') ?></td>
                                     <td><?= $rimborso->getStatusBadge() ?></td>
                                     <td>
                                         <?php if ($rimborso->isModificabile()): ?>

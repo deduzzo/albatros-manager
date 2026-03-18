@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use app\components\widgets\AppActiveForm;
-use app\models\RimborsoSpesa;
+use app\models\VoceSpesa;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\RimborsoSpesa */
@@ -10,6 +10,8 @@ use app\models\RimborsoSpesa;
 /* @var $isModifica bool */
 
 $modulo = $assegnazione->modulo;
+$vociSpesa = VoceSpesa::getListGrouped();
+$dettagli = $isModifica ? $model->dettagli : [];
 
 $this->title = ($isModifica ? 'Modifica' : 'Nuovo') . ' Rimborso Spesa';
 $this->params['breadcrumbs'][] = ['label' => 'I Miei Rimborsi', 'url' => ['rimborsi']];
@@ -44,20 +46,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
                         <div class="row">
                             <div class="col-md-6">
-                                <?= $form->field($model, 'tipo')->dropDownList(RimborsoSpesa::getTipoList(), [
-                                    'prompt' => '-- Seleziona tipo --',
-                                    'class' => 'form-select',
-                                ])->label('Tipo di spesa <span class="text-red">*</span>') ?>
-                            </div>
-                            <div class="col-md-3">
-                                <?= $form->field($model, 'importo')->textInput([
-                                    'type' => 'number',
-                                    'step' => '0.01',
-                                    'min' => '0.01',
-                                    'placeholder' => '0.00',
-                                ])->label('Importo (&euro;) <span class="text-red">*</span>') ?>
-                            </div>
-                            <div class="col-md-3">
                                 <?= $form->field($model, 'data_spesa')->textInput([
                                     'type' => 'date',
                                 ])->label('Data spesa <span class="text-red">*</span>') ?>
@@ -78,9 +66,109 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div class="col-md-12">
                                 <?= $form->field($model, 'note')->textarea([
                                     'rows' => 2,
-                                    'placeholder' => 'Note aggiuntive (opzionale)...',
+                                    'placeholder' => 'Note aggiuntive (PAX, mezzo trasporto, etc.)...',
                                 ]) ?>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voci di spesa -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ti ti-list-details me-2"></i> Voci di Spesa</h3>
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-sm btn-primary" id="btn-aggiungi-voce">
+                                <i class="ti ti-plus me-1"></i> Aggiungi Voce
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="dettagli-container">
+                            <?php if (!empty($dettagli)): ?>
+                                <?php foreach ($dettagli as $i => $dettaglio): ?>
+                                    <div class="dettaglio-row row mb-3 align-items-end" data-index="<?= $i ?>">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Voce</label>
+                                            <select name="Dettagli[<?= $i ?>][voce_spesa_id]" class="form-select voce-select">
+                                                <option value="">-- Libera --</option>
+                                                <?php foreach ($vociSpesa as $catLabel => $voci): ?>
+                                                    <optgroup label="<?= Html::encode($catLabel) ?>">
+                                                        <?php foreach ($voci as $voceId => $voceLabel): ?>
+                                                            <option value="<?= $voceId ?>" <?= $dettaglio->voce_spesa_id == $voceId ? 'selected' : '' ?>>
+                                                                <?= Html::encode($voceLabel) ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    </optgroup>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label required">Descrizione</label>
+                                            <input type="text" name="Dettagli[<?= $i ?>][descrizione]"
+                                                   class="form-control" required
+                                                   value="<?= Html::encode($dettaglio->descrizione) ?>">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label required">Importo (&euro;)</label>
+                                            <input type="number" name="Dettagli[<?= $i ?>][importo]"
+                                                   class="form-control importo-input" required
+                                                   step="0.01" min="0" value="<?= $dettaglio->importo ?>">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Note</label>
+                                            <input type="text" name="Dettagli[<?= $i ?>][note]"
+                                                   class="form-control" value="<?= Html::encode($dettaglio->note) ?>">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-rimuovi-voce">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="dettaglio-row row mb-3 align-items-end" data-index="0">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Voce</label>
+                                        <select name="Dettagli[0][voce_spesa_id]" class="form-select voce-select">
+                                            <option value="">-- Libera --</option>
+                                            <?php foreach ($vociSpesa as $catLabel => $voci): ?>
+                                                <optgroup label="<?= Html::encode($catLabel) ?>">
+                                                    <?php foreach ($voci as $voceId => $voceLabel): ?>
+                                                        <option value="<?= $voceId ?>"><?= Html::encode($voceLabel) ?></option>
+                                                    <?php endforeach; ?>
+                                                </optgroup>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label required">Descrizione</label>
+                                        <input type="text" name="Dettagli[0][descrizione]"
+                                               class="form-control" required placeholder="Descrizione voce...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label required">Importo (&euro;)</label>
+                                        <input type="number" name="Dettagli[0][importo]"
+                                               class="form-control importo-input" required
+                                               step="0.01" min="0" placeholder="0.00">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Note</label>
+                                        <input type="text" name="Dettagli[0][note]" class="form-control" placeholder="Note...">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-rimuovi-voce">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <hr>
+                        <div class="d-flex justify-content-end">
+                            <strong>Totale: &euro; <span id="totale-dettagli">0.00</span></strong>
                         </div>
                     </div>
                 </div>
@@ -154,3 +242,84 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php AppActiveForm::end(); ?>
     </div>
 </div>
+
+<?php
+// Template riga dettaglio per JavaScript
+$vociOptions = '<option value="">-- Libera --</option>';
+foreach ($vociSpesa as $catLabel => $voci) {
+    $vociOptions .= '<optgroup label="' . Html::encode($catLabel) . '">';
+    foreach ($voci as $voceId => $voceLabel) {
+        $vociOptions .= '<option value="' . $voceId . '">' . Html::encode($voceLabel) . '</option>';
+    }
+    $vociOptions .= '</optgroup>';
+}
+$vociOptions = str_replace(["\n", "\r"], '', $vociOptions);
+
+$js = <<<JS
+var dettaglioIndex = document.querySelectorAll('.dettaglio-row').length;
+var vociOptions = '{$vociOptions}';
+
+document.getElementById('btn-aggiungi-voce').addEventListener('click', function() {
+    var container = document.getElementById('dettagli-container');
+    var row = document.createElement('div');
+    row.className = 'dettaglio-row row mb-3 align-items-end';
+    row.setAttribute('data-index', dettaglioIndex);
+    row.innerHTML = '<div class="col-md-3">' +
+        '<label class="form-label">Voce</label>' +
+        '<select name="Dettagli[' + dettaglioIndex + '][voce_spesa_id]" class="form-select voce-select">' + vociOptions + '</select>' +
+        '</div>' +
+        '<div class="col-md-4">' +
+        '<label class="form-label required">Descrizione</label>' +
+        '<input type="text" name="Dettagli[' + dettaglioIndex + '][descrizione]" class="form-control" required placeholder="Descrizione voce...">' +
+        '</div>' +
+        '<div class="col-md-2">' +
+        '<label class="form-label required">Importo (&euro;)</label>' +
+        '<input type="number" name="Dettagli[' + dettaglioIndex + '][importo]" class="form-control importo-input" required step="0.01" min="0" placeholder="0.00">' +
+        '</div>' +
+        '<div class="col-md-2">' +
+        '<label class="form-label">Note</label>' +
+        '<input type="text" name="Dettagli[' + dettaglioIndex + '][note]" class="form-control" placeholder="Note...">' +
+        '</div>' +
+        '<div class="col-md-1">' +
+        '<button type="button" class="btn btn-sm btn-outline-danger btn-rimuovi-voce"><i class="ti ti-trash"></i></button>' +
+        '</div>';
+    container.appendChild(row);
+    dettaglioIndex++;
+    aggiornaListeners();
+    calcolaTotale();
+    // Re-init Tom Select sui nuovi select
+    if (typeof window.initTomSelectOn === 'function') {
+        row.querySelectorAll('select.form-select').forEach(window.initTomSelectOn);
+    }
+});
+
+function aggiornaListeners() {
+    document.querySelectorAll('.btn-rimuovi-voce').forEach(function(btn) {
+        btn.onclick = function() {
+            if (document.querySelectorAll('.dettaglio-row').length > 1) {
+                var selects = this.closest('.dettaglio-row').querySelectorAll('select');
+                selects.forEach(function(s) { if (s.tomselect) s.tomselect.destroy(); });
+                this.closest('.dettaglio-row').remove();
+                calcolaTotale();
+            }
+        };
+    });
+    document.querySelectorAll('.importo-input').forEach(function(input) {
+        input.oninput = calcolaTotale;
+    });
+}
+
+function calcolaTotale() {
+    var tot = 0;
+    document.querySelectorAll('.importo-input').forEach(function(input) {
+        tot += parseFloat(input.value) || 0;
+    });
+    document.getElementById('totale-dettagli').textContent = tot.toFixed(2);
+}
+
+aggiornaListeners();
+calcolaTotale();
+JS;
+
+$this->registerJs($js);
+?>

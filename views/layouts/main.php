@@ -4,11 +4,13 @@
 /* @var $content string */
 
 use app\components\assets\TablerAsset;
+use app\components\assets\TomSelectAsset;
 use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
 use app\components\widgets\Alert;
 
 TablerAsset::register($this);
+TomSelectAsset::register($this);
 
 ?>
 <?php $this->beginPage() ?>

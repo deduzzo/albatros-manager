@@ -10,9 +10,7 @@ use app\components\base\BaseActiveRecord;
  *
  * @property int $id
  * @property int $assegnazione_id
- * @property string $tipo
  * @property string $descrizione
- * @property float $importo
  * @property string $data_spesa
  * @property string|null $allegato_path
  * @property string $status
@@ -29,6 +27,7 @@ use app\components\base\BaseActiveRecord;
  *
  * @property Assegnazione $assegnazione
  * @property User $approvatoDaUser
+ * @property RimborsoSpesaDettaglio[] $dettagli
  */
 class RimborsoSpesa extends BaseActiveRecord
 {
@@ -36,13 +35,6 @@ class RimborsoSpesa extends BaseActiveRecord
     const STATUS_RICHIESTO = 'richiesto';
     const STATUS_APPROVATO = 'approvato';
     const STATUS_RIFIUTATO = 'rifiutato';
-
-    // Costanti tipo
-    const TIPO_MATERIALE = 'materiale';
-    const TIPO_CHILOMETRICO = 'chilometrico';
-    const TIPO_VITTO_ALLOGGIO = 'vitto_alloggio';
-    const TIPO_VIAGGIO = 'viaggio';
-    const TIPO_ALTRO = 'altro';
 
     public static function tableName()
     {
@@ -52,13 +44,11 @@ class RimborsoSpesa extends BaseActiveRecord
     public function rules()
     {
         return [
-            [['assegnazione_id', 'tipo', 'descrizione', 'importo', 'data_spesa'], 'required'],
+            [['assegnazione_id', 'descrizione', 'data_spesa'], 'required'],
             [['assegnazione_id', 'approvato_da'], 'integer'],
-            [['importo'], 'number', 'min' => 0.01],
             [['data_spesa'], 'date', 'format' => 'php:Y-m-d'],
             [['descrizione'], 'string', 'max' => 500],
             [['allegato_path'], 'string', 'max' => 500],
-            [['tipo'], 'in', 'range' => [self::TIPO_MATERIALE, self::TIPO_CHILOMETRICO, self::TIPO_VITTO_ALLOGGIO, self::TIPO_VIAGGIO, self::TIPO_ALTRO]],
             [['status'], 'in', 'range' => [self::STATUS_RICHIESTO, self::STATUS_APPROVATO, self::STATUS_RIFIUTATO]],
             [['motivo_rifiuto', 'note'], 'string'],
             [['approvato_at'], 'safe'],
@@ -76,9 +66,7 @@ class RimborsoSpesa extends BaseActiveRecord
         return [
             'id' => 'ID',
             'assegnazione_id' => 'Assegnazione',
-            'tipo' => 'Tipo',
             'descrizione' => 'Descrizione',
-            'importo' => 'Importo (€)',
             'data_spesa' => 'Data Spesa',
             'allegato_path' => 'Allegato',
             'status' => 'Stato',
@@ -107,48 +95,29 @@ class RimborsoSpesa extends BaseActiveRecord
         return $this->hasOne(User::class, ['id' => 'approvato_da']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDettagli()
+    {
+        return $this->hasMany(RimborsoSpesaDettaglio::class, ['rimborso_spesa_id' => 'id'])
+            ->andWhere(['{{%rimborso_spesa_dettaglio}}.deleted_at' => null]);
+    }
+
+    // ---- Importo calcolato ----
+
+    /**
+     * Calcola il totale importo dai dettagli
+     * @return float
+     */
+    public function getTotaleImporto()
+    {
+        return (float) RimborsoSpesaDettaglio::find()
+            ->where(['rimborso_spesa_id' => $this->id, 'deleted_at' => null])
+            ->sum('importo') ?: 0;
+    }
+
     // ---- Labels e badge ----
-
-    /**
-     * Restituisce le opzioni per il dropdown tipo
-     * @return array
-     */
-    public static function getTipoList()
-    {
-        return [
-            self::TIPO_MATERIALE => 'Materiale didattico',
-            self::TIPO_CHILOMETRICO => 'Rimborso chilometrico',
-            self::TIPO_VITTO_ALLOGGIO => 'Vitto e alloggio',
-            self::TIPO_VIAGGIO => 'Viaggio/Trasporto',
-            self::TIPO_ALTRO => 'Altro',
-        ];
-    }
-
-    /**
-     * Restituisce la label del tipo
-     * @return string
-     */
-    public function getTipoLabel()
-    {
-        return self::getTipoList()[$this->tipo] ?? $this->tipo;
-    }
-
-    /**
-     * Restituisce il badge HTML del tipo
-     * @return string
-     */
-    public function getTipoBadge()
-    {
-        $class = match ($this->tipo) {
-            self::TIPO_MATERIALE => 'bg-blue text-blue-fg',
-            self::TIPO_CHILOMETRICO => 'bg-azure text-azure-fg',
-            self::TIPO_VITTO_ALLOGGIO => 'bg-purple text-purple-fg',
-            self::TIPO_VIAGGIO => 'bg-teal text-teal-fg',
-            self::TIPO_ALTRO => 'bg-default text-default-fg',
-            default => 'bg-default text-default-fg',
-        };
-        return '<span class="badge ' . $class . '">' . $this->getTipoLabel() . '</span>';
-    }
 
     /**
      * Restituisce le opzioni per il dropdown status
@@ -193,6 +162,27 @@ class RimborsoSpesa extends BaseActiveRecord
     public function getStatusBadge()
     {
         return '<span class="badge ' . $this->getStatusBadgeClass() . '">' . $this->getStatusLabel() . '</span>';
+    }
+
+    /**
+     * Restituisce un riepilogo delle voci di dettaglio
+     * @return string
+     */
+    public function getDettagliRiepilogo()
+    {
+        $dettagli = $this->dettagli;
+        if (empty($dettagli)) {
+            return '<span class="text-muted">Nessuna voce</span>';
+        }
+
+        $html = '';
+        foreach ($dettagli as $d) {
+            $html .= '<span class="badge bg-blue-lt me-1 mb-1">'
+                . htmlspecialchars($d->descrizione) . ': '
+                . Yii::$app->formatter->asCurrency($d->importo, 'EUR')
+                . '</span>';
+        }
+        return $html;
     }
 
     // ---- Azioni ----
@@ -241,5 +231,36 @@ class RimborsoSpesa extends BaseActiveRecord
     public function isApprovato()
     {
         return $this->status === self::STATUS_APPROVATO;
+    }
+
+    /**
+     * Salva i dettagli dal form (array di dettagli)
+     * @param array $dettagliData Array di ['descrizione' => ..., 'importo' => ..., 'voce_spesa_id' => ..., 'note' => ...]
+     * @return bool
+     */
+    public function salvaDettagli($dettagliData)
+    {
+        // Soft-delete dettagli esistenti
+        foreach ($this->dettagli as $dettaglio) {
+            $dettaglio->delete();
+        }
+
+        // Salva nuovi dettagli
+        foreach ($dettagliData as $data) {
+            if (empty($data['descrizione']) && empty($data['importo'])) {
+                continue;
+            }
+            $dettaglio = new RimborsoSpesaDettaglio();
+            $dettaglio->rimborso_spesa_id = $this->id;
+            $dettaglio->voce_spesa_id = !empty($data['voce_spesa_id']) ? $data['voce_spesa_id'] : null;
+            $dettaglio->descrizione = $data['descrizione'] ?? 'Generale';
+            $dettaglio->importo = $data['importo'] ?? 0;
+            $dettaglio->note = $data['note'] ?? null;
+            if (!$dettaglio->save()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -25,6 +25,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         Gestione rimborsi spese docenti
                     </div>
                 </div>
+                <div class="col-auto ms-auto">
+                    <?= Html::a('<i class="ti ti-plus me-1"></i> Nuovo Rimborso', ['create'], ['class' => 'btn btn-primary']) ?>
+                </div>
             </div>
         </div>
     </div>
@@ -67,21 +70,19 @@ $this->params['breadcrumbs'][] = $this->title;
                             },
                         ],
                         [
-                            'attribute' => 'tipo',
+                            'label' => 'Voci',
                             'format' => 'raw',
-                            'filter' => RimborsoSpesa::getTipoList(),
-                            'headerOptions' => ['style' => 'width: 170px;'],
                             'content' => function($model) {
-                                return $model->getTipoBadge();
+                                return $model->getDettagliRiepilogo();
                             },
                         ],
                         [
-                            'attribute' => 'importo',
+                            'label' => 'Totale',
                             'format' => 'raw',
                             'headerOptions' => ['style' => 'width: 120px;'],
-                            'contentOptions' => ['class' => 'text-end'],
+                            'contentOptions' => ['class' => 'text-end fw-bold'],
                             'content' => function($model) {
-                                return Yii::$app->formatter->asCurrency($model->importo, 'EUR');
+                                return Yii::$app->formatter->asCurrency($model->getTotaleImporto(), 'EUR');
                             },
                         ],
                         [
@@ -100,7 +101,21 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         [
                             'class' => 'yii\grid\ActionColumn',
-                            'template' => '{view}',
+                            'template' => '{view} {update}',
+                            'buttons' => [
+                                'update' => function($url, $model) {
+                                    return Html::a('<i class="ti ti-edit"></i>', $url, [
+                                        'class' => 'btn btn-sm btn-outline-primary',
+                                        'title' => 'Modifica',
+                                    ]);
+                                },
+                                'view' => function($url, $model) {
+                                    return Html::a('<i class="ti ti-eye"></i>', $url, [
+                                        'class' => 'btn btn-sm btn-outline-blue me-1',
+                                        'title' => 'Visualizza',
+                                    ]);
+                                },
+                            ],
                         ],
                     ],
                 ]); ?>
