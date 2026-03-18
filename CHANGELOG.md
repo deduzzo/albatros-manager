@@ -4,6 +4,7 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.25] - 2026-03-18
 ### Novità {admin}
 - Inserimento e modifica rimborsi spesa da parte degli admin (prima solo approvazione/rifiuto)
 - Dettaglio voci di spesa multiple per ogni rimborso (tabella rimborso_spesa_dettaglio)
