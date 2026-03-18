@@ -4,6 +4,22 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+### Novità {admin}
+- Inserimento e modifica rimborsi spesa da parte degli admin (prima solo approvazione/rifiuto)
+- Dettaglio voci di spesa multiple per ogni rimborso (tabella rimborso_spesa_dettaglio)
+- Collegamento opzionale a voci di bilancio (voce_spesa) per ogni dettaglio
+- Voce "Generale" di default per spese non categorizzate
+
+### Novità {docente}
+- Voci di spesa multiple nel form rimborso (aggiunta/rimozione dinamica)
+- Totale importo calcolato automaticamente dalla somma dei dettagli
+
+### Miglioramenti {admin}
+- Rimosso campo tipo fisso (ENUM) e importo singolo dai rimborsi, sostituiti da voci di spesa dinamiche
+
+### Miglioramenti {tutti}
+- Ricerca testuale nei dropdown select con Tom Select (auto su tutti i select con 5+ opzioni)
+
 ## [v1.0.24] - 2026-03-15
 ## [v1.0.23] - 2026-03-15
 ### Miglioramenti {tutti}

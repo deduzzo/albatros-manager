@@ -11,6 +11,7 @@ Sistema di gestione per docenti e corsi finanziati da FSE, PNRR e MIM.
 
 - **Framework**: Yii2 Basic Template, **PHP** 8.4, **DB**: MySQL 8.0, **Container**: Docker
 - **UI**: Tabler Dashboard Theme v1.4.0 (`web/assets/tabler/`), Asset Bundle: `app\components\assets\TablerAsset`
+- **Select con ricerca**: Tom Select 2.4.3 (CDN), Asset Bundle: `app\components\assets\TomSelectAsset` — auto-init su tutti `select.form-select` con 5+ opzioni. Escludere: classe `no-tom-select`. Forzare: classe `tom-select`. Re-init dinamico: `window.initTomSelectOn(selectEl)`.
 - **Icons**: Tabler Icons v3.36.1 → `<i class="ti ti-{nome}"></i>` ([catalogo](https://tabler.io/icons))
 
 ### Badge e Colori Tabler
@@ -124,14 +125,15 @@ FONTE_FINANZIAMENTO (FSE, PNRR, MIM)
      └── AVVISO (bando selezione docenti)
          └── MODULO (= materia/insegnamento)
              ├── ISTANZA (candidature docenti) → ASSEGNAZIONE → CONTRATTO → PAGAMENTO
+             │                                    └── RIMBORSO_SPESA → RIMBORSO_SPESA_DETTAGLIO (→ VOCE_SPESA)
              ├── CALENDARIO (lezioni) → PRESENZA_ALLIEVO
              ├── ISCRIZIONE (studenti) → PUNTEGGIO_ISCRIZIONE
              └── VALUTAZIONE_DOCENTE
 ```
 
-**36 tabelle totali**. PK persone: `codice_fiscale` (CHAR 16). Altre PK: `id` (INT auto-increment).
-Tabelle principali: fonte_finanziamento, conto_corrente, sede, utente, tipo_documento, progetto, avviso, modulo, docente (PK=CF, campo `provenienza` TP/RU), allievo (PK=CF), istanza (campo `esito_cts`), assegnazione, contratto (campi `data_inizio/fine_lezioni`), pagamento, calendario, iscrizione, rendicontazione_ore.
-Tabelle supporto: docente_auth, allievo_auth, docente_tag, istanza_documento, istanza_tag, istanza_snapshot, storico_esito, storico_iscrizione, avviso_documento_tipo, criterio_valutazione_studente, punteggio_iscrizione, configurazione, presenza_allievo, valutazione_docente, tag_categoria, tag_curriculum, documentazione, audit_log.
+**37+ tabelle totali**. PK persone: `codice_fiscale` (CHAR 16). Altre PK: `id` (INT auto-increment).
+Tabelle principali: fonte_finanziamento, conto_corrente, sede, utente, tipo_documento, progetto, avviso, modulo, docente (PK=CF, campo `provenienza` TP/RU), allievo (PK=CF), istanza (campo `esito_cts`), assegnazione, contratto (campi `data_inizio/fine_lezioni`), pagamento, calendario, iscrizione, rendicontazione_ore, rimborso_spesa, rimborso_spesa_dettaglio.
+Tabelle supporto: docente_auth, allievo_auth, docente_tag, istanza_documento, istanza_tag, istanza_snapshot, storico_esito, storico_iscrizione, avviso_documento_tipo, criterio_valutazione_studente, punteggio_iscrizione, configurazione, presenza_allievo, valutazione_docente, tag_categoria, tag_curriculum, documentazione, audit_log, voce_spesa, voce_spesa_categoria, movimento_spesa.
 **Eccezioni BaseActiveRecord**: `AuditLog`, `Configurazione`, `StoricoIscrizione` NON estendono BaseActiveRecord.
 
 ### Soft Delete + Audit
