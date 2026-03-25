@@ -27,7 +27,7 @@ $isActive = function($controllers) use ($currentController) {
                     </li>
 
                     <!-- Configurazione -->
-                    <li class="nav-item dropdown <?= $isActive(['fonte-finanziamento', 'conto-corrente', 'sede', 'tipo-documento', 'configurazione', 'criterio-valutazione', 'utente']) ?>">
+                    <li class="nav-item dropdown <?= $isActive(['fonte-finanziamento', 'conto-corrente', 'sede', 'tipo-documento', 'configurazione', 'criterio-valutazione', 'utente', 'import']) ?>">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <i class="ti ti-settings"></i>
@@ -61,6 +61,10 @@ $isActive = function($controllers) use ($currentController) {
                                 </a>
                                 <a class="dropdown-item <?= ($currentController == 'site' && $currentAction == 'test-email') ? 'active' : '' ?>" href="<?= Url::to(['/site/test-email']) ?>">
                                     <i class="ti ti-mail-check me-2"></i> Test Email
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item <?= $currentController == 'import' ? 'active' : '' ?>" href="<?= Url::to(['/import/index']) ?>">
+                                    <i class="ti ti-file-upload me-2"></i> Import Dati Excel
                                 </a>
                             <?php endif; ?>
                         </div>
