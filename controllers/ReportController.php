@@ -419,6 +419,62 @@ class ReportController extends Controller
     }
 
     /**
+     * Report docenti con lezioni in calendario ma senza contratto
+     */
+    public function actionDocentiDaContrattualizzare($progetto_id = null)
+    {
+        // Query: docenti con lezioni in calendario MA senza contratto
+        $query = (new Query())
+            ->select([
+                'd.codice_fiscale',
+                'd.cognome',
+                'd.nome',
+                'd.provenienza',
+                'd.email',
+                'd.telefono',
+                'm.id AS modulo_id',
+                'm.codice AS modulo_codice',
+                'm.titolo AS modulo_titolo',
+                'm.compenso_orario',
+                'p.id AS progetto_id',
+                'p.titolo AS progetto_titolo',
+                'p.codice_progetto',
+                'COUNT(cal.id) AS num_lezioni',
+                'SUM(cal.ore) AS ore_totali',
+            ])
+            ->from('calendario cal')
+            ->innerJoin('docente d', 'd.codice_fiscale = cal.docente_codice_fiscale AND d.deleted_at IS NULL')
+            ->innerJoin('modulo m', 'm.id = cal.modulo_id AND m.deleted_at IS NULL')
+            ->innerJoin('avviso a', 'a.id = m.avviso_id AND a.deleted_at IS NULL')
+            ->innerJoin('progetto p', 'p.id = a.progetto_id AND p.deleted_at IS NULL')
+            ->leftJoin('assegnazione ass', 'ass.modulo_id = m.id AND ass.docente_codice_fiscale = d.codice_fiscale AND ass.deleted_at IS NULL')
+            ->leftJoin('contratto c', 'c.assegnazione_id = ass.id AND c.deleted_at IS NULL')
+            ->where(['c.id' => null])
+            ->andWhere(['cal.deleted_at' => null])
+            ->andWhere(['cal.status' => ['programmata', 'completata']])
+            ->groupBy(['d.codice_fiscale', 'm.id', 'p.id']);
+
+        if ($progetto_id) {
+            $query->andWhere(['p.id' => $progetto_id]);
+        }
+
+        $query->orderBy(['p.titolo' => SORT_ASC, 'd.cognome' => SORT_ASC, 'm.codice' => SORT_ASC]);
+
+        $docenti = $query->all();
+
+        // Lista progetti per filtro dropdown
+        $progetti = Progetto::find()
+            ->orderBy(['titolo' => SORT_ASC])
+            ->all();
+
+        return $this->render('docenti-da-contrattualizzare', [
+            'docenti' => $docenti,
+            'progetti' => $progetti,
+            'progetto_id' => $progetto_id,
+        ]);
+    }
+
+    /**
      * Prepara i dati per export in base all'entita
      */
     private function getExportData($entity)

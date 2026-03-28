@@ -246,6 +246,9 @@ $isActive = function($controllers) use ($currentController) {
                             <a class="dropdown-item <?= $currentController == 'report' && $currentAction == 'export' ? 'active' : '' ?>" href="<?= Url::to(['/report/export']) ?>">
                                 <i class="ti ti-download me-2"></i> Export
                             </a>
+                            <a class="dropdown-item <?= $currentController == 'report' && $currentAction == 'docenti-da-contrattualizzare' ? 'active' : '' ?>" href="<?= Url::to(['/report/docenti-da-contrattualizzare']) ?>">
+                                <i class="ti ti-alert-triangle me-2"></i> Docenti da Contrattualizzare
+                            </a>
                             <a class="dropdown-item <?= $currentController == 'audit-log' ? 'active' : '' ?>" href="<?= Url::to(['/audit-log/index']) ?>">
                                 <i class="ti ti-activity me-2"></i> Audit Log
                             </a>

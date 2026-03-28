@@ -4,6 +4,10 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+### Novità {admin}
+- Report "Docenti da Contrattualizzare": identifica docenti con lezioni in calendario ma senza contratto attivo
+- Filtro per progetto, statistiche riepilogative e link diretto alla contrattualizzazione
+
 ## [v1.0.26] - 2026-03-25
 ## [v1.0.25] - 2026-03-18
 ### Novità {admin}
