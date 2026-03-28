@@ -5,6 +5,9 @@ Tutte le modifiche al portale Albatros Manager.
 ## [Unreleased]
 
 ### Novità {admin}
+- Nuova pagina Import Dati con 3 tab: Import Completo, Import Assegnazioni, Import Calendari
+- Flusso preview/conferma per import assegnazioni e calendari: validazione con tabella dettagliata prima dell'import
+- Badge colorati nella preview: nuovo (verde), esistente (azzurro), saltato (arancione), errore (rosso)
 - Import modulare assegnazioni docenti da file Excel con preview/conferma
 - Import calendario lezioni da file Excel con preview/conferma (foglio CALENDARIO)
 - Template XLSX scaricabile per import assegnazioni (con istruzioni e riga esempio)
