@@ -97,6 +97,34 @@ Credenziali e configurazione in `PRODUCTION_SERVER.md` (nel `.gitignore`, NON co
 - **Post-deploy**: `production.php` esegue `composer install --no-dev` + migration automaticamente
 - **Composer**: `/opt/psa/var/modules/composer/composer.phar` (Plesk built-in)
 
+### Deploy in Produzione
+
+Controller: `commands/DeployController.php`. Config FTP: `config/ftp.php`. File versione: `config/version.php`.
+
+```bash
+# Verifica stato (confronta commit locale vs server vs GitHub)
+php yii deploy/status
+
+# Deploy incrementale (solo file modificati, auto-versioning, push GitHub, FTP, post-deploy)
+php yii deploy/update
+
+# Deploy con versione e messaggio specifici
+php yii deploy/update --tag=v1.0.27 --message="Descrizione release"
+
+# Deploy completo (forza upload di TUTTI i file)
+php yii deploy/full --tag=v1.0.27
+
+# Dry-run (simula senza eseguire)
+php yii deploy/update -n
+
+# Inizializzazione server (solo prima volta)
+php yii deploy/init
+```
+
+**Flusso `deploy/update`**: Verifica branch=main e working dir pulita → calcola diff file → auto-incrementa versione semver → aggiorna CHANGELOG.md → commit+push → crea release GitHub → upload FTP (solo modificati) → esegue `production.php` (composer+migration) → carica `config/mail.php` se mancante.
+
+**File esclusi dal deploy**: docker-compose.yml, Dockerfile, vagrant/, PRODUCTION_SERVER.md, .claude/, CLAUDE.md, docs/superpowers/, .github/, tests/.
+
 ## Ambiente Docker
 
 ```bash
