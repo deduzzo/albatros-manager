@@ -4,6 +4,7 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.27] - 2026-03-28
 ### Novità {admin}
 - Nuova pagina Import Dati con 3 tab: Import Completo, Import Assegnazioni, Import Calendari
 - Flusso preview/conferma per import assegnazioni e calendari: validazione con tabella dettagliata prima dell'import
