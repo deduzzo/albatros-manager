@@ -6,11 +6,15 @@ Tutte le modifiche al portale Albatros Manager.
 
 ### Novità {admin}
 - Import modulare assegnazioni docenti da file Excel con preview/conferma
+- Import calendario lezioni da file Excel con preview/conferma (foglio CALENDARIO)
 - Template XLSX scaricabile per import assegnazioni (con istruzioni e riga esempio)
 - Template XLSX scaricabile per import calendario lezioni
 - Preview dettagliata prima dell'import: mostra docenti nuovi/esistenti, assegnazioni da creare/saltare
+- Rilevamento automatico lezioni duplicate (stessa data+modulo+docente+ora) nell'import calendario
 - Report "Docenti da Contrattualizzare": identifica docenti con lezioni in calendario ma senza contratto attivo
 - Filtro per progetto, statistiche riepilogative e link diretto alla contrattualizzazione
+- Generazione contratti Co.Co.Co. differenziata: template PDF bilaterale con 10 articoli (diverso da Prestazione Professionale)
+- Template Co.Co.Co. per PNRR e FSE con clausole specifiche (art. 409 c.p.c., TUIR, INAIL, gestione separata INPS)
 
 ## [v1.0.26] - 2026-03-25
 ## [v1.0.25] - 2026-03-18

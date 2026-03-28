@@ -1326,6 +1326,361 @@ class ImportController extends Controller
     }
 
     /**
+     * Upload e import calendari da file Excel
+     * Fase 1 (preview): POST con preview=1 → valida e restituisce JSON con preview
+     * Fase 2 (confirm): POST con confirm=1 → esegue import in transazione DB
+     */
+    public function actionUploadCalendari()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $uploadedFile = UploadedFile::getInstanceByName('excel_file');
+        if (!$uploadedFile) {
+            return $this->asJson(['success' => false, 'error' => 'Nessun file caricato']);
+        }
+
+        $tempPath = Yii::getAlias('@runtime') . '/import_calendari_' . time() . '_' . $uploadedFile->name;
+        if (!$uploadedFile->saveAs($tempPath)) {
+            return $this->asJson(['success' => false, 'error' => 'Errore nel salvare il file']);
+        }
+
+        $confirm = Yii::$app->request->post('confirm') === '1';
+
+        try {
+            $spreadsheet = IOFactory::load($tempPath);
+            $sheet = $spreadsheet->getSheetByName('CALENDARIO');
+
+            if (!$sheet) {
+                @unlink($tempPath);
+                return $this->asJson(['success' => false, 'error' => 'Foglio "CALENDARIO" non trovato nel file']);
+            }
+
+            $righe = $this->leggiRigheFoglio($sheet);
+
+            if (empty($righe)) {
+                @unlink($tempPath);
+                return $this->asJson(['success' => false, 'error' => 'Nessuna riga di dati trovata nel foglio CALENDARIO']);
+            }
+
+            // Reset log/errors/warnings
+            $this->log = [];
+            $this->errors = [];
+            $this->warnings = [];
+
+            $preview = [];
+            $stats = [
+                'nuove' => 0,
+                'duplicate' => 0,
+                'errori' => 0,
+            ];
+
+            $validStatuses = ['programmata', 'completata', 'annullata', 'recupero'];
+
+            foreach ($righe as $idx => $riga) {
+                $rowNum = $idx + 3; // riga 1 = header, riga 2 = esempio, dati da riga 3
+                $rowPreview = [
+                    'riga' => $rowNum,
+                    'codice_modulo' => '',
+                    'modulo_titolo' => '',
+                    'modulo_trovato' => false,
+                    'cf_docente' => '',
+                    'docente_nome' => '',
+                    'docente_trovato' => false,
+                    'data' => '',
+                    'ora_inizio' => '',
+                    'ora_fine' => '',
+                    'ore' => 0,
+                    'duplicata' => false,
+                    'azione' => 'CREA',
+                ];
+
+                // Validazione CODICE_MODULO
+                $codiceModulo = trim($riga['CODICE_MODULO'] ?? '');
+                $rowPreview['codice_modulo'] = $codiceModulo;
+
+                if (empty($codiceModulo)) {
+                    $this->errors[] = "Riga {$rowNum}: CODICE_MODULO obbligatorio";
+                    $rowPreview['azione'] = 'ERRORE';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+
+                $modulo = Modulo::findOne(['codice' => $codiceModulo]);
+                if (!$modulo) {
+                    $this->errors[] = "Riga {$rowNum}: Modulo '{$codiceModulo}' non trovato nel sistema";
+                    $rowPreview['azione'] = 'ERRORE';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+                $rowPreview['modulo_titolo'] = $modulo->titolo;
+                $rowPreview['modulo_trovato'] = true;
+
+                // Validazione CF_DOCENTE
+                $cfDocente = strtoupper(trim($riga['CF_DOCENTE'] ?? ''));
+                $rowPreview['cf_docente'] = $cfDocente;
+
+                if (empty($cfDocente)) {
+                    $this->errors[] = "Riga {$rowNum}: CF_DOCENTE obbligatorio";
+                    $rowPreview['azione'] = 'ERRORE';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+
+                $docente = Docente::findOne(['codice_fiscale' => $cfDocente]);
+                if (!$docente) {
+                    $this->errors[] = "Riga {$rowNum}: Docente con CF '{$cfDocente}' non trovato nel sistema";
+                    $rowPreview['azione'] = 'ERRORE';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+                $rowPreview['docente_nome'] = $docente->cognome . ' ' . $docente->nome;
+                $rowPreview['docente_trovato'] = true;
+
+                // Validazione e normalizzazione DATA
+                $data = $riga['DATA'] ?? '';
+                if (empty($data)) {
+                    $this->errors[] = "Riga {$rowNum}: DATA obbligatoria";
+                    $rowPreview['azione'] = 'ERRORE';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+
+                if (is_numeric($data)) {
+                    $data = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((int)$data)->format('Y-m-d');
+                } elseif (strpos($data, '/') !== false) {
+                    $parts = explode('/', $data);
+                    if (count($parts) === 3) {
+                        $data = $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+                    }
+                }
+                $rowPreview['data'] = $data;
+
+                // Validazione ORA_INIZIO e ORA_FINE
+                $oraInizio = $this->normalizzaOrario($riga['ORA_INIZIO'] ?? '');
+                $oraFine = $this->normalizzaOrario($riga['ORA_FINE'] ?? '');
+
+                if (!$oraInizio) {
+                    $this->errors[] = "Riga {$rowNum}: ORA_INIZIO obbligatoria o formato non valido";
+                    $rowPreview['azione'] = 'ERRORE';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+                if (!$oraFine) {
+                    $this->errors[] = "Riga {$rowNum}: ORA_FINE obbligatoria o formato non valido";
+                    $rowPreview['azione'] = 'ERRORE';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+
+                $rowPreview['ora_inizio'] = $oraInizio;
+                $rowPreview['ora_fine'] = $oraFine;
+
+                // Calcola ore dalla differenza
+                $inizio = strtotime("2000-01-01 {$oraInizio}");
+                $fine = strtotime("2000-01-01 {$oraFine}");
+                $ore = ($fine - $inizio) / 3600;
+                if ($ore <= 0) {
+                    $this->errors[] = "Riga {$rowNum}: ORA_FINE deve essere successiva a ORA_INIZIO";
+                    $rowPreview['azione'] = 'ERRORE';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+                $rowPreview['ore'] = round($ore, 2);
+
+                // Validazione STATUS
+                $status = strtolower(trim($riga['STATUS'] ?? ''));
+                if (empty($status)) {
+                    $status = 'programmata';
+                }
+                if (!in_array($status, $validStatuses)) {
+                    $this->errors[] = "Riga {$rowNum}: STATUS '{$status}' non valido. Valori ammessi: " . implode(', ', $validStatuses);
+                    $rowPreview['azione'] = 'ERRORE';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+
+                // Verifica duplicata (stessa data+modulo+docente+ora_inizio)
+                $duplicata = Calendario::findOne([
+                    'modulo_id' => $modulo->id,
+                    'docente_codice_fiscale' => $cfDocente,
+                    'data' => $data,
+                    'ora_inizio' => $oraInizio,
+                ]);
+
+                if ($duplicata) {
+                    $rowPreview['duplicata'] = true;
+                    $rowPreview['azione'] = 'SALTA';
+                    $this->warnings[] = "Riga {$rowNum}: Lezione già esistente per {$data} {$oraInizio} - modulo {$codiceModulo} - docente {$cfDocente}";
+                    $stats['duplicate']++;
+                } else {
+                    $stats['nuove']++;
+                }
+
+                $preview[] = $rowPreview;
+            }
+
+            // FASE 1: Preview
+            if (!$confirm) {
+                @unlink($tempPath);
+                return $this->asJson([
+                    'success' => true,
+                    'mode' => 'preview',
+                    'preview' => $preview,
+                    'errors' => $this->errors,
+                    'warnings' => $this->warnings,
+                    'stats' => $stats,
+                ]);
+            }
+
+            // FASE 2: Import effettivo
+            if (!empty($this->errors)) {
+                @unlink($tempPath);
+                return $this->asJson([
+                    'success' => false,
+                    'error' => 'Impossibile procedere con errori bloccanti. Correggere il file e riprovare.',
+                    'errors' => $this->errors,
+                    'warnings' => $this->warnings,
+                    'stats' => $stats,
+                ]);
+            }
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $importati = 0;
+                $saltati = 0;
+
+                foreach ($righe as $idx => $riga) {
+                    $rowNum = $idx + 3;
+                    $codiceModulo = trim($riga['CODICE_MODULO'] ?? '');
+                    $cfDocente = strtoupper(trim($riga['CF_DOCENTE'] ?? ''));
+
+                    if (empty($codiceModulo) || empty($cfDocente)) {
+                        continue;
+                    }
+
+                    $modulo = Modulo::findOne(['codice' => $codiceModulo]);
+                    if (!$modulo) {
+                        continue;
+                    }
+
+                    $docente = Docente::findOne(['codice_fiscale' => $cfDocente]);
+                    if (!$docente) {
+                        continue;
+                    }
+
+                    // Normalizza data
+                    $data = $riga['DATA'] ?? '';
+                    if (empty($data)) {
+                        continue;
+                    }
+                    if (is_numeric($data)) {
+                        $data = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((int)$data)->format('Y-m-d');
+                    } elseif (strpos($data, '/') !== false) {
+                        $parts = explode('/', $data);
+                        if (count($parts) === 3) {
+                            $data = $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+                        }
+                    }
+
+                    // Normalizza orari
+                    $oraInizio = $this->normalizzaOrario($riga['ORA_INIZIO'] ?? '');
+                    $oraFine = $this->normalizzaOrario($riga['ORA_FINE'] ?? '');
+                    if (!$oraInizio || !$oraFine) {
+                        continue;
+                    }
+
+                    // Calcola ore
+                    $inizio = strtotime("2000-01-01 {$oraInizio}");
+                    $fine = strtotime("2000-01-01 {$oraFine}");
+                    $ore = ($fine - $inizio) / 3600;
+                    if ($ore <= 0) {
+                        continue;
+                    }
+
+                    // Status
+                    $status = strtolower(trim($riga['STATUS'] ?? ''));
+                    if (empty($status) || !in_array($status, $validStatuses)) {
+                        $status = 'programmata';
+                    }
+
+                    // Verifica duplicata
+                    $duplicata = Calendario::findOne([
+                        'modulo_id' => $modulo->id,
+                        'docente_codice_fiscale' => $cfDocente,
+                        'data' => $data,
+                        'ora_inizio' => $oraInizio,
+                    ]);
+                    if ($duplicata) {
+                        $saltati++;
+                        continue;
+                    }
+
+                    // Crea record Calendario
+                    $calendario = new Calendario([
+                        'modulo_id' => $modulo->id,
+                        'docente_codice_fiscale' => $cfDocente,
+                        'data' => $data,
+                        'ora_inizio' => $oraInizio,
+                        'ora_fine' => $oraFine,
+                        'ore' => round($ore, 2),
+                        'aula' => trim($riga['AULA'] ?? ''),
+                        'argomento' => trim($riga['ARGOMENTO'] ?? ''),
+                        'descrizione_attivita' => trim($riga['DESCRIZIONE_ATTIVITA'] ?? ''),
+                        'status' => $status,
+                        'note' => trim($riga['NOTE'] ?? ''),
+                    ]);
+
+                    if (!$calendario->save()) {
+                        $this->warnings[] = "Riga {$rowNum}: Errore creazione calendario: " . json_encode($calendario->errors);
+                        continue;
+                    }
+
+                    $this->log[] = "Lezione creata: {$data} {$oraInizio}-{$oraFine} ({$ore}h) - {$modulo->titolo} - {$docente->cognome} {$docente->nome}";
+                    $importati++;
+                }
+
+                $transaction->commit();
+                @unlink($tempPath);
+
+                $this->log[] = "Import completato: {$importati} lezioni create, {$saltati} saltate (duplicate)";
+
+                return $this->asJson([
+                    'success' => true,
+                    'mode' => 'import',
+                    'log' => $this->log,
+                    'warnings' => $this->warnings,
+                    'stats' => [
+                        'nuove' => $importati,
+                        'duplicate' => $saltati,
+                    ],
+                ]);
+
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                @unlink($tempPath);
+                throw $e;
+            }
+
+        } catch (\Throwable $e) {
+            @unlink($tempPath);
+            Yii::error('Import calendari error: ' . $e->getMessage() . "\n" . $e->getTraceAsString(), __METHOD__);
+            return $this->asJson([
+                'success' => false,
+                'error' => 'Errore durante l\'import: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Legge righe da un foglio Excel.
      * Header da riga 1, dati da riga 2+.
      * Salta righe vuote e la riga esempio (riga 2 con sfondo grigio).
