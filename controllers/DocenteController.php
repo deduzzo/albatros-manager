@@ -293,8 +293,9 @@ class DocenteController extends Controller
         $totaleTutor = Docente::find()->where(['tipo' => Docente::TIPO_TUTOR])->count();
 
         // Docenti con assegnazioni attive (non revocate, con deleted_at null)
-        $conAssegnazioniAttive = (int) Docente::find()
+        $conAssegnazioniAttive = (int) Docente::findWithDeleted()
             ->alias('d')
+            ->andWhere(['d.deleted_at' => null])
             ->innerJoin('assegnazione a', 'a.docente_codice_fiscale = d.codice_fiscale AND a.deleted_at IS NULL')
             ->andWhere(['!=', 'a.status', Assegnazione::STATUS_REVOCATO])
             ->count('DISTINCT d.codice_fiscale');
