@@ -173,9 +173,14 @@ class ContrattoController extends Controller
         $fonteFinanziamento = $progetto->fonteFinanziamento;
         $codiceFonte = $fonteFinanziamento ? strtoupper($fonteFinanziamento->codice) : '';
 
-        $template = 'fse'; // Default
-        if (strpos($codiceFonte, 'PNRR') !== false || strpos($codiceFonte, 'MIM') !== false) {
-            $template = 'pnrr';
+        $isPNRR = strpos($codiceFonte, 'PNRR') !== false || strpos($codiceFonte, 'MIM') !== false;
+
+        if ($model->tipo === Contratto::TIPO_COCOCO) {
+            // Co.Co.Co. -> template bilaterale con articoli
+            $template = $isPNRR ? 'cococo-pnrr' : 'cococo-fse';
+        } else {
+            // Prestazione professionale / Occasionale -> template lettera di incarico
+            $template = $isPNRR ? 'pnrr' : 'fse';
         }
 
         $params = [
