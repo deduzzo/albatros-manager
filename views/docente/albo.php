@@ -220,7 +220,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'label' => 'Moduli Assegnati',
                             'format' => 'raw',
                             'content' => function($model) {
-                                $count = (int) $model->num_moduli_assegnati;
+                                $count = (int) $model->getAttribute('num_moduli_assegnati');
                                 if ($count === 0) {
                                     return '<span class="badge bg-default text-default-fg">0</span>';
                                 }
@@ -240,7 +240,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'label' => 'Valutazione',
                             'format' => 'raw',
                             'content' => function($model) {
-                                $media = $model->valutazione_media;
+                                $media = $model->getAttribute('valutazione_media');
                                 if ($media === null) {
                                     return '<span class="text-muted">-</span>';
                                 }
