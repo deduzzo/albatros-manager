@@ -18,6 +18,7 @@ use app\models\Assegnazione;
 use app\models\Contratto;
 use app\models\Pagamento;
 use app\models\FonteFinanziamento;
+use app\models\Calendario;
 
 /**
  * Controller per import dati da Excel
@@ -43,6 +44,8 @@ class ImportController extends Controller
                 'class' => \yii\filters\VerbFilter::class,
                 'actions' => [
                     'upload' => ['POST'],
+                    'upload-assegnazioni' => ['POST'],
+                    'upload-calendari' => ['POST'],
                 ],
             ],
         ];
@@ -53,7 +56,7 @@ class ImportController extends Controller
      */
     public function beforeAction($action)
     {
-        if ($action->id === 'upload') {
+        if (in_array($action->id, ['upload', 'upload-assegnazioni', 'upload-calendari'])) {
             $this->enableCsrfValidation = false;
         }
         return parent::beforeAction($action);
@@ -763,5 +766,684 @@ class ImportController extends Controller
         }
 
         return Yii::$app->response->sendFile($filePath, 'TEMPLATE_IMPORT_ALBATROS.xlsx');
+    }
+
+    /**
+     * Download template assegnazioni XLSX generato programmaticamente
+     */
+    public function actionDownloadTemplateAssegnazioni()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        // --- Foglio ISTRUZIONI ---
+        $istruzioni = $spreadsheet->getActiveSheet();
+        $istruzioni->setTitle('ISTRUZIONI');
+
+        $istruzioni->setCellValue('A1', 'TEMPLATE IMPORT ASSEGNAZIONI');
+        $istruzioni->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+
+        $istruzioni->setCellValue('A3', 'Questo template permette di importare assegnazioni docenti ai moduli esistenti.');
+        $istruzioni->setCellValue('A5', 'ISTRUZIONI:');
+        $istruzioni->getStyle('A5')->getFont()->setBold(true);
+        $istruzioni->setCellValue('A6', '1. Compilare il foglio "ASSEGNAZIONI" con i dati richiesti');
+        $istruzioni->setCellValue('A7', '2. I campi con * sono obbligatori');
+        $istruzioni->setCellValue('A8', '3. CODICE_MODULO deve corrispondere a un modulo esistente nel sistema');
+        $istruzioni->setCellValue('A9', '4. Se CODICE_FISCALE è fornito, il docente verrà cercato per CF; altrimenti per COGNOME+NOME');
+        $istruzioni->setCellValue('A10', '5. Se il docente non esiste, verrà creato automaticamente');
+        $istruzioni->setCellValue('A11', '6. PROVENIENZA: TP = Terza Parte/Professionista (€60/h), RU = Ricercatore Universitario (€70/h)');
+        $istruzioni->setCellValue('A12', '7. TIPO_CONTRATTO: partita_iva, cococo (default), occasionale');
+        $istruzioni->setCellValue('A13', '8. La riga 2 in grigio è un esempio e verrà ignorata dall\'import');
+        $istruzioni->setCellValue('A15', 'CAMPI:');
+        $istruzioni->getStyle('A15')->getFont()->setBold(true);
+        $istruzioni->setCellValue('A16', 'CODICE_MODULO* - Codice del modulo esistente');
+        $istruzioni->setCellValue('A17', 'COGNOME* - Cognome del docente');
+        $istruzioni->setCellValue('A18', 'NOME* - Nome del docente');
+        $istruzioni->setCellValue('A19', 'CODICE_FISCALE - CF del docente (se vuoto verrà generato)');
+        $istruzioni->setCellValue('A20', 'PROVENIENZA - TP o RU (default: TP)');
+        $istruzioni->setCellValue('A21', 'COMPENSO_ORARIO - Compenso orario in euro (default: da modulo)');
+        $istruzioni->setCellValue('A22', 'ORE_ASSEGNATE - Ore assegnate (default: ore_totali del modulo)');
+        $istruzioni->setCellValue('A23', 'TIPO_CONTRATTO - partita_iva, cococo, occasionale (default: cococo)');
+        $istruzioni->setCellValue('A24', 'DATA_ASSEGNAZIONE - Data assegnazione (formato YYYY-MM-DD)');
+        $istruzioni->setCellValue('A25', 'NOTE - Note aggiuntive');
+
+        $istruzioni->getColumnDimension('A')->setWidth(80);
+
+        // --- Foglio ASSEGNAZIONI ---
+        $assegnazioni = $spreadsheet->createSheet();
+        $assegnazioni->setTitle('ASSEGNAZIONI');
+
+        $headers = [
+            'A' => 'CODICE_MODULO*',
+            'B' => 'COGNOME*',
+            'C' => 'NOME*',
+            'D' => 'CODICE_FISCALE',
+            'E' => 'PROVENIENZA',
+            'F' => 'COMPENSO_ORARIO',
+            'G' => 'ORE_ASSEGNATE',
+            'H' => 'TIPO_CONTRATTO',
+            'I' => 'DATA_ASSEGNAZIONE',
+            'J' => 'NOTE',
+        ];
+
+        // Header blu (#206BC4) con testo bianco grassetto
+        foreach ($headers as $col => $header) {
+            $assegnazioni->setCellValue($col . '1', $header);
+            $assegnazioni->getStyle($col . '1')->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '206BC4'],
+                ],
+            ]);
+            $assegnazioni->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Riga esempio in grigio
+        $esempio = ['MOD-001', 'Rossi', 'Mario', 'RSSMRA80A01H501Z', 'TP', '60', '20', 'cococo', '2025-01-15', 'Esempio - cancellare questa riga'];
+        $colIdx = 0;
+        foreach (array_keys($headers) as $col) {
+            $assegnazioni->setCellValue($col . '2', $esempio[$colIdx]);
+            $assegnazioni->getStyle($col . '2')->applyFromArray([
+                'font' => ['italic' => true, 'color' => ['rgb' => '999999']],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'F0F0F0'],
+                ],
+            ]);
+            $colIdx++;
+        }
+
+        // Genera file
+        $tempPath = Yii::getAlias('@runtime') . '/template_assegnazioni_' . time() . '.xlsx';
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($tempPath);
+
+        return Yii::$app->response->sendFile($tempPath, 'TEMPLATE_IMPORT_ASSEGNAZIONI.xlsx')
+            ->on(\yii\web\Response::EVENT_AFTER_SEND, function () use ($tempPath) {
+                @unlink($tempPath);
+            });
+    }
+
+    /**
+     * Download template calendari XLSX generato programmaticamente
+     */
+    public function actionDownloadTemplateCalendari()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        // --- Foglio ISTRUZIONI ---
+        $istruzioni = $spreadsheet->getActiveSheet();
+        $istruzioni->setTitle('ISTRUZIONI');
+
+        $istruzioni->setCellValue('A1', 'TEMPLATE IMPORT CALENDARIO');
+        $istruzioni->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+
+        $istruzioni->setCellValue('A3', 'Questo template permette di importare il calendario lezioni per i moduli esistenti.');
+        $istruzioni->setCellValue('A5', 'ISTRUZIONI:');
+        $istruzioni->getStyle('A5')->getFont()->setBold(true);
+        $istruzioni->setCellValue('A6', '1. Compilare il foglio "CALENDARIO" con i dati richiesti');
+        $istruzioni->setCellValue('A7', '2. I campi con * sono obbligatori');
+        $istruzioni->setCellValue('A8', '3. CODICE_MODULO deve corrispondere a un modulo esistente nel sistema');
+        $istruzioni->setCellValue('A9', '4. CF_DOCENTE deve corrispondere a un docente assegnato al modulo');
+        $istruzioni->setCellValue('A10', '5. DATA in formato YYYY-MM-DD');
+        $istruzioni->setCellValue('A11', '6. ORA_INIZIO e ORA_FINE in formato HH:MM');
+        $istruzioni->setCellValue('A12', '7. STATUS: programmata (default), completata, annullata');
+        $istruzioni->setCellValue('A13', '8. La riga 2 in grigio è un esempio e verrà ignorata dall\'import');
+
+        $istruzioni->getColumnDimension('A')->setWidth(80);
+
+        // --- Foglio CALENDARIO ---
+        $calendario = $spreadsheet->createSheet();
+        $calendario->setTitle('CALENDARIO');
+
+        $headers = [
+            'A' => 'CODICE_MODULO*',
+            'B' => 'CF_DOCENTE*',
+            'C' => 'DATA*',
+            'D' => 'ORA_INIZIO*',
+            'E' => 'ORA_FINE*',
+            'F' => 'AULA',
+            'G' => 'ARGOMENTO',
+            'H' => 'DESCRIZIONE_ATTIVITA',
+            'I' => 'STATUS',
+            'J' => 'NOTE',
+        ];
+
+        // Header blu (#206BC4) con testo bianco grassetto
+        foreach ($headers as $col => $header) {
+            $calendario->setCellValue($col . '1', $header);
+            $calendario->getStyle($col . '1')->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '206BC4'],
+                ],
+            ]);
+            $calendario->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Riga esempio in grigio
+        $esempio = ['MOD-001', 'RSSMRA80A01H501Z', '2025-02-01', '09:00', '13:00', 'Aula A1', 'Introduzione', 'Lezione introduttiva', 'programmata', 'Esempio - cancellare questa riga'];
+        $colIdx = 0;
+        foreach (array_keys($headers) as $col) {
+            $calendario->setCellValue($col . '2', $esempio[$colIdx]);
+            $calendario->getStyle($col . '2')->applyFromArray([
+                'font' => ['italic' => true, 'color' => ['rgb' => '999999']],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'F0F0F0'],
+                ],
+            ]);
+            $colIdx++;
+        }
+
+        // Genera file
+        $tempPath = Yii::getAlias('@runtime') . '/template_calendari_' . time() . '.xlsx';
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($tempPath);
+
+        return Yii::$app->response->sendFile($tempPath, 'TEMPLATE_IMPORT_CALENDARIO.xlsx')
+            ->on(\yii\web\Response::EVENT_AFTER_SEND, function () use ($tempPath) {
+                @unlink($tempPath);
+            });
+    }
+
+    /**
+     * Upload e import assegnazioni con flusso preview/conferma
+     *
+     * POST params:
+     * - excel_file: file XLSX
+     * - preview: 1 (default) = solo validazione e preview
+     * - confirm: 1 = esegue import effettivo
+     */
+    public function actionUploadAssegnazioni()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $uploadedFile = UploadedFile::getInstanceByName('excel_file');
+        if (!$uploadedFile) {
+            return $this->asJson(['success' => false, 'error' => 'Nessun file caricato']);
+        }
+
+        $tempPath = Yii::getAlias('@runtime') . '/import_assegnazioni_' . time() . '_' . $uploadedFile->name;
+        if (!$uploadedFile->saveAs($tempPath)) {
+            return $this->asJson(['success' => false, 'error' => 'Errore nel salvare il file']);
+        }
+
+        $confirm = Yii::$app->request->post('confirm') === '1';
+
+        try {
+            $spreadsheet = IOFactory::load($tempPath);
+            $sheet = $spreadsheet->getSheetByName('ASSEGNAZIONI');
+
+            if (!$sheet) {
+                @unlink($tempPath);
+                return $this->asJson(['success' => false, 'error' => 'Foglio "ASSEGNAZIONI" non trovato nel file']);
+            }
+
+            $righe = $this->leggiRigheFoglio($sheet);
+
+            if (empty($righe)) {
+                @unlink($tempPath);
+                return $this->asJson(['success' => false, 'error' => 'Nessuna riga di dati trovata nel foglio ASSEGNAZIONI']);
+            }
+
+            // Reset log/errors/warnings
+            $this->log = [];
+            $this->errors = [];
+            $this->warnings = [];
+
+            $preview = [];
+            $stats = [
+                'nuovi_docenti' => 0,
+                'nuove_assegnazioni' => 0,
+                'saltate' => 0,
+                'errori' => 0,
+            ];
+
+            foreach ($righe as $idx => $riga) {
+                $rowNum = $idx + 3; // riga 1 = header, riga 2 = esempio, dati da riga 3
+                $rowPreview = [
+                    'riga' => $rowNum,
+                    'codice_modulo' => $riga['CODICE_MODULO'] ?? '',
+                    'cognome' => $riga['COGNOME'] ?? '',
+                    'nome' => $riga['NOME'] ?? '',
+                    'codice_fiscale' => $riga['CODICE_FISCALE'] ?? '',
+                    'azioni' => [],
+                    'stato' => 'ok', // ok, warning, errore
+                ];
+
+                // Validazione campi obbligatori
+                $codiceModulo = trim($riga['CODICE_MODULO'] ?? '');
+                $cognome = trim($riga['COGNOME'] ?? '');
+                $nome = trim($riga['NOME'] ?? '');
+
+                if (empty($codiceModulo)) {
+                    $this->errors[] = "Riga {$rowNum}: CODICE_MODULO obbligatorio";
+                    $rowPreview['stato'] = 'errore';
+                    $rowPreview['azioni'][] = 'CODICE_MODULO mancante';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+
+                if (empty($cognome) || empty($nome)) {
+                    $this->errors[] = "Riga {$rowNum}: COGNOME e NOME obbligatori";
+                    $rowPreview['stato'] = 'errore';
+                    $rowPreview['azioni'][] = 'COGNOME/NOME mancanti';
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+
+                // Cerca modulo
+                $modulo = Modulo::findOne(['codice' => $codiceModulo]);
+                if (!$modulo) {
+                    $this->errors[] = "Riga {$rowNum}: Modulo '{$codiceModulo}' non trovato nel sistema";
+                    $rowPreview['stato'] = 'errore';
+                    $rowPreview['azioni'][] = "Modulo '{$codiceModulo}' non trovato";
+                    $stats['errori']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+
+                $rowPreview['modulo_titolo'] = $modulo->titolo;
+                $rowPreview['azioni'][] = "Modulo trovato: {$modulo->titolo} (ID: {$modulo->id})";
+
+                // Cerca docente
+                $cf = trim($riga['CODICE_FISCALE'] ?? '');
+                $docente = null;
+                $docenteNuovo = false;
+
+                if (!empty($cf)) {
+                    $docente = Docente::findOne(['codice_fiscale' => strtoupper($cf)]);
+                    if ($docente) {
+                        $rowPreview['azioni'][] = "Docente esistente: {$docente->cognome} {$docente->nome} (CF: {$docente->codice_fiscale})";
+                    }
+                }
+
+                if (!$docente) {
+                    // Cerca per cognome+nome
+                    $docente = Docente::findOne(['cognome' => $cognome, 'nome' => $nome]);
+                    if ($docente) {
+                        $rowPreview['azioni'][] = "Docente trovato per nome: {$docente->cognome} {$docente->nome} (CF: {$docente->codice_fiscale})";
+                        if (empty($cf)) {
+                            $cf = $docente->codice_fiscale;
+                        }
+                    }
+                }
+
+                if (!$docente) {
+                    $docenteNuovo = true;
+                    if (empty($cf)) {
+                        $cf = $this->generaCodiceFiscaleFittizio($cognome, $nome);
+                    }
+                    $cf = strtoupper($cf);
+                    $rowPreview['azioni'][] = "Nuovo docente da creare: {$cognome} {$nome} (CF: {$cf})";
+                    $stats['nuovi_docenti']++;
+                } else {
+                    $cf = $docente->codice_fiscale;
+                }
+
+                $rowPreview['codice_fiscale'] = $cf;
+
+                // Verifica se assegnazione esiste già
+                $assegnazioneEsistente = Assegnazione::findOne([
+                    'modulo_id' => $modulo->id,
+                    'docente_codice_fiscale' => $cf,
+                ]);
+
+                if ($assegnazioneEsistente) {
+                    $rowPreview['stato'] = 'warning';
+                    $rowPreview['azioni'][] = 'Assegnazione già esistente - verrà saltata';
+                    $this->warnings[] = "Riga {$rowNum}: Assegnazione già esistente per {$cognome} {$nome} al modulo {$codiceModulo}";
+                    $stats['saltate']++;
+                    $preview[] = $rowPreview;
+                    continue;
+                }
+
+                // Calcola dettagli contratto per preview
+                $provenienza = strtoupper(trim($riga['PROVENIENZA'] ?? 'TP'));
+                if ($provenienza === 'P.P.') $provenienza = 'TP';
+                if ($provenienza === 'U.R.') $provenienza = 'RU';
+                if (!in_array($provenienza, ['TP', 'RU'])) $provenienza = 'TP';
+
+                $compensoOrario = !empty($riga['COMPENSO_ORARIO']) ? (float)$riga['COMPENSO_ORARIO'] : (float)($modulo->compenso_orario ?? 60);
+                $oreAssegnate = !empty($riga['ORE_ASSEGNATE']) ? (float)$riga['ORE_ASSEGNATE'] : (float)($modulo->ore_totali ?? 20);
+
+                $tipoContratto = 'cococo';
+                $tipoInput = strtoupper(trim($riga['TIPO_CONTRATTO'] ?? ''));
+                if (strpos($tipoInput, 'PARTITA') !== false || $tipoInput === 'PARTITA_IVA') {
+                    $tipoContratto = 'partita_iva';
+                } elseif (strpos($tipoInput, 'OCCASIONALE') !== false) {
+                    $tipoContratto = 'occasionale';
+                } elseif (!empty($tipoInput) && in_array(strtolower($tipoInput), ['partita_iva', 'cococo', 'occasionale'])) {
+                    $tipoContratto = strtolower($tipoInput);
+                }
+
+                $dataAssegnazione = !empty($riga['DATA_ASSEGNAZIONE']) ? $riga['DATA_ASSEGNAZIONE'] : date('Y-m-d');
+
+                $rowPreview['azioni'][] = "Nuova assegnazione: {$oreAssegnate}h x €{$compensoOrario}/h = €" . ($oreAssegnate * $compensoOrario);
+                $rowPreview['azioni'][] = "Contratto: {$tipoContratto}, provenienza: {$provenienza}";
+                $stats['nuove_assegnazioni']++;
+
+                $preview[] = $rowPreview;
+            }
+
+            // FASE 1: Preview
+            if (!$confirm) {
+                @unlink($tempPath);
+                return $this->asJson([
+                    'success' => true,
+                    'mode' => 'preview',
+                    'preview' => $preview,
+                    'errors' => $this->errors,
+                    'warnings' => $this->warnings,
+                    'stats' => $stats,
+                ]);
+            }
+
+            // FASE 2: Import effettivo
+            if (!empty($this->errors)) {
+                @unlink($tempPath);
+                return $this->asJson([
+                    'success' => false,
+                    'error' => 'Impossibile procedere con errori bloccanti. Correggere il file e riprovare.',
+                    'errors' => $this->errors,
+                    'warnings' => $this->warnings,
+                    'stats' => $stats,
+                ]);
+            }
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $importati = 0;
+                $saltati = 0;
+
+                foreach ($righe as $idx => $riga) {
+                    $rowNum = $idx + 3;
+                    $codiceModulo = trim($riga['CODICE_MODULO'] ?? '');
+                    $cognome = trim($riga['COGNOME'] ?? '');
+                    $nome = trim($riga['NOME'] ?? '');
+
+                    if (empty($codiceModulo) || empty($cognome) || empty($nome)) {
+                        continue;
+                    }
+
+                    $modulo = Modulo::findOne(['codice' => $codiceModulo]);
+                    if (!$modulo) {
+                        continue;
+                    }
+
+                    // Trova o crea docente
+                    $cf = trim($riga['CODICE_FISCALE'] ?? '');
+                    $docente = null;
+
+                    if (!empty($cf)) {
+                        $docente = Docente::findOne(['codice_fiscale' => strtoupper($cf)]);
+                    }
+                    if (!$docente) {
+                        $docente = Docente::findOne(['cognome' => $cognome, 'nome' => $nome]);
+                    }
+                    if (!$docente) {
+                        if (empty($cf)) {
+                            $cf = $this->generaCodiceFiscaleFittizio($cognome, $nome);
+                        }
+                        $cf = strtoupper($cf);
+
+                        $provenienza = strtoupper(trim($riga['PROVENIENZA'] ?? 'TP'));
+                        if ($provenienza === 'P.P.') $provenienza = 'TP';
+                        if ($provenienza === 'U.R.') $provenienza = 'RU';
+                        if (!in_array($provenienza, ['TP', 'RU'])) $provenienza = 'TP';
+
+                        $docente = new Docente([
+                            'codice_fiscale' => $cf,
+                            'cognome' => $cognome,
+                            'nome' => $nome,
+                            'provenienza' => $provenienza,
+                        ]);
+                        if (!$docente->save()) {
+                            $this->warnings[] = "Riga {$rowNum}: Errore creazione docente: " . json_encode($docente->errors);
+                            continue;
+                        }
+                        $this->log[] = "Docente creato: {$cognome} {$nome} (CF: {$cf})";
+                    } else {
+                        $cf = $docente->codice_fiscale;
+                    }
+
+                    // Verifica assegnazione esistente
+                    $assegnazioneEsistente = Assegnazione::findOne([
+                        'modulo_id' => $modulo->id,
+                        'docente_codice_fiscale' => $cf,
+                    ]);
+                    if ($assegnazioneEsistente) {
+                        $saltati++;
+                        continue;
+                    }
+
+                    // Crea istanza
+                    $avvisoId = $modulo->avviso_id;
+                    $istanza = new Istanza([
+                        'avviso_id' => $avvisoId,
+                        'modulo_id' => $modulo->id,
+                        'docente_codice_fiscale' => $cf,
+                        'data_presentazione' => $riga['DATA_ASSEGNAZIONE'] ?? date('Y-m-d'),
+                        'esito_cts' => 'assegnato',
+                        'status' => 'valutata',
+                    ]);
+                    if (!$istanza->save()) {
+                        $this->warnings[] = "Riga {$rowNum}: Errore creazione istanza: " . json_encode($istanza->errors);
+                        continue;
+                    }
+
+                    // Storico esito
+                    $storico = new \app\models\StoricoEsito([
+                        'istanza_id' => $istanza->id,
+                        'esito' => 'assegnato',
+                        'data_esito' => $riga['DATA_ASSEGNAZIONE'] ?? date('Y-m-d'),
+                        'note' => 'Importato da file Excel assegnazioni',
+                    ]);
+                    $storico->save(false);
+
+                    // Crea assegnazione
+                    $dataAssegnazione = !empty($riga['DATA_ASSEGNAZIONE']) ? $riga['DATA_ASSEGNAZIONE'] : date('Y-m-d');
+                    $assegnazione = new Assegnazione([
+                        'modulo_id' => $modulo->id,
+                        'docente_codice_fiscale' => $cf,
+                        'istanza_id' => $istanza->id,
+                        'data_assegnazione' => $dataAssegnazione,
+                    ]);
+                    if (!$assegnazione->save()) {
+                        $this->warnings[] = "Riga {$rowNum}: Errore creazione assegnazione: " . json_encode($assegnazione->errors);
+                        continue;
+                    }
+
+                    // Crea contratto
+                    $compensoOrario = !empty($riga['COMPENSO_ORARIO']) ? (float)$riga['COMPENSO_ORARIO'] : (float)($modulo->compenso_orario ?? 60);
+                    $oreAssegnate = !empty($riga['ORE_ASSEGNATE']) ? (float)$riga['ORE_ASSEGNATE'] : (float)($modulo->ore_totali ?? 20);
+
+                    $tipoContratto = 'cococo';
+                    $tipoInput = strtoupper(trim($riga['TIPO_CONTRATTO'] ?? ''));
+                    if (strpos($tipoInput, 'PARTITA') !== false || $tipoInput === 'PARTITA_IVA') {
+                        $tipoContratto = 'partita_iva';
+                    } elseif (strpos($tipoInput, 'OCCASIONALE') !== false) {
+                        $tipoContratto = 'occasionale';
+                    } elseif (!empty($tipoInput) && in_array(strtolower($tipoInput), ['partita_iva', 'cococo', 'occasionale'])) {
+                        $tipoContratto = strtolower($tipoInput);
+                    }
+
+                    $contratto = new Contratto([
+                        'assegnazione_id' => $assegnazione->id,
+                        'tipo' => $tipoContratto,
+                        'numero_contratto' => 'CONTR-' . $assegnazione->id,
+                        'data_stipula' => $dataAssegnazione,
+                        'data_inizio' => $dataAssegnazione,
+                        'data_fine' => date('Y-m-d', strtotime($dataAssegnazione . ' +6 months')),
+                        'compenso_orario' => $compensoOrario,
+                        'ore_contrattualizzate' => $oreAssegnate,
+                        'compenso_totale' => $compensoOrario * $oreAssegnate,
+                        'status' => 'attivo',
+                    ]);
+                    if (!$contratto->save()) {
+                        $this->warnings[] = "Riga {$rowNum}: Errore creazione contratto: " . json_encode($contratto->errors);
+                        continue;
+                    }
+
+                    $this->log[] = "Assegnazione creata: {$cognome} {$nome} → {$modulo->titolo} ({$oreAssegnate}h x €{$compensoOrario}/h)";
+                    $importati++;
+                }
+
+                $transaction->commit();
+                @unlink($tempPath);
+
+                $this->log[] = "Import completato: {$importati} assegnazioni create, {$saltati} saltate";
+
+                return $this->asJson([
+                    'success' => true,
+                    'mode' => 'import',
+                    'log' => $this->log,
+                    'warnings' => $this->warnings,
+                    'stats' => [
+                        'nuove_assegnazioni' => $importati,
+                        'saltate' => $saltati,
+                    ],
+                ]);
+
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                @unlink($tempPath);
+                throw $e;
+            }
+
+        } catch (\Throwable $e) {
+            @unlink($tempPath);
+            Yii::error('Import assegnazioni error: ' . $e->getMessage() . "\n" . $e->getTraceAsString(), __METHOD__);
+            return $this->asJson([
+                'success' => false,
+                'error' => 'Errore durante l\'import: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Legge righe da un foglio Excel.
+     * Header da riga 1, dati da riga 2+.
+     * Salta righe vuote e la riga esempio (riga 2 con sfondo grigio).
+     *
+     * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet
+     * @return array Array di righe associative [header => valore]
+     */
+    private function leggiRigheFoglio($sheet)
+    {
+        $righe = [];
+        $headers = [];
+
+        foreach ($sheet->getRowIterator(1) as $rowIndex => $row) {
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
+
+            $cells = [];
+            foreach ($cellIterator as $cell) {
+                $value = $cell->getValue();
+                if (is_object($value)) {
+                    $value = $value->__toString();
+                } elseif (is_array($value)) {
+                    $value = '';
+                } elseif ($value === null) {
+                    $value = '';
+                } else {
+                    $value = (string)$value;
+                }
+                $cells[] = trim($value);
+            }
+
+            if ($rowIndex === 1) {
+                // Header: rimuovi asterischi
+                $headers = array_map(function ($h) {
+                    return trim(str_replace('*', '', $h));
+                }, $cells);
+                continue;
+            }
+
+            // Salta riga 2 (esempio) - controlla se contiene testo indicativo di esempio
+            if ($rowIndex === 2) {
+                $lastCell = end($cells);
+                if (stripos($lastCell, 'esempio') !== false || stripos($lastCell, 'cancellare') !== false) {
+                    continue;
+                }
+            }
+
+            // Salta righe completamente vuote
+            $nonEmpty = array_filter($cells, function ($c) { return $c !== ''; });
+            if (empty($nonEmpty)) {
+                continue;
+            }
+
+            // Assicurati che cells e headers abbiano la stessa lunghezza
+            while (count($cells) < count($headers)) {
+                $cells[] = '';
+            }
+            $cells = array_slice($cells, 0, count($headers));
+
+            $righe[] = array_combine($headers, $cells);
+        }
+
+        return $righe;
+    }
+
+    /**
+     * Normalizza formato orario da Excel.
+     * Gestisce: decimale Excel (0.375 = 09:00), HH:MM, HH:MM:SS
+     *
+     * @param mixed $orario Valore orario dal file Excel
+     * @return string|null Orario in formato HH:MM o null se non valido
+     */
+    private function normalizzaOrario($orario)
+    {
+        if (empty($orario)) {
+            return null;
+        }
+
+        $orario = trim((string)$orario);
+
+        // Formato HH:MM:SS
+        if (preg_match('/^(\d{1,2}):(\d{2}):(\d{2})$/', $orario, $m)) {
+            return sprintf('%02d:%02d', (int)$m[1], (int)$m[2]);
+        }
+
+        // Formato HH:MM
+        if (preg_match('/^(\d{1,2}):(\d{2})$/', $orario, $m)) {
+            return sprintf('%02d:%02d', (int)$m[1], (int)$m[2]);
+        }
+
+        // Formato decimale Excel (es: 0.375 = 09:00, 0.75 = 18:00)
+        if (is_numeric($orario)) {
+            $decimal = (float)$orario;
+            if ($decimal >= 0 && $decimal < 1) {
+                $totalMinutes = round($decimal * 24 * 60);
+                $hours = (int)($totalMinutes / 60);
+                $minutes = (int)($totalMinutes % 60);
+                return sprintf('%02d:%02d', $hours, $minutes);
+            }
+            // Potrebbe essere un numero intero tipo 900 per 09:00 o 1300 per 13:00
+            if ($decimal >= 100 && $decimal <= 2359) {
+                $hours = (int)($decimal / 100);
+                $minutes = (int)($decimal % 100);
+                if ($hours < 24 && $minutes < 60) {
+                    return sprintf('%02d:%02d', $hours, $minutes);
+                }
+            }
+        }
+
+        // Formato H.MM (es: 9.00 per 09:00)
+        if (preg_match('/^(\d{1,2})\.(\d{2})$/', $orario, $m)) {
+            $h = (int)$m[1];
+            $min = (int)$m[2];
+            if ($h < 24 && $min < 60) {
+                return sprintf('%02d:%02d', $h, $min);
+            }
+        }
+
+        return null;
     }
 }

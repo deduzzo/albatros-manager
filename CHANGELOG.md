@@ -5,6 +5,10 @@ Tutte le modifiche al portale Albatros Manager.
 ## [Unreleased]
 
 ### Novità {admin}
+- Import modulare assegnazioni docenti da file Excel con preview/conferma
+- Template XLSX scaricabile per import assegnazioni (con istruzioni e riga esempio)
+- Template XLSX scaricabile per import calendario lezioni
+- Preview dettagliata prima dell'import: mostra docenti nuovi/esistenti, assegnazioni da creare/saltare
 - Report "Docenti da Contrattualizzare": identifica docenti con lezioni in calendario ma senza contratto attivo
 - Filtro per progetto, statistiche riepilogative e link diretto alla contrattualizzazione
 
