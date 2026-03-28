@@ -229,7 +229,7 @@ class RichiestaFatturazione extends BaseActiveRecord
                 . "si prega di emettere fattura per la seguente prestazione:\n\n"
                 . "Ente committente: {$fondazione}\n"
                 . "C.F. Ente: {$cfEnte}\n"
-                . ($modulo ? "Modulo: {$modulo->nome}\n" : '')
+                . ($modulo ? "Modulo: {$modulo->titolo}\n" : '')
                 . "Importo: € " . number_format($this->importo, 2, ',', '.') . "\n"
                 . ($this->periodo_riferimento ? "Periodo: {$this->periodo_riferimento}\n" : '')
                 . "N. Contratto: {$contratto->numero_contratto}\n\n"

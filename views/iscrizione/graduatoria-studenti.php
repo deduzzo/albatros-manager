@@ -289,7 +289,7 @@ document.querySelectorAll('.btn-rifiuta').forEach(function(btn) {
         var nome = this.dataset.nome;
         document.getElementById('rifiuta-nome').textContent = nome;
         document.getElementById('form-rifiuta').action = '{$rifiutaUrl}'.replace('__ID__', id);
-        new bootstrap.Modal(document.getElementById('modal-rifiuta')).show();
+        new (window.bootstrap || window.tabler).Modal(document.getElementById('modal-rifiuta')).show();
     });
 });
 JS;

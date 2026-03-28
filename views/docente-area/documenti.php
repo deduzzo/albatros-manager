@@ -140,7 +140,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <tr>
                                     <td><?= $richiesta->getTipoBadge() ?></td>
                                     <td>
-                                        <div class="fw-bold"><?= Html::encode($modulo ? $modulo->nome : 'N/D') ?></div>
+                                        <div class="fw-bold"><?= Html::encode($modulo ? $modulo->titolo : 'N/D') ?></div>
                                         <?php if ($contratto && $contratto->numero_contratto): ?>
                                             <div class="text-secondary small">
                                                 Contratto: <?= Html::encode($contratto->numero_contratto) ?>

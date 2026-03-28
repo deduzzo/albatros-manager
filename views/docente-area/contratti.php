@@ -132,7 +132,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ?>
                                 <tr>
                                     <td>
-                                        <div class="fw-bold"><?= Html::encode($modulo ? $modulo->nome : 'N/D') ?></div>
+                                        <div class="fw-bold"><?= Html::encode($modulo ? $modulo->titolo : 'N/D') ?></div>
                                         <?php if ($avviso): ?>
                                             <div class="text-secondary small"><?= Html::encode($avviso->titolo) ?></div>
                                         <?php endif; ?>

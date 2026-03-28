@@ -113,7 +113,7 @@ HTML;
         $js = <<<JS
 setTimeout(function() {
     document.querySelectorAll('.alert.alert-dismissible').forEach(function(alert) {
-        var bsAlert = new bootstrap.Alert(alert);
+        var bsAlert = new (window.bootstrap || window.tabler).Alert(alert);
         bsAlert.close();
     });
 }, {$delay});
