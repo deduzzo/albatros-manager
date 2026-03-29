@@ -73,3 +73,20 @@ PRODUCTION_SERVER.md
 
 # Mail SMTP config (credentials)
 /config/mail.php
+
+# Uploaded files (contratti, fatture, firme, rimborsi, istanze, import-valutazioni)
+/web/uploads/contratti/*
+/web/uploads/fatture/*
+/web/uploads/firme/*
+/web/uploads/rimborsi/*
+/web/uploads/istanze/*
+/web/uploads/import-valutazioni/*
+!/web/uploads/contratti/.gitkeep
+!/web/uploads/fatture/.gitkeep
+!/web/uploads/firme/.gitkeep
+!/web/uploads/rimborsi/.gitkeep
+!/web/uploads/istanze/.gitkeep
+!/web/uploads/import-valutazioni/.gitkeep
+
+# Dati reali sensibili (bilanci, prospetti, valutazioni)
+/docs/DATI REALI/

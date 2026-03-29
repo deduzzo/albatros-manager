@@ -46,6 +46,41 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <i class="ti ti-calendar-plus me-1"></i>Import Calendari
                             </a>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-studenti" class="nav-link" data-bs-toggle="tab" role="tab">
+                                <i class="ti ti-school me-1"></i>Studenti
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-presenze" class="nav-link" data-bs-toggle="tab" role="tab">
+                                <i class="ti ti-clipboard-check me-1"></i>Presenze
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-borse" class="nav-link" data-bs-toggle="tab" role="tab">
+                                <i class="ti ti-award me-1"></i>Borse Studio
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-rendicontazione" class="nav-link" data-bs-toggle="tab" role="tab">
+                                <i class="ti ti-clock-hour-4 me-1"></i>Ore Docenti
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-movimenti" class="nav-link" data-bs-toggle="tab" role="tab">
+                                <i class="ti ti-receipt me-1"></i>Movimenti Spesa
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-tranche" class="nav-link" data-bs-toggle="tab" role="tab">
+                                <i class="ti ti-cash me-1"></i>Tranche
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#tab-pagamenti" class="nav-link" data-bs-toggle="tab" role="tab">
+                                <i class="ti ti-credit-card me-1"></i>Pagamenti
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="card-body">
@@ -247,6 +282,146 @@ $this->params['breadcrumbs'][] = $this->title;
                             </div>
                         </div>
 
+                        <!-- TAB 4: Import Studenti -->
+                        <div class="tab-pane" id="tab-studenti" role="tabpanel">
+                            <div class="card bg-azure-lt mb-3"><div class="card-body">
+                                <h4 class="mb-2"><i class="ti ti-info-circle me-1"></i>Import Studenti + Iscrizioni</h4>
+                                <ol class="mb-0">
+                                    <li class="mb-1">Scarica il template e compila il foglio STUDENTI</li>
+                                    <li class="mb-1">CF_STUDENTE (16 car.), COGNOME e NOME sono obbligatori</li>
+                                    <li class="mb-1">Se CODICE_MODULO è fornito, verrà creata un'iscrizione</li>
+                                    <li>Studenti esistenti (stesso CF) verranno aggiornati</li>
+                                </ol>
+                            </div></div>
+                            <div class="mb-3"><?= Html::a('<i class="ti ti-download me-1"></i> Scarica Template Studenti', ['download-template-studenti'], ['class' => 'btn btn-outline-primary']) ?></div>
+                            <div class="mb-3"><label class="form-label required">File Excel (.xlsx)</label><input type="file" id="file-studenti" class="form-control" accept=".xlsx"><div class="form-hint">Dimensione massima: 10 MB</div></div>
+                            <button type="button" class="btn btn-primary" id="btn-upload-studenti"><i class="ti ti-search me-1"></i>Valida File</button>
+                            <div id="results-studenti" class="mt-3" style="display:none;">
+                                <div id="progress-studenti" style="display:none;"><div class="progress mb-3"><div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar-studenti" style="width:0%"><span id="progresstext-studenti">0%</span></div></div></div>
+                                <div id="status-studenti"></div><div id="preview-studenti"></div><div id="errors-studenti"></div><div id="warnings-studenti"></div><div id="stats-studenti" class="mt-3"></div>
+                                <div id="footer-studenti" class="mt-3" style="display:none;"><button type="button" class="btn bg-green text-green-fg" id="btn-confirm-studenti" style="display:none;"><i class="ti ti-check me-1"></i>Conferma Import</button> <button type="button" class="btn btn-primary" onclick="location.reload()"><i class="ti ti-refresh me-1"></i>Nuova Importazione</button></div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 5: Import Presenze -->
+                        <div class="tab-pane" id="tab-presenze" role="tabpanel">
+                            <div class="card bg-azure-lt mb-3"><div class="card-body">
+                                <h4 class="mb-2"><i class="ti ti-info-circle me-1"></i>Import Presenze Allievi</h4>
+                                <ol class="mb-0">
+                                    <li class="mb-1">CODICE_MODULO + DATA_LEZIONE devono corrispondere a una lezione nel calendario</li>
+                                    <li class="mb-1">CF_STUDENTE deve essere uno studente esistente</li>
+                                    <li>Presenze duplicate (stesso studente + lezione) verranno saltate</li>
+                                </ol>
+                            </div></div>
+                            <div class="mb-3"><?= Html::a('<i class="ti ti-download me-1"></i> Scarica Template Presenze', ['download-template-presenze'], ['class' => 'btn btn-outline-primary']) ?></div>
+                            <div class="mb-3"><label class="form-label required">File Excel (.xlsx)</label><input type="file" id="file-presenze" class="form-control" accept=".xlsx"><div class="form-hint">Dimensione massima: 10 MB</div></div>
+                            <button type="button" class="btn btn-primary" id="btn-upload-presenze"><i class="ti ti-search me-1"></i>Valida File</button>
+                            <div id="results-presenze" class="mt-3" style="display:none;">
+                                <div id="progress-presenze" style="display:none;"><div class="progress mb-3"><div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar-presenze" style="width:0%"><span id="progresstext-presenze">0%</span></div></div></div>
+                                <div id="status-presenze"></div><div id="preview-presenze"></div><div id="errors-presenze"></div><div id="warnings-presenze"></div><div id="stats-presenze" class="mt-3"></div>
+                                <div id="footer-presenze" class="mt-3" style="display:none;"><button type="button" class="btn bg-green text-green-fg" id="btn-confirm-presenze" style="display:none;"><i class="ti ti-check me-1"></i>Conferma Import</button> <button type="button" class="btn btn-primary" onclick="location.reload()"><i class="ti ti-refresh me-1"></i>Nuova Importazione</button></div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 6: Import Borse di Studio -->
+                        <div class="tab-pane" id="tab-borse" role="tabpanel">
+                            <div class="card bg-azure-lt mb-3"><div class="card-body">
+                                <h4 class="mb-2"><i class="ti ti-info-circle me-1"></i>Import Borse di Studio</h4>
+                                <ol class="mb-0">
+                                    <li class="mb-1">CF_STUDENTE e CODICE_PROGETTO devono esistere nel sistema</li>
+                                    <li class="mb-1">L'importo base è calcolato automaticamente dalla tipologia sede</li>
+                                    <li>Borse duplicate (stesso studente + progetto + anno) verranno saltate</li>
+                                </ol>
+                            </div></div>
+                            <div class="mb-3"><?= Html::a('<i class="ti ti-download me-1"></i> Scarica Template Borse', ['download-template-borse'], ['class' => 'btn btn-outline-primary']) ?></div>
+                            <div class="mb-3"><label class="form-label required">File Excel (.xlsx)</label><input type="file" id="file-borse" class="form-control" accept=".xlsx"><div class="form-hint">Dimensione massima: 10 MB</div></div>
+                            <button type="button" class="btn btn-primary" id="btn-upload-borse"><i class="ti ti-search me-1"></i>Valida File</button>
+                            <div id="results-borse" class="mt-3" style="display:none;">
+                                <div id="progress-borse" style="display:none;"><div class="progress mb-3"><div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar-borse" style="width:0%"><span id="progresstext-borse">0%</span></div></div></div>
+                                <div id="status-borse"></div><div id="preview-borse"></div><div id="errors-borse"></div><div id="warnings-borse"></div><div id="stats-borse" class="mt-3"></div>
+                                <div id="footer-borse" class="mt-3" style="display:none;"><button type="button" class="btn bg-green text-green-fg" id="btn-confirm-borse" style="display:none;"><i class="ti ti-check me-1"></i>Conferma Import</button> <button type="button" class="btn btn-primary" onclick="location.reload()"><i class="ti ti-refresh me-1"></i>Nuova Importazione</button></div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 7: Import Rendicontazione Ore -->
+                        <div class="tab-pane" id="tab-rendicontazione" role="tabpanel">
+                            <div class="card bg-azure-lt mb-3"><div class="card-body">
+                                <h4 class="mb-2"><i class="ti ti-info-circle me-1"></i>Import Rendicontazione Ore</h4>
+                                <ol class="mb-0">
+                                    <li class="mb-1">Il docente deve avere un'assegnazione attiva al modulo</li>
+                                    <li class="mb-1">ORE minimo 0.25, STATUS: inserito (default), approvato, rifiutato</li>
+                                    <li>Duplicati (stessa assegnazione + data) verranno saltati</li>
+                                </ol>
+                            </div></div>
+                            <div class="mb-3"><?= Html::a('<i class="ti ti-download me-1"></i> Scarica Template Ore', ['download-template-rendicontazione'], ['class' => 'btn btn-outline-primary']) ?></div>
+                            <div class="mb-3"><label class="form-label required">File Excel (.xlsx)</label><input type="file" id="file-rendicontazione" class="form-control" accept=".xlsx"><div class="form-hint">Dimensione massima: 10 MB</div></div>
+                            <button type="button" class="btn btn-primary" id="btn-upload-rendicontazione"><i class="ti ti-search me-1"></i>Valida File</button>
+                            <div id="results-rendicontazione" class="mt-3" style="display:none;">
+                                <div id="progress-rendicontazione" style="display:none;"><div class="progress mb-3"><div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar-rendicontazione" style="width:0%"><span id="progresstext-rendicontazione">0%</span></div></div></div>
+                                <div id="status-rendicontazione"></div><div id="preview-rendicontazione"></div><div id="errors-rendicontazione"></div><div id="warnings-rendicontazione"></div><div id="stats-rendicontazione" class="mt-3"></div>
+                                <div id="footer-rendicontazione" class="mt-3" style="display:none;"><button type="button" class="btn bg-green text-green-fg" id="btn-confirm-rendicontazione" style="display:none;"><i class="ti ti-check me-1"></i>Conferma Import</button> <button type="button" class="btn btn-primary" onclick="location.reload()"><i class="ti ti-refresh me-1"></i>Nuova Importazione</button></div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 8: Import Movimenti Spesa -->
+                        <div class="tab-pane" id="tab-movimenti" role="tabpanel">
+                            <div class="card bg-azure-lt mb-3"><div class="card-body">
+                                <h4 class="mb-2"><i class="ti ti-info-circle me-1"></i>Import Movimenti Spesa</h4>
+                                <ol class="mb-0">
+                                    <li class="mb-1">CODICE_VOCE_SPESA deve corrispondere a una voce di spesa esistente</li>
+                                    <li class="mb-1">CODICE_PROGETTO è opzionale</li>
+                                    <li>TIPO: spesa (default) o entrata</li>
+                                </ol>
+                            </div></div>
+                            <div class="mb-3"><?= Html::a('<i class="ti ti-download me-1"></i> Scarica Template Movimenti', ['download-template-movimenti'], ['class' => 'btn btn-outline-primary']) ?></div>
+                            <div class="mb-3"><label class="form-label required">File Excel (.xlsx)</label><input type="file" id="file-movimenti" class="form-control" accept=".xlsx"><div class="form-hint">Dimensione massima: 10 MB</div></div>
+                            <button type="button" class="btn btn-primary" id="btn-upload-movimenti"><i class="ti ti-search me-1"></i>Valida File</button>
+                            <div id="results-movimenti" class="mt-3" style="display:none;">
+                                <div id="progress-movimenti" style="display:none;"><div class="progress mb-3"><div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar-movimenti" style="width:0%"><span id="progresstext-movimenti">0%</span></div></div></div>
+                                <div id="status-movimenti"></div><div id="preview-movimenti"></div><div id="errors-movimenti"></div><div id="warnings-movimenti"></div><div id="stats-movimenti" class="mt-3"></div>
+                                <div id="footer-movimenti" class="mt-3" style="display:none;"><button type="button" class="btn bg-green text-green-fg" id="btn-confirm-movimenti" style="display:none;"><i class="ti ti-check me-1"></i>Conferma Import</button> <button type="button" class="btn btn-primary" onclick="location.reload()"><i class="ti ti-refresh me-1"></i>Nuova Importazione</button></div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 9: Import Tranche -->
+                        <div class="tab-pane" id="tab-tranche" role="tabpanel">
+                            <div class="card bg-azure-lt mb-3"><div class="card-body">
+                                <h4 class="mb-2"><i class="ti ti-info-circle me-1"></i>Import Tranche Finanziamento</h4>
+                                <ol class="mb-0">
+                                    <li class="mb-1">CODICE_PROGETTO deve corrispondere a un progetto esistente</li>
+                                    <li>STATUS: prevista (default), accreditata, parziale</li>
+                                </ol>
+                            </div></div>
+                            <div class="mb-3"><?= Html::a('<i class="ti ti-download me-1"></i> Scarica Template Tranche', ['download-template-tranche'], ['class' => 'btn btn-outline-primary']) ?></div>
+                            <div class="mb-3"><label class="form-label required">File Excel (.xlsx)</label><input type="file" id="file-tranche" class="form-control" accept=".xlsx"><div class="form-hint">Dimensione massima: 10 MB</div></div>
+                            <button type="button" class="btn btn-primary" id="btn-upload-tranche"><i class="ti ti-search me-1"></i>Valida File</button>
+                            <div id="results-tranche" class="mt-3" style="display:none;">
+                                <div id="progress-tranche" style="display:none;"><div class="progress mb-3"><div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar-tranche" style="width:0%"><span id="progresstext-tranche">0%</span></div></div></div>
+                                <div id="status-tranche"></div><div id="preview-tranche"></div><div id="errors-tranche"></div><div id="warnings-tranche"></div><div id="stats-tranche" class="mt-3"></div>
+                                <div id="footer-tranche" class="mt-3" style="display:none;"><button type="button" class="btn bg-green text-green-fg" id="btn-confirm-tranche" style="display:none;"><i class="ti ti-check me-1"></i>Conferma Import</button> <button type="button" class="btn btn-primary" onclick="location.reload()"><i class="ti ti-refresh me-1"></i>Nuova Importazione</button></div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 10: Import Pagamenti -->
+                        <div class="tab-pane" id="tab-pagamenti" role="tabpanel">
+                            <div class="card bg-azure-lt mb-3"><div class="card-body">
+                                <h4 class="mb-2"><i class="ti ti-info-circle me-1"></i>Import Pagamenti Storici</h4>
+                                <ol class="mb-0">
+                                    <li class="mb-1">Il docente deve avere un contratto attivo per il modulo indicato</li>
+                                    <li class="mb-1">TIPO: acconto, saldo (default), rata, rimborso</li>
+                                    <li>STATUS: programmato, in_attesa, pagato (default), annullato</li>
+                                </ol>
+                            </div></div>
+                            <div class="mb-3"><?= Html::a('<i class="ti ti-download me-1"></i> Scarica Template Pagamenti', ['download-template-pagamenti'], ['class' => 'btn btn-outline-primary']) ?></div>
+                            <div class="mb-3"><label class="form-label required">File Excel (.xlsx)</label><input type="file" id="file-pagamenti" class="form-control" accept=".xlsx"><div class="form-hint">Dimensione massima: 10 MB</div></div>
+                            <button type="button" class="btn btn-primary" id="btn-upload-pagamenti"><i class="ti ti-search me-1"></i>Valida File</button>
+                            <div id="results-pagamenti" class="mt-3" style="display:none;">
+                                <div id="progress-pagamenti" style="display:none;"><div class="progress mb-3"><div class="progress-bar progress-bar-striped progress-bar-animated" id="progressbar-pagamenti" style="width:0%"><span id="progresstext-pagamenti">0%</span></div></div></div>
+                                <div id="status-pagamenti"></div><div id="preview-pagamenti"></div><div id="errors-pagamenti"></div><div id="warnings-pagamenti"></div><div id="stats-pagamenti" class="mt-3"></div>
+                                <div id="footer-pagamenti" class="mt-3" style="display:none;"><button type="button" class="btn bg-green text-green-fg" id="btn-confirm-pagamenti" style="display:none;"><i class="ti ti-check me-1"></i>Conferma Import</button> <button type="button" class="btn btn-primary" onclick="location.reload()"><i class="ti ti-refresh me-1"></i>Nuova Importazione</button></div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -259,6 +434,13 @@ $this->params['breadcrumbs'][] = $this->title;
 $urlCompleto = \yii\helpers\Url::to(['import/upload']);
 $urlAssegnazioni = \yii\helpers\Url::to(['import/upload-assegnazioni']);
 $urlCalendari = \yii\helpers\Url::to(['import/upload-calendari']);
+$urlStudenti = \yii\helpers\Url::to(['import/upload-studenti']);
+$urlPresenze = \yii\helpers\Url::to(['import/upload-presenze']);
+$urlBorse = \yii\helpers\Url::to(['import/upload-borse']);
+$urlRendicontazione = \yii\helpers\Url::to(['import/upload-rendicontazione']);
+$urlMovimenti = \yii\helpers\Url::to(['import/upload-movimenti']);
+$urlTranche = \yii\helpers\Url::to(['import/upload-tranche']);
+$urlPagamenti = \yii\helpers\Url::to(['import/upload-pagamenti']);
 
 $this->registerJs(<<<JS
 
@@ -300,6 +482,34 @@ $('#btn-confirm-calendari').on('click', function() {
     if (!confirm('Sei sicuro di voler procedere con l\\'import definitivo?')) return;
     confirmImport('calendari', '$urlCalendari');
 });
+
+// TAB 4: Studenti
+$('#btn-upload-studenti').on('click', function() { submitImport('studenti', '$urlStudenti', true); });
+$('#btn-confirm-studenti').on('click', function() { if (!confirm('Confermi l\\'import?')) return; confirmImport('studenti', '$urlStudenti'); });
+
+// TAB 5: Presenze
+$('#btn-upload-presenze').on('click', function() { submitImport('presenze', '$urlPresenze', true); });
+$('#btn-confirm-presenze').on('click', function() { if (!confirm('Confermi l\\'import?')) return; confirmImport('presenze', '$urlPresenze'); });
+
+// TAB 6: Borse di Studio
+$('#btn-upload-borse').on('click', function() { submitImport('borse', '$urlBorse', true); });
+$('#btn-confirm-borse').on('click', function() { if (!confirm('Confermi l\\'import?')) return; confirmImport('borse', '$urlBorse'); });
+
+// TAB 7: Rendicontazione Ore
+$('#btn-upload-rendicontazione').on('click', function() { submitImport('rendicontazione', '$urlRendicontazione', true); });
+$('#btn-confirm-rendicontazione').on('click', function() { if (!confirm('Confermi l\\'import?')) return; confirmImport('rendicontazione', '$urlRendicontazione'); });
+
+// TAB 8: Movimenti Spesa
+$('#btn-upload-movimenti').on('click', function() { submitImport('movimenti', '$urlMovimenti', true); });
+$('#btn-confirm-movimenti').on('click', function() { if (!confirm('Confermi l\\'import?')) return; confirmImport('movimenti', '$urlMovimenti'); });
+
+// TAB 9: Tranche
+$('#btn-upload-tranche').on('click', function() { submitImport('tranche', '$urlTranche', true); });
+$('#btn-confirm-tranche').on('click', function() { if (!confirm('Confermi l\\'import?')) return; confirmImport('tranche', '$urlTranche'); });
+
+// TAB 10: Pagamenti
+$('#btn-upload-pagamenti').on('click', function() { submitImport('pagamenti', '$urlPagamenti', true); });
+$('#btn-confirm-pagamenti').on('click', function() { if (!confirm('Confermi l\\'import?')) return; confirmImport('pagamenti', '$urlPagamenti'); });
 
 // ==========================================
 // Funzione generica upload
@@ -520,6 +730,34 @@ function handlePreviewResponse(tabId, data) {
                         '<td>' + (row.ore || '') + '</td>' +
                         '<td>' + getActionBadge(row.azione) + '</td>' +
                         '</tr>';
+                });
+            } else {
+                // Preview generica per tutti gli altri import
+                html += '<thead><tr><th>Riga</th><th>Stato</th><th>Dettagli</th></tr></thead><tbody>';
+                data.preview.forEach(function(row) {
+                    var stato = row.stato || row.azione || 'ok';
+                    var dettagli = '';
+                    if (row.azioni && row.azioni.length) {
+                        dettagli = row.azioni.join('<br>');
+                    } else if (row.azione) {
+                        dettagli = row.azione;
+                    }
+                    // Mostra info chiave dalla riga
+                    var info = [];
+                    if (row.cf_studente) info.push('CF: ' + row.cf_studente);
+                    if (row.cognome && row.nome) info.push(row.cognome + ' ' + row.nome);
+                    if (row.studente_nome) info.push(row.studente_nome);
+                    if (row.codice_modulo) info.push('Mod: ' + row.codice_modulo);
+                    if (row.cf_docente) info.push('Doc: ' + row.cf_docente);
+                    if (row.codice_progetto) info.push('Prg: ' + row.codice_progetto);
+                    if (row.data_lezione) info.push(row.data_lezione);
+                    if (row.data) info.push(row.data);
+                    if (row.importo) info.push('€' + row.importo);
+                    if (row.importo_lordo) info.push('Lordo: €' + row.importo_lordo);
+                    if (row.ore) info.push(row.ore + 'h');
+                    if (row.presente) info.push(row.presente === 'SI' ? 'Presente' : 'Assente');
+                    var infoStr = info.length ? '<strong>' + info.join(' | ') + '</strong><br>' : '';
+                    html += '<tr><td>' + (row.riga || '') + '</td><td>' + getBadge(stato) + '</td><td>' + infoStr + dettagli + '</td></tr>';
                 });
             }
 
