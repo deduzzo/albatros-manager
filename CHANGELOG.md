@@ -4,6 +4,7 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.30] - 2026-03-30
 ## [v1.0.29] - 2026-03-28
 ## [v1.0.28] - 2026-03-28
 ## [v1.0.27] - 2026-03-28
