@@ -91,6 +91,7 @@ class Contratto extends BaseActiveRecord
             }],
             // Compenso totale deve essere >= compenso orario * ore
             ['compenso_totale', 'compare', 'compareValue' => 0, 'operator' => '>', 'message' => 'Il compenso totale deve essere maggiore di zero'],
+            [['allegati_path'], 'safe'],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
             [['created_by', 'updated_by', 'deleted_by'], 'integer'],
         ];
@@ -370,5 +371,35 @@ class Contratto extends BaseActiveRecord
     public function isSaldato()
     {
         return abs($this->getSaldoRimanente()) < 0.01; // Tolleranza per arrotondamenti
+    }
+
+    /**
+     * Restituisce la lista degli allegati caricati
+     * @return array
+     */
+    public function getAllegati()
+    {
+        $json = $this->allegati_path;
+        if (empty($json)) return [];
+        $decoded = is_string($json) ? json_decode($json, true) : $json;
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    /**
+     * Aggiunge un allegato alla lista e salva
+     * @param string $path Percorso relativo del file
+     * @param string $nomeOriginale Nome originale del file
+     * @return bool
+     */
+    public function aggiungiAllegato($path, $nomeOriginale)
+    {
+        $allegati = $this->getAllegati();
+        $allegati[] = [
+            'path' => $path,
+            'nome' => $nomeOriginale,
+            'data' => date('Y-m-d H:i:s'),
+        ];
+        $this->allegati_path = json_encode($allegati);
+        return $this->save(false);
     }
 }

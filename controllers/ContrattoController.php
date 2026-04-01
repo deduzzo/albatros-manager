@@ -42,6 +42,7 @@ class ContrattoController extends Controller
                     'delete' => ['POST'],
                     'genera' => ['POST'],
                     'upload-firmato' => ['POST'],
+                    'upload-allegato' => ['POST'],
                 ],
             ],
         ];
@@ -350,6 +351,41 @@ class ContrattoController extends Controller
         }
 
         return $this->redirect(['view', 'id' => $id]);
+    }
+
+    /**
+     * Upload di un allegato scansione per un contratto firmato a mano.
+     * @param int $id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     */
+    public function actionUploadAllegato($id)
+    {
+        $model = $this->findModel($id);
+        $file = \yii\web\UploadedFile::getInstanceByName('allegato');
+        if (!$file) {
+            Yii::$app->session->setFlash('error', 'Nessun file selezionato.');
+            return $this->redirect(['view', 'id' => $id]);
+        }
+        $ext = strtolower($file->extension);
+        if (!in_array($ext, ['pdf', 'jpg', 'jpeg', 'png'])) {
+            Yii::$app->session->setFlash('error', 'Formato non supportato. Usare PDF, JPG o PNG.');
+            return $this->redirect(['view', 'id' => $id]);
+        }
+        $dir = Yii::getAlias('@webroot/uploads/contratti/allegati');
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $filename = $id . '_allegato_' . time() . '.' . $ext;
+        $path = $dir . '/' . $filename;
+        if ($file->saveAs($path)) {
+            $model->aggiungiAllegato('uploads/contratti/allegati/' . $filename, $file->baseName . '.' . $ext);
+            Yii::$app->session->setFlash('success', 'Allegato caricato con successo.');
+        } else {
+            Yii::$app->session->setFlash('error', 'Errore nel caricamento del file.');
+        }
+        $returnUrl = Yii::$app->request->get('returnUrl');
+        return $this->redirect($returnUrl ?: ['view', 'id' => $id]);
     }
 
     /**

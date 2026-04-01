@@ -516,6 +516,47 @@ if ($model->firma_dettagli) {
                     </div>
                 </div>
 
+                <!-- Allegati Scansione -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="ti ti-paperclip me-2"></i>Allegati</h3>
+                        </div>
+                        <div class="card-body">
+                            <?php $allegati = $model->getAllegati(); ?>
+                            <?php if (!empty($allegati)): ?>
+                            <div class="list-group list-group-flush mb-3">
+                                <?php foreach ($allegati as $all): ?>
+                                <div class="list-group-item d-flex align-items-center">
+                                    <i class="ti ti-file me-2 text-muted"></i>
+                                    <div>
+                                        <a href="<?= Yii::$app->request->baseUrl . '/' . $all['path'] ?>" target="_blank">
+                                            <?= Html::encode($all['nome']) ?>
+                                        </a>
+                                        <small class="text-muted d-block"><?= $all['data'] ?></small>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php else: ?>
+                            <div class="text-muted mb-3">Nessun allegato caricato.</div>
+                            <?php endif; ?>
+
+                            <form method="post" action="<?= \yii\helpers\Url::to(['/contratto/upload-allegato', 'id' => $model->id]) ?>"
+                                  enctype="multipart/form-data">
+                                <?= Html::hiddenInput(Yii::$app->request->csrfParam, Yii::$app->request->csrfToken) ?>
+                                <div class="input-group">
+                                    <input type="file" name="allegato" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                                    <button type="submit" class="btn btn-outline-indigo">
+                                        <i class="ti ti-upload me-1"></i> Carica
+                                    </button>
+                                </div>
+                                <small class="text-muted">Formati: PDF, JPG, PNG</small>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Footer con azioni -->
                 <div class="col-12">
                     <div class="card">

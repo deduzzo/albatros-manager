@@ -14,7 +14,11 @@ Tutte le modifiche al portale Albatros Manager.
 - Borse di studio: export SEPA XML pain.001 per pagamento massivo tramite bonifico bancario
 - Borse di studio: pulsante "Export SEPA XML" nella lista borse per generare file da inviare alla banca
 
+- Contratti: upload allegati scansione (PDF/JPG/PNG) per contratti firmati a mano, visualizzabili nella vista contratto
+- Dashboard admin: alert operativi automatici per docenti da contrattualizzare, presenze non acquisite e borse bloccate
+
 ### Tecnico {admin}
+- `AlertWidget`: widget riutilizzabile per alert operativi (contratti/presenze/borse), supporta modalità compatta e filtro per corso
 - Migration: aggiunto `docente_presente` (3 stati: null/1/0) e `docente_ore_effettive` alla tabella `calendario`
 - Migration: campo `presente` in `presenza_allievo` ora nullable (3 stati: null=non acquisito, 1=presente, 0=assente)
 - Migration: aggiunto `allegati_path` (JSON) alla tabella `contratto` per allegati multipli
