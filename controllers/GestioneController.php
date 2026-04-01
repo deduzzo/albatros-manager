@@ -10,6 +10,8 @@ use app\models\Contratto;
 use app\models\Iscrizione;
 use app\models\Calendario;
 use app\models\BorsaStudio;
+use app\models\Docente;
+use app\models\Istanza;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
@@ -266,6 +268,68 @@ class GestioneController extends Controller
             default:
                 return [];
         }
+    }
+
+    /**
+     * Inserimento candidatura su più moduli contemporaneamente.
+     */
+    public function actionNuovaCandidatura($corso_id)
+    {
+        $corso = $this->findCorso($corso_id);
+
+        $moduli = Modulo::find()
+            ->where(['avviso_id' => $corso_id, 'deleted_at' => null])
+            ->orderBy(['codice' => SORT_ASC])
+            ->all();
+
+        $docenti = Docente::find()
+            ->where(['deleted_at' => null])
+            ->orderBy(['cognome' => SORT_ASC, 'nome' => SORT_ASC])
+            ->all();
+
+        if (Yii::$app->request->isPost) {
+            $post = Yii::$app->request->post();
+            $docenteCf = $post['docente_codice_fiscale'] ?? null;
+            $moduliIds = $post['moduli_ids'] ?? [];
+
+            if (!$docenteCf || empty($moduliIds)) {
+                Yii::$app->session->setFlash('error', 'Selezionare un docente e almeno un modulo.');
+                return $this->render('_candidatura-multi', compact('corso', 'moduli', 'docenti'));
+            }
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $count = 0;
+                foreach ($moduliIds as $moduloId) {
+                    $exists = Istanza::find()->where([
+                        'docente_codice_fiscale' => $docenteCf,
+                        'modulo_id' => $moduloId,
+                        'deleted_at' => null,
+                    ])->exists();
+
+                    if (!$exists) {
+                        $istanza = new Istanza();
+                        $istanza->docente_codice_fiscale = $docenteCf;
+                        $istanza->modulo_id = (int) $moduloId;
+                        $istanza->avviso_id = (int) $corso_id;
+                        $istanza->status = Istanza::STATUS_PRESENTATA;
+                        $istanza->data_presentazione = date('Y-m-d');
+                        if (!$istanza->save()) {
+                            throw new \Exception('Errore salvataggio istanza: ' . implode(', ', $istanza->getFirstErrors()));
+                        }
+                        $count++;
+                    }
+                }
+                $transaction->commit();
+                Yii::$app->session->setFlash('success', "Candidatura inserita per {$count} modulo/i.");
+                return $this->redirect(['/gestione/sezione', 'id' => $corso_id, 'section' => 'piano-formativo']);
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
+        }
+
+        return $this->render('_candidatura-multi', compact('corso', 'moduli', 'docenti'));
     }
 
     protected function findCorso($id): Avviso

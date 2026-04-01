@@ -8,8 +8,8 @@ use yii\widgets\DetailView;
 /* @var $model app\models\Avviso */
 /* @var $rendiconto array */
 
-$this->title = 'Avviso: ' . $model->codice_avviso;
-$this->params['breadcrumbs'][] = ['label' => 'Avvisi/Bandi', 'url' => ['index']];
+$this->title = 'Corso: ' . $model->codice_avviso;
+$this->params['breadcrumbs'][] = ['label' => 'Corsi', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->codice_avviso;
 
 $formatter = Yii::$app->formatter;
@@ -35,11 +35,14 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                 </div>
                 <div class="col-auto ms-auto">
                     <?= Html::a('<i class="ti ti-file-plus me-1"></i> Documenti Richiesti', ['documenti', 'id' => $model->id], ['class' => 'btn btn-info']) ?>
+                    <?= Html::a('<i class="ti ti-users-plus me-1"></i> Candidatura Multi-modulo',
+                        ['/gestione/nuova-candidatura', 'corso_id' => $model->id],
+                        ['class' => 'btn btn-outline-indigo']) ?>
                     <?= Html::a('<i class="ti ti-edit me-1"></i> Modifica', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
                     <?= Html::a('<i class="ti ti-trash me-1"></i> Elimina', ['delete', 'id' => $model->id], [
                         'class' => 'btn btn-danger',
                         'data' => [
-                            'confirm' => 'Sei sicuro di voler eliminare questo avviso?',
+                            'confirm' => 'Sei sicuro di voler eliminare questo corso?',
                             'method' => 'post',
                         ],
                     ]) ?>
@@ -54,7 +57,7 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                 <div class="col-lg-8">
                     <div class="card mb-3">
                         <div class="card-header">
-                            <h3 class="card-title">Dettagli Avviso</h3>
+                            <h3 class="card-title">Dettagli Corso</h3>
                         </div>
                         <div class="card-body">
                             <?= DetailView::widget([
@@ -177,7 +180,7 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
             <!-- Tabella Moduli -->
             <div class="card mt-3">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="ti ti-books me-2"></i>Moduli dell'Avviso</h3>
+                    <h3 class="card-title"><i class="ti ti-books me-2"></i>Moduli del Corso</h3>
                     <div class="card-actions">
                         <?= Html::a('<i class="ti ti-plus me-1"></i> Nuovo Modulo', ['/modulo/create', 'avviso_id' => $model->id], [
                             'class' => 'btn btn-sm btn-success',
@@ -263,7 +266,7 @@ $percentualeInAttesa = $rendiconto['contrattualizzato'] > 0
                 <?php else: ?>
                 <div class="card-body text-muted text-center">
                     <i class="ti ti-books mb-2" style="font-size: 2rem;"></i>
-                    <p>Nessun modulo collegato a questo avviso</p>
+                    <p>Nessun modulo collegato a questo corso</p>
                 </div>
                 <?php endif; ?>
             </div>
