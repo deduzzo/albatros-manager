@@ -9,7 +9,7 @@ use yii\helpers\Url;
 /* @var $candidaturaEsistente app\models\Iscrizione|null */
 
 $this->title = $avviso->codice_avviso;
-$this->params['breadcrumbs'][] = ['label' => 'Bandi Aperti', 'url' => ['bandi']];
+$this->params['breadcrumbs'][] = ['label' => 'Corsi Aperti', 'url' => ['bandi']];
 $this->params['breadcrumbs'][] = $this->title;
 
 $colore = $avviso->getTablerColor();
@@ -17,7 +17,7 @@ $colore = $avviso->getTablerColor();
 
 <div class="page-body">
     <div class="container-xl">
-        <!-- Header Bando -->
+        <!-- Header Corso -->
         <div class="card mb-4">
             <div class="card-status-top" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
             <div class="card-body">
@@ -160,7 +160,7 @@ $colore = $avviso->getTablerColor();
             </div>
             <?php if (empty($moduli)): ?>
                 <div class="card-body text-center py-5">
-                    <p class="text-secondary">Nessun modulo disponibile per questo bando.</p>
+                    <p class="text-secondary">Nessun modulo disponibile per questo corso.</p>
                 </div>
             <?php else: ?>
                 <div class="list-group list-group-flush">
@@ -196,7 +196,7 @@ $colore = $avviso->getTablerColor();
         </div>
 
         <div class="mt-3 d-flex gap-2">
-            <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Torna ai bandi', ['bandi'], ['class' => 'btn btn-secondary']) ?>
+            <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Torna ai corsi', ['bandi'], ['class' => 'btn btn-secondary']) ?>
             <?php if (!$candidaturaEsistente): ?>
                 <?= Html::a('<i class="ti ti-send me-1"></i> Invia Candidatura', ['candidatura', 'id' => $avviso->id], [
                     'class' => 'btn',

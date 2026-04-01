@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                     <h3>Nessuna candidatura</h3>
                     <p class="text-secondary">Non hai ancora presentato nessuna candidatura.</p>
-                    <?= Html::a('<i class="ti ti-file-text me-2"></i> Esplora i bandi aperti', ['bandi'], [
+                    <?= Html::a('<i class="ti ti-file-text me-2"></i> Esplora i corsi aperti', ['bandi'], [
                         'class' => 'btn',
                         'style' => 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;',
                     ]) ?>
@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <thead>
                             <tr>
                                 <th>Data</th>
-                                <th>Bando</th>
+                                <th>Corso</th>
                                 <th>Stato</th>
                                 <th>Punteggio</th>
                                 <th>Posizione</th>

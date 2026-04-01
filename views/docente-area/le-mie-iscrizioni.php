@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                     <h3>Nessuna iscrizione</h3>
                     <p class="text-secondary">Non hai ancora presentato nessuna candidatura.</p>
-                    <?= Html::a('<i class="ti ti-file-text me-2"></i> Esplora i bandi aperti', ['bandi'], ['class' => 'btn btn-primary']) ?>
+                    <?= Html::a('<i class="ti ti-file-text me-2"></i> Esplora i corsi aperti', ['bandi'], ['class' => 'btn btn-primary']) ?>
                 </div>
             </div>
         <?php else: ?>
@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <thead>
                             <tr>
                                 <th>Data</th>
-                                <th>Bando</th>
+                                <th>Corso</th>
                                 <th>Modulo</th>
                                 <th>Stato</th>
                                 <th>Punteggio</th>

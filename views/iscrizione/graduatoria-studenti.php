@@ -38,7 +38,7 @@ foreach ($models as $m) {
                         <i class="ti ti-list-numbers me-2"></i><?= Html::encode($this->title) ?>
                     </h2>
                     <div class="text-muted mt-1">
-                        Bando: <strong><?= Html::encode($avviso->titolo) ?></strong>
+                        Corso: <strong><?= Html::encode($avviso->titolo) ?></strong>
                     </div>
                 </div>
                 <div class="col-auto ms-auto">

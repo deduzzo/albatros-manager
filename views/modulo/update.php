@@ -8,7 +8,7 @@ use yii\helpers\Html;
 /* @var $sediList array */
 
 $this->title = 'Modifica: ' . $model->codice;
-$this->params['breadcrumbs'][] = ['label' => 'Moduli/Corsi', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Moduli/Insegnamenti', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->codice, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = 'Modifica';
 ?>

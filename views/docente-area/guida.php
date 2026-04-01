@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="card-body py-3">
                 <div class="steps steps-blue steps-counter" id="wizard-docente-steps">
                     <a href="#" class="step-item active" data-step="1">Benvenuto</a>
-                    <a href="#" class="step-item" data-step="2">Bandi</a>
+                    <a href="#" class="step-item" data-step="2">Corsi</a>
                     <a href="#" class="step-item" data-step="3">Ore</a>
                     <a href="#" class="step-item" data-step="4">Pagamenti</a>
                 </div>
@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <i class="ti ti-school" style="font-size: 3rem; color: var(--tblr-blue);"></i>
                         <h2 class="mt-3 mb-2">Benvenuto nella tua area riservata!</h2>
                         <p class="text-secondary" style="max-width: 600px; margin: auto;">
-                            Qui puoi gestire il tuo profilo, consultare i bandi aperti, candidarti ai moduli formativi e rendicontare le ore di lavoro.
+                            Qui puoi gestire il tuo profilo, consultare i corsi aperti, candidarti ai moduli formativi e rendicontare le ore di lavoro.
                         </p>
                     </div>
                     <div class="row g-3 justify-content-center">
@@ -57,7 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div class="card card-sm">
                                 <div class="card-body text-center py-3">
                                     <i class="ti ti-clipboard-list mb-2" style="font-size: 1.5rem; color: var(--tblr-azure);"></i>
-                                    <div class="fw-medium small">Bandi Aperti</div>
+                                    <div class="fw-medium small">Corsi Aperti</div>
                                     <div class="text-secondary" style="font-size: 0.75rem;">Candidati ai moduli</div>
                                 </div>
                             </div>
@@ -100,9 +100,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="card-body">
                     <div class="text-center mb-4">
                         <i class="ti ti-clipboard-list" style="font-size: 3rem; color: var(--tblr-azure);"></i>
-                        <h2 class="mt-3 mb-2">Bandi e Iscrizioni</h2>
+                        <h2 class="mt-3 mb-2">Corsi e Iscrizioni</h2>
                         <p class="text-secondary">
-                            Consulta i bandi aperti e candidati ai moduli formativi che corrispondono alle tue competenze.
+                            Consulta i corsi aperti e candidati ai moduli formativi che corrispondono alle tue competenze.
                         </p>
                     </div>
                     <div class="list-group list-group-flush">
@@ -110,8 +110,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div class="d-flex align-items-center">
                                 <span class="badge bg-blue text-blue-fg me-3 p-2">1</span>
                                 <div>
-                                    <div class="fw-medium">Consulta i Bandi</div>
-                                    <div class="text-secondary small">Nella sezione "Bandi Aperti" trovi tutti gli avvisi disponibili con i moduli formativi</div>
+                                    <div class="fw-medium">Consulta i Corsi</div>
+                                    <div class="text-secondary small">Nella sezione "Corsi Aperti" trovi tutti i corsi disponibili con i moduli formativi</div>
                                 </div>
                             </div>
                         </div>

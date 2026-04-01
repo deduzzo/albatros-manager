@@ -28,11 +28,11 @@ if ($avviso) {
                     </h2>
                     <?php if ($avviso): ?>
                         <div class="text-muted mt-1">
-                            Bando: <strong><?= Html::encode($avviso->titolo) ?></strong>
+                            Corso: <strong><?= Html::encode($avviso->titolo) ?></strong>
                             <span class="badge <?= $avviso->getStatusBadgeClass() ?> ms-2"><?= Html::encode($avviso->getStatusLabel()) ?></span>
                         </div>
                     <?php else: ?>
-                        <div class="text-muted mt-1">Seleziona un bando per visualizzare le candidature</div>
+                        <div class="text-muted mt-1">Seleziona un corso per visualizzare le candidature</div>
                     <?php endif; ?>
                 </div>
                 <?php if ($avviso): ?>
@@ -47,7 +47,7 @@ if ($avviso) {
     <div class="page-body">
         <div class="container-xl">
             <?php if (!$avviso && isset($avvisi)): ?>
-                <!-- Lista bandi disponibili -->
+                <!-- Lista corsi disponibili -->
                 <div class="row row-deck row-cards">
                     <?php foreach ($avvisi as $a): ?>
                         <?php
@@ -83,8 +83,8 @@ if ($avviso) {
                                 <div class="card-body">
                                     <div class="empty">
                                         <div class="empty-icon"><i class="ti ti-file-off" style="font-size: 3rem;"></i></div>
-                                        <p class="empty-title">Nessun bando trovato</p>
-                                        <p class="empty-subtitle text-muted">Non ci sono bandi nel sistema.</p>
+                                        <p class="empty-title">Nessun corso trovato</p>
+                                        <p class="empty-subtitle text-muted">Non ci sono corsi nel sistema.</p>
                                     </div>
                                 </div>
                             </div>
@@ -93,7 +93,7 @@ if ($avviso) {
                 </div>
 
             <?php elseif ($avviso && $dataProvider): ?>
-                <!-- Lista candidature per bando specifico -->
+                <!-- Lista candidature per corso specifico -->
                 <div class="card">
                     <?= AppGridView::widget([
                         'dataProvider' => $dataProvider,

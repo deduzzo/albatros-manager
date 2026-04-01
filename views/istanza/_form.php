@@ -51,7 +51,7 @@ if ($model->avviso_id) {
         <div class="row">
             <div class="col-md-6">
                 <?= $form->field($model, 'avviso_id')->dropDownList($avvisoList, [
-                    'prompt' => '-- Seleziona Avviso/Bando --',
+                    'prompt' => '-- Seleziona Corso --',
                     'id' => 'istanza-avviso_id',
                 ]) ?>
             </div>

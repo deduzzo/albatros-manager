@@ -86,7 +86,7 @@ $this->params['breadcrumbs'][] = $model->codice_progetto;
                         </div>
                         <div class="card-body">
                             <div class="d-flex mb-2">
-                                <span class="me-auto">Avvisi/Bandi</span>
+                                <span class="me-auto">Corsi</span>
                                 <span class="badge bg-blue text-blue-fg"><?= count($model->avvisi) ?></span>
                             </div>
                             <div class="d-flex mb-2">
@@ -98,12 +98,12 @@ $this->params['breadcrumbs'][] = $model->codice_progetto;
                 </div>
             </div>
 
-            <!-- Tabella Avvisi/Bandi -->
+            <!-- Tabella Corsi -->
             <div class="card mt-3">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="ti ti-speakerphone me-2"></i>Avvisi/Bandi del Progetto</h3>
+                    <h3 class="card-title"><i class="ti ti-speakerphone me-2"></i>Corsi del Progetto</h3>
                     <div class="card-actions">
-                        <?= Html::a('<i class="ti ti-plus me-1"></i> Nuovo Avviso', ['/avviso/create', 'progetto_id' => $model->id], [
+                        <?= Html::a('<i class="ti ti-plus me-1"></i> Nuovo Corso', ['/avviso/create', 'progetto_id' => $model->id], [
                             'class' => 'btn btn-sm btn-success',
                         ]) ?>
                     </div>

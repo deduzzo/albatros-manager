@@ -71,7 +71,7 @@ class Istanza extends BaseActiveRecord
     {
         return [
             'id' => 'ID',
-            'avviso_id' => 'Avviso',
+            'avviso_id' => 'Corso',
             'docente_codice_fiscale' => 'Docente',
             'modulo_id' => 'Modulo',
             'data_presentazione' => 'Data Presentazione',

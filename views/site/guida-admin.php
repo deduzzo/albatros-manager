@@ -164,7 +164,7 @@ $this->title = 'Guida Interattiva';
                     <div class="card-body">
                         <div class="steps steps-green steps-counter mb-0">
                             <span class="step-item">Progetto</span>
-                            <span class="step-item">Avviso/Bando</span>
+                            <span class="step-item">Corso</span>
                             <span class="step-item">Moduli</span>
                             <span class="step-item">Assegnazione</span>
                         </div>
@@ -177,7 +177,7 @@ $this->title = 'Guida Interattiva';
                             <h4 class="alert-title">Flusso operativo</h4>
                             <ul class="mb-0 ps-3 small">
                                 <li>Crea un <strong>Progetto</strong> associato a una fonte di finanziamento</li>
-                                <li>Pubblica un <strong>Avviso/Bando</strong> per la selezione docenti</li>
+                                <li>Pubblica un <strong>Corso</strong> per la selezione docenti</li>
                                 <li>Definisci i <strong>Moduli</strong> formativi con ore e compensi</li>
                                 <li>Il CTS valuta le candidature e genera le <strong>Assegnazioni</strong></li>
                             </ul>

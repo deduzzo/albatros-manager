@@ -14,7 +14,7 @@ $modulo = $assegnazione->modulo;
 $contratto = $assegnazione->contratto;
 
 $this->title = 'Riepilogo Ore';
-$this->params['breadcrumbs'][] = ['label' => 'Moduli/Corsi', 'url' => ['/modulo/index']];
+$this->params['breadcrumbs'][] = ['label' => 'Moduli/Insegnamenti', 'url' => ['/modulo/index']];
 if ($modulo) {
     $this->params['breadcrumbs'][] = ['label' => $modulo->codice, 'url' => ['/modulo/view', 'id' => $modulo->id]];
 }

@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <tr>
                                 <th>Docente</th>
                                 <th>Modulo</th>
-                                <th>Avviso</th>
+                                <th>Corso</th>
                                 <th class="text-end">Ore Contratto</th>
                                 <th class="text-end">Approvate</th>
                                 <th class="text-end">In Attesa</th>

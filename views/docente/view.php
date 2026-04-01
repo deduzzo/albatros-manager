@@ -365,7 +365,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     <tr>
                                         <th>Codice Modulo</th>
                                         <th>Titolo</th>
-                                        <th>Avviso</th>
+                                        <th>Corso</th>
                                         <th>Ore</th>
                                         <th>Compenso/h</th>
                                         <th>Ore Rendicontate</th>
@@ -447,7 +447,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <thead>
                                     <tr>
                                         <th>Modulo</th>
-                                        <th>Avviso</th>
+                                        <th>Corso</th>
                                         <th>Punteggio</th>
                                         <th>Storico Esiti</th>
                                         <th>Stato Attuale</th>

@@ -184,7 +184,7 @@ $currentAction = Yii::$app->controller->action->id;
                         <li class="nav-item <?= in_array($currentAction, ['bandi', 'bando', 'candidatura']) ? 'active' : '' ?>">
                             <a class="nav-link" href="<?= Url::to(['/studente-area/bandi']) ?>">
                                 <span class="nav-link-icon"><i class="ti ti-file-text"></i></span>
-                                <span class="nav-link-title">Bandi Aperti</span>
+                                <span class="nav-link-title">Corsi Aperti</span>
                             </a>
                         </li>
                         <li class="nav-item <?= in_array($currentAction, ['le-mie-candidature', 'candidatura-view']) ? 'active' : '' ?>">

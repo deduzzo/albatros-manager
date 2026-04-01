@@ -100,7 +100,7 @@ $this->params['breadcrumbs'][] = 'Subentro';
                                     <div class="datagrid-content"><?= $modulo->compenso_orario ? Yii::$app->formatter->asCurrency($modulo->compenso_orario) : '-' ?></div>
                                 </div>
                                 <div class="datagrid-item">
-                                    <div class="datagrid-title">Bando</div>
+                                    <div class="datagrid-title">Corso</div>
                                     <div class="datagrid-content"><?= $modulo->avviso ? Html::encode($modulo->avviso->titolo) : '-' ?></div>
                                 </div>
                             </div>

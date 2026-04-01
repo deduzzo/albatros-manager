@@ -619,11 +619,11 @@ $tagsNonPromossi = $model->getTagsNonPromossiCount();
                     </div>
                     <?php endif; ?>
 
-                    <!-- Info Bando -->
+                    <!-- Info Corso -->
                     <?php if ($model->avviso): ?>
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Bando di Riferimento</h3>
+                            <h3 class="card-title">Corso di Riferimento</h3>
                         </div>
                         <div class="card-body">
                             <h4><?= Html::a($model->avviso->codice_avviso, ['/avviso/view', 'id' => $model->avviso_id]) ?></h4>

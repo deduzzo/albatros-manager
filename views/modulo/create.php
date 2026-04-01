@@ -7,8 +7,8 @@ use yii\helpers\Html;
 /* @var $avvisiList array */
 /* @var $sediList array */
 
-$this->title = 'Nuovo Modulo/Corso';
-$this->params['breadcrumbs'][] = ['label' => 'Moduli/Corsi', 'url' => ['index']];
+$this->title = 'Nuovo Modulo/Insegnamento';
+$this->params['breadcrumbs'][] = ['label' => 'Moduli/Insegnamenti', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

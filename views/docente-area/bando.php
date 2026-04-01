@@ -9,7 +9,7 @@ use yii\helpers\Url;
 /* @var $iscrizioniEffettuate array */
 
 $this->title = $avviso->codice_avviso;
-$this->params['breadcrumbs'][] = ['label' => 'Bandi Aperti', 'url' => ['bandi']];
+$this->params['breadcrumbs'][] = ['label' => 'Corsi Aperti', 'url' => ['bandi']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -158,7 +158,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
 
         <div class="mt-3">
-            <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Torna ai bandi', ['bandi'], ['class' => 'btn btn-secondary']) ?>
+            <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Torna ai corsi', ['bandi'], ['class' => 'btn btn-secondary']) ?>
         </div>
     </div>
 </div>

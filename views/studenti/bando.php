@@ -19,10 +19,10 @@ $moduli = $bando->moduli;
     <div class="container-xl">
         <!-- Breadcrumb -->
         <div class="page-pretitle mb-2">
-            <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Tutti i Bandi', ['index'], ['class' => 'text-decoration-none']) ?>
+            <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Tutti i Corsi', ['index'], ['class' => 'text-decoration-none']) ?>
         </div>
 
-        <!-- Header Bando -->
+        <!-- Header Corso -->
         <div class="card mb-4 bg-<?= $tc ?> text-<?= $tc ?>-fg">
             <div class="card-body py-5">
                 <div class="row align-items-center">
@@ -220,7 +220,7 @@ $moduli = $bando->moduli;
                     <div class="card-header bg-<?= $tc ?>-lt">
                         <h3 class="card-title">
                             <i class="ti ti-book me-2"></i>
-                            Corsi Inclusi nel Bando
+                            Moduli Inclusi nel Corso
                         </h3>
                     </div>
                     <div class="list-group list-group-flush">
@@ -251,7 +251,7 @@ $moduli = $bando->moduli;
                     </div>
                     <div class="card-footer text-center">
                         <?= Html::a(
-                            '<i class="ti ti-send me-1"></i> Iscriviti a questo Bando',
+                            '<i class="ti ti-send me-1"></i> Iscriviti a questo Corso',
                             ['iscrizione', 'id' => $bando->id],
                             ['class' => 'btn btn-' . $tc . ' btn-lg w-100']
                         ) ?>
@@ -263,7 +263,7 @@ $moduli = $bando->moduli;
         <!-- CTA Contatti -->
         <div class="card text-center mt-4 bg-indigo text-indigo-fg">
             <div class="card-body py-4">
-                <h3 class="mb-2">Hai domande su questo bando?</h3>
+                <h3 class="mb-2">Hai domande su questo corso?</h3>
                 <p class="mb-3 opacity-75">Il nostro team è a disposizione per aiutarti nella scelta del corso più adatto.</p>
                 <div class="d-flex justify-content-center gap-3">
                     <a href="tel:+390212345678" class="btn btn-light">

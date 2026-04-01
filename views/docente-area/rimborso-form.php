@@ -213,7 +213,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <dd class="col-7">
                                 <span class="badge bg-azure-lt"><?= Html::encode($modulo->codice) ?></span>
                             </dd>
-                            <dt class="col-5">Avviso:</dt>
+                            <dt class="col-5">Corso:</dt>
                             <dd class="col-7">
                                 <span class="badge bg-blue-lt"><?= Html::encode($modulo->avviso->codice_avviso ?? '-') ?></span>
                             </dd>

@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = 'Graduatoria';
                         </div>
                     <?php elseif ($avviso): ?>
                         <div class="text-muted mt-1">
-                            Bando: <strong><?= Html::encode($avviso->titolo) ?></strong>
+                            Corso: <strong><?= Html::encode($avviso->titolo) ?></strong>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -50,10 +50,10 @@ $this->params['breadcrumbs'][] = 'Graduatoria';
                 <div class="card-body">
                     <?= Html::beginForm(['graduatoria'], 'get', ['class' => 'row g-3 align-items-end']) ?>
                     <div class="col-md-5">
-                        <label class="form-label">Bando/Avviso</label>
+                        <label class="form-label">Corso</label>
                         <?= Html::dropDownList('avviso_id', $avviso_id, $bandiList, [
                             'class' => 'form-select',
-                            'prompt' => '-- Tutti i bandi --',
+                            'prompt' => '-- Tutti i corsi --',
                             'id' => 'filtro-avviso',
                         ]) ?>
                     </div>
@@ -146,7 +146,7 @@ $this->params['breadcrumbs'][] = 'Graduatoria';
                                 <th>Modulo</th>
                                 <?php endif; ?>
                                 <?php if (!$avviso_id && !$modulo_id): ?>
-                                <th>Bando</th>
+                                <th>Corso</th>
                                 <?php endif; ?>
                                 <th>Provenienza</th>
                                 <th class="text-center">P. Titoli</th>
@@ -227,7 +227,7 @@ $this->params['breadcrumbs'][] = 'Graduatoria';
                         <i class="ti ti-list-numbers"></i>
                     </span>
                     <h3 class="text-muted">Nessuna candidatura valutata</h3>
-                    <p class="text-secondary">Seleziona un bando o un modulo per visualizzare la graduatoria.</p>
+                    <p class="text-secondary">Seleziona un corso o un modulo per visualizzare la graduatoria.</p>
                 </div>
             </div>
             <?php endif; ?>

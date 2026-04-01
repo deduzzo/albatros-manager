@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <i class="ti ti-file-description me-2"></i> <?= Html::encode($this->title) ?>
                     </h2>
                     <div class="page-subtitle text-secondary">
-                        Bando: <?= Html::encode($iscrizione->avviso->codice_avviso ?? '-') ?> - <?= Html::encode($iscrizione->avviso->titolo ?? '') ?>
+                        Corso: <?= Html::encode($iscrizione->avviso->codice_avviso ?? '-') ?> - <?= Html::encode($iscrizione->avviso->titolo ?? '') ?>
                     </div>
                 </div>
                 <div class="col-auto">
@@ -203,10 +203,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <!-- Colonna laterale -->
             <div class="col-lg-4">
-                <!-- Info Bando -->
+                <!-- Info Corso -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h3 class="card-title">Info Bando</h3>
+                        <h3 class="card-title">Info Corso</h3>
                     </div>
                     <div class="card-body">
                         <dl class="row mb-0">

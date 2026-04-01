@@ -76,9 +76,9 @@ $this->title = 'Guida Interattiva - Area Docenti';
                     <i class="ti ti-clipboard-list" style="font-size: 2.5rem;"></i>
                 </span>
             </div>
-            <h2>Bandi Aperti e Iscrizioni</h2>
+            <h2>Corsi Aperti e Iscrizioni</h2>
             <p class="text-secondary mx-auto" style="max-width: 600px;">
-                Consulta i bandi di selezione pubblicati e candidati per i moduli formativi di tuo interesse.
+                Consulta i corsi pubblicati e candidati per i moduli formativi di tuo interesse.
             </p>
             <div class="mt-4 text-start mx-auto" style="max-width: 600px;">
                 <div class="list-group list-group-flush">
@@ -86,8 +86,8 @@ $this->title = 'Guida Interattiva - Area Docenti';
                         <div class="d-flex">
                             <span class="badge bg-green-lt me-3 mt-1">1</span>
                             <div>
-                                <strong>Consulta i bandi</strong>
-                                <div class="text-secondary small">Vai su "Bandi Aperti" per vedere tutti i bandi con scadenza futura</div>
+                                <strong>Consulta i corsi</strong>
+                                <div class="text-secondary small">Vai su "Corsi Aperti" per vedere tutti i corsi con scadenza futura</div>
                             </div>
                         </div>
                     </div>

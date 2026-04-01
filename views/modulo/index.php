@@ -10,7 +10,7 @@ use app\models\Sede;
 /* @var $searchModel app\models\ModuloSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Moduli/Corsi';
+$this->title = 'Moduli/Insegnamenti';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

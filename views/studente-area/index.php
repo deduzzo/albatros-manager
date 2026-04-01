@@ -33,7 +33,7 @@ $this->title = 'Dashboard';
                     </div>
                 </div>
                 <div class="col-auto">
-                    <?= Html::a('<i class="ti ti-file-text me-2"></i> Vedi Bandi Aperti', ['bandi'], [
+                    <?= Html::a('<i class="ti ti-file-text me-2"></i> Vedi Corsi Aperti', ['bandi'], [
                         'class' => 'btn bg-purple text-purple-fg',
                     ]) ?>
                 </div>
@@ -61,7 +61,7 @@ $this->title = 'Dashboard';
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
-                            <div class="subheader">Bandi aperti</div>
+                            <div class="subheader">Corsi aperti</div>
                         </div>
                         <div class="h1 mb-0 text-purple"><?= $bandiAperti ?></div>
                     </div>
@@ -90,15 +90,15 @@ $this->title = 'Dashboard';
         </div>
 
         <div class="row row-cards">
-            <!-- Bandi in scadenza -->
+            <!-- Corsi in scadenza -->
             <div class="col-lg-6">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="ti ti-clock-exclamation me-2"></i> Bandi in Scadenza</h3>
+                        <h3 class="card-title"><i class="ti ti-clock-exclamation me-2"></i> Corsi in Scadenza</h3>
                     </div>
                     <?php if (empty($bandiInScadenza)): ?>
                         <div class="card-body text-center py-4">
-                            <p class="text-secondary mb-0">Nessun bando in scadenza nei prossimi 7 giorni.</p>
+                            <p class="text-secondary mb-0">Nessun corso in scadenza nei prossimi 7 giorni.</p>
                         </div>
                     <?php else: ?>
                         <div class="list-group list-group-flush">
@@ -136,7 +136,7 @@ $this->title = 'Dashboard';
                                     <i class="ti ti-file-text"></i>
                                 </span>
                                 <div>
-                                    <strong>Esplora Bandi Aperti</strong>
+                                    <strong>Esplora Corsi Aperti</strong>
                                     <div class="text-secondary small">Scopri i corsi disponibili e candidati</div>
                                 </div>
                                 <i class="ti ti-chevron-right ms-auto"></i>

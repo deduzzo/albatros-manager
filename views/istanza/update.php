@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = 'Modifica';
                                 <strong>Docente:</strong> <?= $model->docente ? $model->docente->cognome . ' ' . $model->docente->nome : $model->docente_codice_fiscale ?>
                             </div>
                             <div class="col-md-4">
-                                <strong>Bando:</strong> <?= $model->avviso ? $model->avviso->codice_avviso : '-' ?>
+                                <strong>Corso:</strong> <?= $model->avviso ? $model->avviso->codice_avviso : '-' ?>
                             </div>
                             <div class="col-md-4">
                                 <strong>Modulo:</strong> <?= $model->modulo ? $model->modulo->codice : '-' ?>

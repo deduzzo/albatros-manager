@@ -198,7 +198,7 @@ $this->title = 'Manuale Docente';
             <a class="nav-link" href="#introduzione"><i class="ti ti-info-circle"></i> Introduzione</a>
             <a class="nav-link" href="#registrazione"><i class="ti ti-user-plus"></i> Registrazione e Login</a>
             <a class="nav-link" href="#profilo"><i class="ti ti-user"></i> Il Tuo Profilo</a>
-            <a class="nav-link" href="#bandi"><i class="ti ti-file-text"></i> Bandi Aperti</a>
+            <a class="nav-link" href="#bandi"><i class="ti ti-file-text"></i> Corsi Aperti</a>
             <a class="nav-link" href="#iscrizione"><i class="ti ti-send"></i> Iscriversi a un Modulo</a>
             <a class="nav-link" href="#le-mie-iscrizioni"><i class="ti ti-list-check"></i> Le Tue Iscrizioni</a>
             <a class="nav-link" href="#assegnazioni"><i class="ti ti-circle-check"></i> Le Tue Assegnazioni</a>
@@ -230,7 +230,7 @@ $this->title = 'Manuale Docente';
                     <h3>Cos'e l'Area Docenti</h3>
                     <p>L'Area Docenti e il portale riservato ai professionisti e ricercatori che collaborano o desiderano collaborare con i progetti formativi gestiti da Albatros Manager. Attraverso questa area puoi:</p>
                     <ul>
-                        <li>Consultare i bandi aperti e candidarti per moduli di tuo interesse</li>
+                        <li>Consultare i corsi aperti e candidarti per moduli di tuo interesse</li>
                         <li>Monitorare lo stato delle tue candidature</li>
                         <li>Gestire le assegnazioni ricevute e inserire le ore lavorate</li>
                         <li>Aggiornare il tuo profilo professionale</li>
@@ -330,24 +330,24 @@ $this->title = 'Manuale Docente';
         <section id="bandi">
             <div class="section-card">
                 <div class="section-card-header bg-azure-lt">
-                    <i class="ti ti-file-text"></i> 4. Bandi Aperti
+                    <i class="ti ti-file-text"></i> 4. Corsi Aperti
                 </div>
                 <div class="section-card-body">
-                    <p>La sezione "Bandi Aperti" mostra tutti gli avvisi/bandi pubblicati per la selezione docenti. Accedi dal menu <strong>"Bandi Aperti"</strong>.</p>
+                    <p>La sezione "Corsi Aperti" mostra tutti i corsi pubblicati per la selezione docenti. Accedi dal menu <strong>"Corsi Aperti"</strong>.</p>
 
                     <h3>Cosa vedi</h3>
-                    <p>Per ogni bando aperto vengono mostrati:</p>
+                    <p>Per ogni corso aperto vengono mostrati:</p>
                     <ul>
-                        <li>Titolo dell'avviso e progetto di riferimento</li>
+                        <li>Titolo del corso e progetto di riferimento</li>
                         <li>Data di pubblicazione e data di scadenza</li>
                         <li>Numero di moduli (materie) disponibili</li>
                         <li>Descrizione sintetica</li>
                     </ul>
 
-                    <h3>Dettaglio bando</h3>
-                    <p>Cliccando su un bando si apre la pagina di dettaglio con:</p>
+                    <h3>Dettaglio corso</h3>
+                    <p>Cliccando su un corso si apre la pagina di dettaglio con:</p>
                     <ul>
-                        <li>Informazioni complete sull'avviso</li>
+                        <li>Informazioni complete sul corso</li>
                         <li>Elenco dei moduli con: titolo, ore previste, compenso orario, sede</li>
                         <li>Documenti richiesti per la candidatura</li>
                         <li>Pulsante <strong>"Iscriviti"</strong> per ogni modulo di tuo interesse</li>
@@ -355,7 +355,7 @@ $this->title = 'Manuale Docente';
 
                     <div class="alert-manuale bg-orange-lt">
                         <i class="ti ti-alert-triangle text-orange"></i>
-                        <div><strong>Attenzione</strong>: Puoi candidarti solo per bandi la cui data di scadenza non sia ancora stata superata. Dopo la scadenza il pulsante "Iscriviti" non sara piu disponibile.</div>
+                        <div><strong>Attenzione</strong>: Puoi candidarti solo per corsi la cui data di scadenza non sia ancora stata superata. Dopo la scadenza il pulsante "Iscriviti" non sara piu disponibile.</div>
                     </div>
                 </div>
             </div>
@@ -385,7 +385,7 @@ $this->title = 'Manuale Docente';
 
                     <div class="step-box">
                         <strong>Passaggio 3 - Documenti</strong>
-                        <p class="mb-0 mt-1">Carica i documenti richiesti dal bando (es: curriculum vitae, documento d'identita, diplomi, attestati). Per ogni tipo di documento vedrai se e obbligatorio o facoltativo. I formati accettati sono PDF, DOC, DOCX, JPG, PNG.</p>
+                        <p class="mb-0 mt-1">Carica i documenti richiesti dal corso (es: curriculum vitae, documento d'identita, diplomi, attestati). Per ogni tipo di documento vedrai se e obbligatorio o facoltativo. I formati accettati sono PDF, DOC, DOCX, JPG, PNG.</p>
                     </div>
 
                     <div class="step-box">
@@ -413,7 +413,7 @@ $this->title = 'Manuale Docente';
 
                     <h3>Informazioni per ogni candidatura</h3>
                     <ul>
-                        <li>Avviso e modulo per cui ti sei candidato</li>
+                        <li>Corso e modulo per cui ti sei candidato</li>
                         <li>Data di presentazione della candidatura</li>
                         <li>Stato della candidatura</li>
                         <li>Esito CTS (quando disponibile)</li>

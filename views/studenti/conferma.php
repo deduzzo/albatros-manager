@@ -30,7 +30,7 @@ $this->title = 'Iscrizione Confermata';
                 </div>
                 <div class="card-body">
                     <dl class="row mb-0">
-                        <dt class="col-4">Bando:</dt>
+                        <dt class="col-4">Corso:</dt>
                         <dd class="col-8"><strong><?= Html::encode($iscrizione->avviso->titolo) ?></strong></dd>
 
                         <dt class="col-4">Codice:</dt>
@@ -100,7 +100,7 @@ $this->title = 'Iscrizione Confermata';
 
             <div class="empty-action mt-4">
                 <?= Html::a('<i class="ti ti-home me-2"></i> Torna alla Home', ['index'], ['class' => 'btn btn-primary']) ?>
-                <?= Html::a('<i class="ti ti-book me-2"></i> Vedi altri bandi', ['index'], ['class' => 'btn btn-outline-primary ms-2']) ?>
+                <?= Html::a('<i class="ti ti-book me-2"></i> Vedi altri corsi', ['index'], ['class' => 'btn btn-outline-primary ms-2']) ?>
             </div>
         </div>
     </div>

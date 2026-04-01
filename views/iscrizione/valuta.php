@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = 'Valuta #' . $iscrizione->id;
                     <div class="text-muted mt-1">
                         Candidato: <strong><?= $iscrizione->allievo ? Html::encode($iscrizione->allievo->cognome . ' ' . $iscrizione->allievo->nome) : '-' ?></strong>
                         <?php if ($iscrizione->avviso): ?>
-                            | Bando: <strong><?= Html::encode($iscrizione->avviso->titolo) ?></strong>
+                            | Corso: <strong><?= Html::encode($iscrizione->avviso->titolo) ?></strong>
                         <?php endif; ?>
                     </div>
                 </div>

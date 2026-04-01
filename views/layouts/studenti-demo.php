@@ -80,7 +80,7 @@ $isStudenteLogged = !Yii::$app->studenteUser->isGuest;
                     <li class="nav-item">
                         <a class="nav-link" href="<?= Url::to(['/studenti/index']) ?>#bandi">
                             <span class="nav-link-icon"><i class="ti ti-speakerphone"></i></span>
-                            <span class="nav-link-title">Bandi Aperti</span>
+                            <span class="nav-link-title">Corsi Aperti</span>
                         </a>
                     </li>
                 </ul>

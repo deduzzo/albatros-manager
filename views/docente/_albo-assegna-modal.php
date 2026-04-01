@@ -42,9 +42,9 @@ use yii\helpers\Html;
                     </select>
                 </div>
 
-                <!-- Selezione Avviso (cascading) -->
+                <!-- Selezione Corso (cascading) -->
                 <div class="mb-3">
-                    <label class="form-label required">Avviso/Bando</label>
+                    <label class="form-label required">Corso</label>
                     <select id="assegna-avviso" class="form-select" disabled>
                         <option value="">-- Seleziona prima un progetto --</option>
                     </select>
@@ -54,7 +54,7 @@ use yii\helpers\Html;
                 <div class="mb-3">
                     <label class="form-label required">Modulo</label>
                     <select id="assegna-modulo" class="form-select" disabled>
-                        <option value="">-- Seleziona prima un avviso --</option>
+                        <option value="">-- Seleziona prima un corso --</option>
                     </select>
                     <small class="form-hint">Solo i moduli senza docente assegnato sono selezionabili.</small>
                 </div>

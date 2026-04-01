@@ -13,7 +13,7 @@ use app\models\Avviso;
 <div class="avviso-form">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Dati Avviso/Bando</h3>
+            <h3 class="card-title">Dati Corso</h3>
         </div>
 
         <?php $form = AppActiveForm::begin(); ?>
@@ -40,7 +40,7 @@ use app\models\Avviso;
                 <div class="col-12">
                     <?= $form->field($model, 'titolo')->textInput([
                         'maxlength' => true,
-                        'placeholder' => 'Titolo del bando',
+                        'placeholder' => 'Titolo del corso',
                     ]) ?>
                 </div>
             </div>
@@ -62,7 +62,7 @@ use app\models\Avviso;
                 <div class="col-12">
                     <?= $form->field($model, 'descrizione')->textarea([
                         'rows' => 4,
-                        'placeholder' => 'Descrizione del bando, requisiti, competenze richieste...',
+                        'placeholder' => 'Descrizione del corso, requisiti, competenze richieste...',
                     ]) ?>
                 </div>
             </div>

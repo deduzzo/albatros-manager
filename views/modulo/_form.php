@@ -14,7 +14,7 @@ use app\models\Modulo;
 <div class="modulo-form">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Dati Modulo/Corso</h3>
+            <h3 class="card-title">Dati Modulo/Insegnamento</h3>
         </div>
 
         <?php $form = AppActiveForm::begin(); ?>
@@ -29,7 +29,7 @@ use app\models\Modulo;
                 </div>
                 <div class="col-md-5">
                     <?= $form->field($model, 'avviso_id')->dropDownList($avvisiList, [
-                        'prompt' => '-- Seleziona avviso/bando --',
+                        'prompt' => '-- Seleziona corso --',
                     ]) ?>
                 </div>
                 <div class="col-md-4">
@@ -43,7 +43,7 @@ use app\models\Modulo;
                 <div class="col-12">
                     <?= $form->field($model, 'titolo')->textInput([
                         'maxlength' => true,
-                        'placeholder' => 'Titolo del corso/modulo',
+                        'placeholder' => 'Titolo del modulo/insegnamento',
                     ]) ?>
                 </div>
             </div>

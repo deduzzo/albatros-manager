@@ -70,7 +70,7 @@ class Modulo extends BaseActiveRecord
     {
         return [
             'id' => 'ID',
-            'avviso_id' => 'Avviso/Bando',
+            'avviso_id' => 'Corso',
             'sede_id' => 'Sede',
             'codice' => 'Codice',
             'titolo' => 'Titolo',

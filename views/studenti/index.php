@@ -7,7 +7,7 @@ use app\models\Configurazione;
 /* @var $this yii\web\View */
 /* @var $bandiAperti app\models\Avviso[] */
 
-$this->title = 'Bandi di Formazione Gratuiti';
+$this->title = 'Corsi di Formazione Gratuiti';
 ?>
 
 <div class="page-body">
@@ -20,7 +20,7 @@ $this->title = 'Bandi di Formazione Gratuiti';
                     Fondazione Albatros
                 </h1>
                 <p class="lead mb-0 text-white opacity-75" style="max-width: 700px; margin: auto;">
-                    Scopri i bandi aperti finanziati da FSE, PNRR e MIM. Corsi professionali gratuiti con certificazione riconosciuta per disoccupati, studenti e lavoratori.
+                    Scopri i corsi aperti finanziati da FSE, PNRR e MIM. Corsi professionali gratuiti con certificazione riconosciuta per disoccupati, studenti e lavoratori.
                 </p>
             </div>
         </div>
@@ -36,7 +36,7 @@ $this->title = 'Bandi di Formazione Gratuiti';
                             </div>
                             <div class="col">
                                 <div class="fw-bold fs-3"><?= count($bandiAperti) ?></div>
-                                <div class="text-secondary">Bandi Aperti</div>
+                                <div class="text-secondary">Corsi Aperti</div>
                             </div>
                         </div>
                     </div>
@@ -101,10 +101,10 @@ $this->title = 'Bandi di Formazione Gratuiti';
 
         <h2 class="mb-4">
             <i class="ti ti-sparkles me-2 text-warning"></i>
-            Bandi Aperti
+            Corsi Aperti
         </h2>
 
-        <!-- Lista Bandi -->
+        <!-- Lista Corsi -->
         <?php foreach ($bandiAperti as $bando): ?>
             <?php
             $tc = $bando->getTablerColor();
@@ -119,7 +119,7 @@ $this->title = 'Bandi di Formazione Gratuiti';
                 <div class="row g-0">
                     <div class="col-lg-8">
                         <div class="card-body">
-                            <!-- Header Bando -->
+                            <!-- Header Corso -->
                             <div class="d-flex align-items-start mb-3">
                                 <div>
                                     <span class="badge bg-<?= $tc ?> text-<?= $tc ?>-fg mb-2">
@@ -256,7 +256,7 @@ $this->title = 'Bandi di Formazione Gratuiti';
                             </div>
 
                             <?= Html::a(
-                                '<i class="ti ti-send me-1"></i> Iscriviti al Bando',
+                                '<i class="ti ti-send me-1"></i> Iscriviti al Corso',
                                 ['iscrizione', 'id' => $bando->id],
                                 ['class' => 'btn btn-primary w-100 mb-2']
                             ) ?>

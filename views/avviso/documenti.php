@@ -9,7 +9,7 @@ use app\components\widgets\AppActiveForm;
 /* @var $nuovoDocumento app\models\AvvisoDocumentoTipo */
 
 $this->title = 'Documenti Richiesti: ' . $avviso->codice_avviso;
-$this->params['breadcrumbs'][] = ['label' => 'Avvisi/Bandi', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Corsi', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $avviso->codice_avviso, 'url' => ['view', 'id' => $avviso->id]];
 $this->params['breadcrumbs'][] = 'Documenti Richiesti';
 ?>
@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = 'Documenti Richiesti';
                             </table>
                         </div>
                         <div class="card-footer">
-                            <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Torna all\'avviso', ['view', 'id' => $avviso->id], ['class' => 'btn btn-secondary']) ?>
+                            <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Torna al corso', ['view', 'id' => $avviso->id], ['class' => 'btn btn-secondary']) ?>
                         </div>
                     </div>
                 </div>

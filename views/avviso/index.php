@@ -9,7 +9,7 @@ use app\models\Progetto;
 /* @var $searchModel app\models\AvvisoSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Avvisi/Bandi';
+$this->title = 'Corsi';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </h2>
                 </div>
                 <div class="col-auto ms-auto">
-                    <?= Html::a('<i class="ti ti-plus me-1"></i> Nuovo Avviso', ['create'], ['class' => 'btn btn-success']) ?>
+                    <?= Html::a('<i class="ti ti-plus me-1"></i> Nuovo Corso', ['create'], ['class' => 'btn btn-success']) ?>
                 </div>
             </div>
         </div>
@@ -115,7 +115,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <div class="card-footer d-flex align-items-center">
                     <p class="m-0 text-muted small">
-                        Totale: <?= $dataProvider->totalCount ?> avvisi
+                        Totale: <?= $dataProvider->totalCount ?> corsi
                     </p>
                 </div>
             </div>

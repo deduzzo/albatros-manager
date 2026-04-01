@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'nome',
                         [
                             'attribute' => 'avviso_id',
-                            'label' => 'Bando',
+                            'label' => 'Corso',
                             'format' => 'raw',
                             'content' => function ($model) {
                                 if ($model->isGlobale()) {
@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 }
                                 return $model->avviso
                                     ? Html::a(Html::encode($model->avviso->titolo), ['/avviso/view', 'id' => $model->avviso_id])
-                                    : '<span class="text-muted">Bando #' . $model->avviso_id . '</span>';
+                                    : '<span class="text-muted">Corso #' . $model->avviso_id . '</span>';
                             },
                         ],
                         [

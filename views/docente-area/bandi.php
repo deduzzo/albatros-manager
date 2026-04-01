@@ -6,7 +6,7 @@ use yii\helpers\Url;
 /* @var $this yii\web\View */
 /* @var $bandi app\models\Avviso[] */
 
-$this->title = 'Bandi Aperti';
+$this->title = 'Corsi Aperti';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <i class="ti ti-file-text me-2"></i> <?= Html::encode($this->title) ?>
             </h2>
             <div class="page-subtitle text-secondary">
-                Esplora i bandi aperti e candidati ai moduli di tuo interesse
+                Esplora i corsi aperti e candidati ai moduli di tuo interesse
             </div>
         </div>
 
@@ -29,8 +29,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             <i class="ti ti-file-off"></i>
                         </span>
                     </div>
-                    <h3>Nessun bando aperto</h3>
-                    <p class="text-secondary">Al momento non ci sono bandi aperti per le iscrizioni.<br>Torna a controllare presto!</p>
+                    <h3>Nessun corso aperto</h3>
+                    <p class="text-secondary">Al momento non ci sono corsi aperti per le iscrizioni.<br>Torna a controllare presto!</p>
                 </div>
             </div>
         <?php else: ?>

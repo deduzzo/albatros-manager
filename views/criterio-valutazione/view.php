@@ -51,10 +51,10 @@ $this->params['breadcrumbs'][] = $model->nome;
                             <div class="datagrid-content"><?= Html::encode($model->nome) ?></div>
                         </div>
                         <div class="datagrid-item">
-                            <div class="datagrid-title">Bando</div>
+                            <div class="datagrid-title">Corso</div>
                             <div class="datagrid-content">
                                 <?php if ($model->isGlobale()): ?>
-                                    <span class="badge bg-azure-lt"><i class="ti ti-world me-1"></i>Globale (tutti i bandi)</span>
+                                    <span class="badge bg-azure-lt"><i class="ti ti-world me-1"></i>Globale (tutti i corsi)</span>
                                 <?php elseif ($model->avviso): ?>
                                     <?= Html::a(Html::encode($model->avviso->titolo), ['/avviso/view', 'id' => $model->avviso_id]) ?>
                                 <?php else: ?>

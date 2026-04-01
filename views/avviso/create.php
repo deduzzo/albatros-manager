@@ -6,8 +6,8 @@ use yii\helpers\Html;
 /* @var $model app\models\Avviso */
 /* @var $progettiList array */
 
-$this->title = 'Nuovo Avviso/Bando';
-$this->params['breadcrumbs'][] = ['label' => 'Avvisi/Bandi', 'url' => ['index']];
+$this->title = 'Nuovo Corso';
+$this->params['breadcrumbs'][] = ['label' => 'Corsi', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

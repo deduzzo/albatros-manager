@@ -26,7 +26,7 @@ Tutte le modifiche al portale Albatros Manager.
 - Dashboard tutor differenziata con link rapido a gestione presenze
 
 ### Modificato {tutti}
-- Terminologia aggiornata: "Avviso/Bando" → "Corso", "Moduli/Corsi" → "Moduli/Insegnamenti"
+- Terminologia aggiornata: "Avviso/Bando" → "Corso", "Moduli/Corsi" → "Moduli/Insegnamenti" in tutte le viste, layout, manuali e guide
 - Migliorata validazione form con feedback visivo errori su tutti i campi
 
 ### Corretto {tutti}

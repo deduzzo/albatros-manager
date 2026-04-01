@@ -16,7 +16,7 @@ $this->title = $bando['titolo'];
             <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Tutti i Bandi', ['index'], ['class' => 'text-decoration-none']) ?>
         </div>
 
-        <!-- Header Bando -->
+        <!-- Header Corso -->
         <div class="card mb-4" style="background: linear-gradient(135deg, <?= $bando['colore'] ?> 0%, <?= $bando['colore'] ?>99 100%);">
             <div class="card-body text-white py-5">
                 <div class="row align-items-center">

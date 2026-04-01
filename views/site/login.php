@@ -375,7 +375,7 @@ $selectedType = $activeCard ?: 'admin';
                             </a>
                             <span class="mx-1 text-secondary">|</span>
                             <a href="<?= Url::to(['/studenti']) ?>" class="text-secondary">
-                                <small>Consulta i bandi</small>
+                                <small>Consulta i corsi</small>
                             </a>
                         </div>
                     </div>
@@ -431,7 +431,7 @@ $selectedType = $activeCard ?: 'admin';
                     <div class="col-12 col-md-4">
                         <div class="p-3 rounded bg-purple-lt">
                             <h4 class="mb-2"><i class="ti ti-users me-1 text-purple"></i> Studente</h4>
-                            <div class="mb-1"><strong>Accesso:</strong> Pubblico (iscrizione ai bandi)</div>
+                            <div class="mb-1"><strong>Accesso:</strong> Pubblico (iscrizione ai corsi)</div>
                             <?php if (!empty($demoAllievi)): ?>
                             <div class="mt-2">
                                 <small class="text-secondary d-block mb-1">Allievi registrati:</small>
@@ -443,7 +443,7 @@ $selectedType = $activeCard ?: 'admin';
                                 <?php endforeach; ?>
                             </div>
                             <?php else: ?>
-                            <div class="text-secondary mt-1"><small>Nessun allievo registrato. Iscriviti a un bando.</small></div>
+                            <div class="text-secondary mt-1"><small>Nessun allievo registrato. Iscriviti a un corso.</small></div>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -453,11 +453,11 @@ $selectedType = $activeCard ?: 'admin';
     </div>
     <?php endif; ?>
 
-    <!-- BANDI APERTI -->
+    <!-- CORSI APERTI -->
     <?php if (!empty($bandiAperti)): ?>
     <div class="mb-4">
         <div class="section-divider mb-3">
-            <span><i class="ti ti-speakerphone me-1"></i> Bandi Aperti</span>
+            <span><i class="ti ti-speakerphone me-1"></i> Corsi Aperti</span>
         </div>
         <div class="row g-3">
             <?php foreach ($bandiAperti as $bando): ?>
@@ -495,14 +495,14 @@ $selectedType = $activeCard ?: 'admin';
     <?php else: ?>
     <div class="mb-4">
         <div class="section-divider mb-3">
-            <span><i class="ti ti-speakerphone me-1"></i> Bandi Aperti</span>
+            <span><i class="ti ti-speakerphone me-1"></i> Corsi Aperti</span>
         </div>
         <div class="card">
             <div class="card-body text-center py-4">
                 <span class="avatar avatar-lg bg-default text-default-fg mb-2">
                     <i class="ti ti-clipboard-off"></i>
                 </span>
-                <p class="text-secondary mb-0">Nessun bando aperto al momento</p>
+                <p class="text-secondary mb-0">Nessun corso aperto al momento</p>
             </div>
         </div>
     </div>
@@ -518,7 +518,7 @@ $selectedType = $activeCard ?: 'admin';
                 <a href="<?= Url::to(['/studenti']) ?>" class="card card-sm bando-card text-decoration-none">
                     <div class="card-body py-3">
                         <i class="ti ti-clipboard-list text-green mb-1" style="font-size: 1.5rem;"></i>
-                        <div class="small">Bandi Aperti</div>
+                        <div class="small">Corsi Aperti</div>
                     </div>
                 </a>
             </div>
@@ -534,7 +534,7 @@ $selectedType = $activeCard ?: 'admin';
                 <a href="<?= Url::to(['/studenti']) ?>" class="card card-sm bando-card text-decoration-none">
                     <div class="card-body py-3">
                         <i class="ti ti-school text-purple mb-1" style="font-size: 1.5rem;"></i>
-                        <div class="small">Iscriviti a un Bando</div>
+                        <div class="small">Iscriviti a un Corso</div>
                     </div>
                 </a>
             </div>

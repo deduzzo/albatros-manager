@@ -10,7 +10,7 @@ use app\models\Allievo;
 /* @var $allievo app\models\Allievo */
 /* @var $iscrizione app\models\Iscrizione */
 
-$this->title = 'Iscrizione al Bando';
+$this->title = 'Iscrizione al Corso';
 $colore = $bando->getColore();
 $moduli = $bando->moduli;
 ?>
@@ -20,7 +20,7 @@ $moduli = $bando->moduli;
         <div class="page-header d-print-none mb-4">
             <div class="row align-items-center">
                 <div class="col">
-                    <div class="page-pretitle">Iscrizione al Bando</div>
+                    <div class="page-pretitle">Iscrizione al Corso</div>
                     <h2 class="page-title"><?= Html::encode($bando->titolo) ?></h2>
                 </div>
             </div>
@@ -184,10 +184,10 @@ $moduli = $bando->moduli;
                 </div>
 
                 <div class="col-lg-4">
-                    <!-- Riepilogo Bando -->
+                    <!-- Riepilogo Corso -->
                     <div class="card sticky-top" style="top: 70px;">
                         <div class="card-header" style="background: linear-gradient(135deg, <?= Html::encode($colore) ?> 0%, <?= Html::encode($colore) ?>99 100%);">
-                            <h3 class="card-title text-white">Riepilogo Bando</h3>
+                            <h3 class="card-title text-white">Riepilogo Corso</h3>
                         </div>
                         <div class="card-body">
                             <dl class="row mb-0">
@@ -238,7 +238,7 @@ $moduli = $bando->moduli;
                             </button>
                             <div class="text-center mt-2">
                                 <?= Html::a(
-                                    '<i class="ti ti-arrow-left me-1"></i> Torna ai bandi',
+                                    '<i class="ti ti-arrow-left me-1"></i> Torna ai corsi',
                                     ['index'],
                                     ['class' => 'text-secondary']
                                 ) ?>

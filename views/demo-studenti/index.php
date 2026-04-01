@@ -35,7 +35,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                             </div>
                             <div class="col">
                                 <div class="fw-bold fs-3"><?= count($bandi) ?></div>
-                                <div class="text-secondary">Bandi Aperti</div>
+                                <div class="text-secondary">Corsi Aperti</div>
                             </div>
                         </div>
                     </div>
@@ -100,17 +100,17 @@ $this->title = 'Corsi di Formazione Gratuiti';
 
         <h2 class="mb-4">
             <i class="ti ti-sparkles me-2 text-warning"></i>
-            Bandi Aperti
+            Corsi Aperti
         </h2>
 
-        <!-- Lista Bandi -->
+        <!-- Lista Corsi -->
         <?php foreach ($bandi as $bando): ?>
             <div class="card mb-4">
                 <div class="card-status-start" style="background-color: <?= $bando['colore'] ?>;"></div>
                 <div class="row g-0">
                     <div class="col-lg-8">
                         <div class="card-body">
-                            <!-- Header Bando -->
+                            <!-- Header Corso -->
                             <div class="d-flex align-items-start mb-3">
                                 <div>
                                     <span class="badge mb-2" style="background-color: <?= $bando['colore'] ?>; color: #fff;">
@@ -193,7 +193,7 @@ $this->title = 'Corsi di Formazione Gratuiti';
                     <!-- Sidebar con info e corsi -->
                     <div class="col-lg-4">
                         <div class="card-body bg-light h-100">
-                            <!-- Info Bando -->
+                            <!-- Info Corso -->
                             <div class="mb-4">
                                 <div class="mb-3">
                                     <span class="text-secondary d-block mb-1">Fonte di Finanziamento</span>

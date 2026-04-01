@@ -12,7 +12,7 @@ use app\models\Allievo;
 /* @var $iscrizione app\models\Iscrizione */
 
 $this->title = 'Candidatura - ' . $avviso->codice_avviso;
-$this->params['breadcrumbs'][] = ['label' => 'Bandi Aperti', 'url' => ['bandi']];
+$this->params['breadcrumbs'][] = ['label' => 'Corsi Aperti', 'url' => ['bandi']];
 $this->params['breadcrumbs'][] = ['label' => $avviso->codice_avviso, 'url' => ['bando', 'id' => $avviso->id]];
 $this->params['breadcrumbs'][] = 'Candidatura';
 ?>
@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = 'Candidatura';
     <div class="container-xl">
         <div class="page-header d-print-none mb-4">
             <h2 class="page-title">
-                <i class="ti ti-send me-2"></i> Candidatura al Bando
+                <i class="ti ti-send me-2"></i> Candidatura al Corso
             </h2>
             <div class="page-subtitle text-secondary">
                 <?= Html::encode($avviso->codice_avviso) ?> - <?= Html::encode($avviso->titolo) ?>
@@ -194,7 +194,7 @@ $this->params['breadcrumbs'][] = 'Candidatura';
 
             <!-- Pulsanti -->
             <div class="d-flex gap-2">
-                <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Torna al bando', ['bando', 'id' => $avviso->id], ['class' => 'btn btn-secondary']) ?>
+                <?= Html::a('<i class="ti ti-arrow-left me-1"></i> Torna al corso', ['bando', 'id' => $avviso->id], ['class' => 'btn btn-secondary']) ?>
                 <?= Html::submitButton('<i class="ti ti-send me-1"></i> Invia Candidatura', [
                     'class' => 'btn ms-auto',
                     'style' => 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;',

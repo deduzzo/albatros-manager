@@ -13,7 +13,7 @@ use app\components\widgets\AppActiveForm;
 /* @var $documentiRichiesti app\models\AvvisoDocumentoTipo[] */
 
 $this->title = 'Iscrizione: ' . $modulo->codice;
-$this->params['breadcrumbs'][] = ['label' => 'Bandi Aperti', 'url' => ['bandi']];
+$this->params['breadcrumbs'][] = ['label' => 'Corsi Aperti', 'url' => ['bandi']];
 $this->params['breadcrumbs'][] = ['label' => $modulo->avviso->codice_avviso, 'url' => ['bando', 'id' => $modulo->avviso_id]];
 $this->params['breadcrumbs'][] = 'Iscrizione';
 ?>
@@ -203,7 +203,7 @@ $this->params['breadcrumbs'][] = 'Iscrizione';
                             <dt class="col-5">Titolo:</dt>
                             <dd class="col-7"><?= Html::encode($modulo->titolo) ?></dd>
 
-                            <dt class="col-5">Bando:</dt>
+                            <dt class="col-5">Corso:</dt>
                             <dd class="col-7"><?= Html::encode($modulo->avviso->codice_avviso) ?></dd>
 
                             <dt class="col-5">Ore totali:</dt>
