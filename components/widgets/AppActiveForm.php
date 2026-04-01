@@ -47,6 +47,11 @@ class AppActiveForm extends ActiveForm
             $this->options['class'] = '';
         }
 
+        // Usa is-invalid (Bootstrap 5) invece del default has-error (Bootstrap 3)
+        // In modalità VALIDATION_STATE_ON_INPUT, questa classe viene aggiunta all'input
+        // quando il model ha errori sul campo, rendendo visibile il blocco invalid-feedback
+        $this->errorCssClass = 'is-invalid';
+
         // Configura il layout
         switch ($this->layout) {
             case 'horizontal':

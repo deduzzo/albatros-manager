@@ -16,6 +16,16 @@ $isActive = function($controllers) use ($currentController) {
         <div class="navbar">
             <div class="container-xl">
                 <ul class="navbar-nav">
+                    <!-- Gestione Semplificata -->
+                    <li class="nav-item <?= $isActive('gestione') ?>">
+                        <a class="nav-link" href="<?= \yii\helpers\Url::to(['/gestione']) ?>">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <i class="ti ti-layout-dashboard"></i>
+                            </span>
+                            <span class="nav-link-title">Gestione Semplificata</span>
+                        </a>
+                    </li>
+
                     <!-- Dashboard -->
                     <li class="nav-item <?= $isActive('site') ?>">
                         <a class="nav-link" href="<?= Url::to(['/site/index']) ?>">
@@ -83,10 +93,10 @@ $isActive = function($controllers) use ($currentController) {
                                 <i class="ti ti-folder me-2"></i> Progetti
                             </a>
                             <a class="dropdown-item <?= $currentController == 'avviso' ? 'active' : '' ?>" href="<?= Url::to(['/avviso/index']) ?>">
-                                <i class="ti ti-file me-2"></i> Avvisi/Bandi
+                                <i class="ti ti-file me-2"></i> Corsi
                             </a>
                             <a class="dropdown-item <?= $currentController == 'modulo' ? 'active' : '' ?>" href="<?= Url::to(['/modulo/index']) ?>">
-                                <i class="ti ti-book me-2"></i> Moduli/Corsi
+                                <i class="ti ti-book me-2"></i> Moduli/Insegnamenti
                             </a>
                         </div>
                     </li>

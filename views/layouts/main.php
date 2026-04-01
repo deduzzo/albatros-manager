@@ -60,6 +60,19 @@ TomSelectAsset::register($this);
             opacity: 1;
             color: var(--tblr-primary);
         }
+        /* Validazione form Yii2 con tema Tabler (Bootstrap 5) */
+        /* VALIDATION_STATE_ON_INPUT: is-invalid sull'input rende visibile invalid-feedback */
+        .is-invalid ~ .invalid-feedback,
+        .is-invalid ~ .invalid-tooltip { display: block; }
+        .form-select.is-invalid ~ .invalid-feedback { display: block; }
+        /* Fallback per form che usano has-error sul container (ActiveForm nativo) */
+        .has-error .form-control,
+        .has-error .form-select { border-color: #d63939; }
+        .has-error .help-block { color: #d63939; display: block; font-size: 0.875rem; margin-top: 0.25rem; }
+        .field-has-error .form-control,
+        .field-has-error .form-select { border-color: #d63939; }
+        .field-has-error .invalid-feedback,
+        .field-has-error .help-block { color: #d63939; display: block; }
     </style>
 </head>
 <body>

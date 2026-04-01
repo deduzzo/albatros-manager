@@ -113,6 +113,9 @@ $config = [
                 'area-docenti/modifica-rimborso/<id:\d+>' => 'docente-area/modifica-rimborso',
                 'area-docenti/notifiche' => 'docente-area/notifiche',
                 'area-docenti/notifica/<id:\d+>' => 'docente-area/notifica-view',
+                'area-docenti/presenze' => 'docente-area/presenze',
+                'area-docenti/presenze/<calendario_id:\d+>' => 'docente-area/presenze-lezione',
+                'area-docenti/salva-presenze/<calendario_id:\d+>' => 'docente-area/salva-presenze',
 
                 // Valutazione pubblica anonima
                 'valutazione/<codice:[A-Z0-9]{8}>' => 'valutazione-public/index',
@@ -143,6 +146,13 @@ $config = [
                 // Backward compatibility: vecchio URL demo
                 'demo-studenti' => 'studenti/index',
                 'demo-studenti/<action:[\w-]+>' => 'studenti/<action>',
+
+                // Vista Semplificata
+                'gestione' => 'gestione/index',
+                'gestione/corso/<id:\d+>' => 'gestione/corso',
+                'gestione/corso/<id:\d+>/<section:[\w-]+>' => 'gestione/sezione',
+                'gestione/nuova-candidatura/<corso_id:\d+>' => 'gestione/nuova-candidatura',
+                'gestione/metti-a-bando/<corso_id:\d+>' => 'gestione/metti-a-bando',
 
                 // CRUD standard per ogni entità
                 '<controller:[\w-]+>' => '<controller>/index',

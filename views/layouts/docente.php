@@ -36,6 +36,17 @@ $currentAction = Yii::$app->controller->action->id;
         :root {
             --tblr-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
         }
+        /* Validazione form Yii2 con tema Tabler (Bootstrap 5) */
+        .is-invalid ~ .invalid-feedback,
+        .is-invalid ~ .invalid-tooltip { display: block; }
+        .form-select.is-invalid ~ .invalid-feedback { display: block; }
+        .has-error .form-control,
+        .has-error .form-select { border-color: #d63939; }
+        .has-error .help-block { color: #d63939; display: block; font-size: 0.875rem; margin-top: 0.25rem; }
+        .field-has-error .form-control,
+        .field-has-error .form-select { border-color: #d63939; }
+        .field-has-error .invalid-feedback,
+        .field-has-error .help-block { color: #d63939; display: block; }
     </style>
 </head>
 <body>
