@@ -32,6 +32,12 @@ Tutte le modifiche al portale Albatros Manager.
 ### Corretto {tutti}
 - Fix validazione form: campi con errore ora mostrano bordo rosso e messaggio di errore (era bug CSS has-error vs is-invalid)
 
+### Documentazione {tutti}
+- Manuale Amministratore: aggiunte sezioni 24-31 (Gestione Semplificata, Candidatura Multi-modulo, Metti a Bando, Alert Dashboard, Allegati Contratto, Erogazione Bloccata, Export SEPA XML, Ridenominazione Termini)
+- Manuale Docente: aggiunta sezione 14 — Gestione Presenze riservata ai Tutor
+- Manuale Studente: aggiunta sezione 5 — Borse di Studio con stato Erogazione Bloccata
+- Aggiornata MAPPA_FEATURE_MANUALE.md con riferimenti alle nuove sezioni
+
 ### Tecnico {admin}
 - `AlertWidget`: widget riutilizzabile per alert operativi (contratti/presenze/borse), supporta modalità compatta e filtro per corso
 - `SepaXmlGenerator`: componente per generazione XML pain.001.001.03 per bonifici SEPA

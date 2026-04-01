@@ -43,3 +43,12 @@
 | Generazione Contratti PDF (FSE/PNRR) | Sez. 22 | Sez. 12 | - |
 | Upload Contratto Firmato | Sez. 22 | Sez. 12 | - |
 | Coordinatori e Tutor | Sez. 23 | - | - |
+| Gestione Semplificata (vista corsi con sidebar) | Sez. 24 | - | - |
+| Candidatura Multi-modulo | Sez. 25 | - | - |
+| Metti a Bando (da Gestione Semplificata) | Sez. 26 | - | - |
+| Alert Dashboard (non contrattualizzati, presenze, borse) | Sez. 27 | - | - |
+| Allegati Contratto (upload scansioni) | Sez. 28 | - | - |
+| Borse di Studio — Stato Erogazione Bloccata | Sez. 29 | - | Sez. 5 |
+| Export SEPA XML (pain.001.001.03) | Sez. 30 | - | - |
+| Ridenominazione Termini (Avviso→Corso, Moduli→Insegnamenti) | Sez. 31 | - | - |
+| Gestione Presenze (Area Tutor) | - | Sez. 14 | - |

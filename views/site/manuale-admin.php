@@ -242,6 +242,14 @@ $this->title = 'Manuale Amministratore';
             <a class="nav-link" href="#firma-digitale"><i class="ti ti-certificate"></i> Verifica Firma Digitale</a>
             <a class="nav-link" href="#contratti-pdf"><i class="ti ti-file-type-pdf"></i> Generazione Contratti PDF</a>
             <a class="nav-link" href="#coordinatori-tutor"><i class="ti ti-user-star"></i> Coordinatori e Tutor</a>
+            <a class="nav-link" href="#gestione-semplificata"><i class="ti ti-layout-grid"></i> Gestione Semplificata</a>
+            <a class="nav-link" href="#candidatura-multimodulo"><i class="ti ti-users-plus"></i> Candidatura Multi-modulo</a>
+            <a class="nav-link" href="#metti-a-bando"><i class="ti ti-speakerphone"></i> Metti a Bando</a>
+            <a class="nav-link" href="#alert-dashboard"><i class="ti ti-bell-exclamation"></i> Alert Dashboard</a>
+            <a class="nav-link" href="#allegati-contratto"><i class="ti ti-paperclip"></i> Allegati Contratto</a>
+            <a class="nav-link" href="#borsa-bloccata"><i class="ti ti-lock"></i> Erogazione Bloccata (Borsa)</a>
+            <a class="nav-link" href="#export-sepa"><i class="ti ti-file-export"></i> Export SEPA XML</a>
+            <a class="nav-link" href="#ridenominazione"><i class="ti ti-tag"></i> Ridenominazione Termini</a>
         </div>
 
         <div class="sidebar-heading mt-4">Altri manuali</div>
@@ -296,7 +304,7 @@ $this->title = 'Manuale Amministratore';
                         <tbody>
                             <tr><td><i class="ti ti-home me-1"></i> Dashboard</td><td>Panoramica con statistiche, grafici e attivita recenti</td></tr>
                             <tr><td><i class="ti ti-settings me-1"></i> Configurazione</td><td>Fonti di finanziamento, Conti correnti, Sedi, Tipi documento</td></tr>
-                            <tr><td><i class="ti ti-folder me-1"></i> Progetti</td><td>Progetti, Avvisi/Bandi, Moduli/Corsi</td></tr>
+                            <tr><td><i class="ti ti-folder me-1"></i> Progetti</td><td>Progetti, Corsi, Moduli/Insegnamenti</td></tr>
                             <tr><td><i class="ti ti-users me-1"></i> Personale</td><td>Docenti, Allievi, Documentazione, Tag curriculum</td></tr>
                             <tr><td><i class="ti ti-clipboard me-1"></i> Gestione</td><td>Istanze, Assegnazioni, Contratti, Ore, Calendario, Presenze, Valutazioni</td></tr>
                             <tr><td><i class="ti ti-currency-euro me-1"></i> Pagamenti</td><td>Elenco pagamenti e liquidazione massiva</td></tr>
@@ -448,40 +456,40 @@ $this->title = 'Manuale Amministratore';
             <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
         </section>
 
-        <!-- 5. AVVISI E BANDI -->
+        <!-- 5. CORSI -->
         <section id="avvisi">
             <div class="section-card">
                 <div class="section-card-header bg-green-lt">
-                    <i class="ti ti-file-text"></i> 5. Avvisi e Bandi
+                    <i class="ti ti-file-text"></i> 5. Corsi
                 </div>
                 <div class="section-card-body">
-                    <p>Gli Avvisi (o Bandi) sono le procedure di selezione pubblica per il reclutamento dei docenti. Ogni avviso e collegato a un progetto e contiene uno o piu moduli.</p>
+                    <p>I Corsi sono le procedure di selezione pubblica per il reclutamento dei docenti. Ogni corso e collegato a un progetto e contiene uno o piu moduli.</p>
 
-                    <h3>Creare un avviso</h3>
+                    <h3>Creare un corso</h3>
                     <ol>
-                        <li>Vai su <span class="menu-path">Progetti > Avvisi/Bandi</span></li>
-                        <li>Clicca <strong>"Nuovo Avviso"</strong></li>
+                        <li>Vai su <span class="menu-path">Progetti > Corsi</span></li>
+                        <li>Clicca <strong>"Nuovo Corso"</strong></li>
                         <li>Seleziona il progetto di riferimento</li>
                         <li>Compila: titolo, numero protocollo, data pubblicazione, data scadenza, descrizione</li>
                         <li>Imposta lo stato iniziale (generalmente "bozza")</li>
                         <li>Clicca <strong>"Salva"</strong></li>
                     </ol>
 
-                    <h3>Stati dell'avviso</h3>
+                    <h3>Stati del corso</h3>
                     <table class="table campo-table">
                         <thead><tr><th>Stato</th><th>Significato</th></tr></thead>
                         <tbody>
-                            <tr><td><span class="badge bg-default text-default-fg">Bozza</span></td><td>Avviso in preparazione, non visibile ai docenti</td></tr>
-                            <tr><td><span class="badge bg-green text-green-fg">Pubblicato</span></td><td>Avviso visibile nell'area docenti, candidature aperte</td></tr>
+                            <tr><td><span class="badge bg-default text-default-fg">Bozza</span></td><td>Corso in preparazione, non visibile ai docenti</td></tr>
+                            <tr><td><span class="badge bg-green text-green-fg">Pubblicato</span></td><td>Corso visibile nell'area docenti, candidature aperte</td></tr>
                             <tr><td><span class="badge bg-red text-red-fg">Chiuso</span></td><td>Scadenza superata, candidature chiuse</td></tr>
                         </tbody>
                     </table>
 
                     <h3>Documenti richiesti</h3>
-                    <p>Per ogni avviso puoi configurare quali documenti sono necessari per la candidatura. Nella pagina di dettaglio dell'avviso, nella sezione "Documenti Richiesti", puoi aggiungere i tipi di documento necessari (es: CV, Diploma, Documento d'identita). I docenti dovranno caricare tali documenti al momento dell'iscrizione.</p>
+                    <p>Per ogni corso puoi configurare quali documenti sono necessari per la candidatura. Nella pagina di dettaglio del corso, nella sezione "Documenti Richiesti", puoi aggiungere i tipi di documento necessari (es: CV, Diploma, Documento d'identita). I docenti dovranno caricare tali documenti al momento dell'iscrizione.</p>
 
                     <h3>Collegamento gerarchico</h3>
-                    <p>La gerarchia e: <strong>Progetto > Avviso > Moduli</strong>. Un progetto puo avere piu avvisi (ad esempio avvisi distinti per diverse figure professionali), e ogni avviso contiene i moduli per cui si ricercano docenti.</p>
+                    <p>La gerarchia e: <strong>Progetto > Corso > Moduli</strong>. Un progetto puo avere piu corsi (ad esempio corsi distinti per diverse figure professionali), e ogni corso contiene i moduli per cui si ricercano docenti.</p>
                 </div>
             </div>
             <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
@@ -494,11 +502,11 @@ $this->title = 'Manuale Amministratore';
                     <i class="ti ti-book"></i> 6. Moduli Formativi
                 </div>
                 <div class="section-card-body">
-                    <p>I Moduli (o Materie) sono le singole discipline all'interno di un avviso/bando. Ad esempio, in un progetto "Health Food" i moduli possono essere "Chimica degli Alimenti", "Sicurezza Alimentare", "Marketing Agroalimentare", ecc.</p>
+                    <p>I Moduli (o Materie/Insegnamenti) sono le singole discipline all'interno di un corso. Ad esempio, in un progetto "Health Food" i moduli possono essere "Chimica degli Alimenti", "Sicurezza Alimentare", "Marketing Agroalimentare", ecc.</p>
 
                     <h3>Creare un modulo</h3>
                     <ol>
-                        <li>Vai su <span class="menu-path">Progetti > Moduli/Corsi</span></li>
+                        <li>Vai su <span class="menu-path">Progetti > Moduli/Insegnamenti</span></li>
                         <li>Clicca <strong>"Nuovo Modulo"</strong></li>
                         <li>Seleziona l'avviso di appartenenza</li>
                         <li>Compila i campi:</li>
@@ -887,7 +895,7 @@ $this->title = 'Manuale Amministratore';
                         <thead><tr><th>Sezione</th><th>Funzionalita</th></tr></thead>
                         <tbody>
                             <tr><td><strong>Dashboard</strong></td><td>Statistiche personali: iscrizioni, bandi aperti, assegnazioni attive, ore da validare</td></tr>
-                            <tr><td><strong>Bandi Aperti</strong></td><td>Lista dei bandi pubblicati con moduli disponibili</td></tr>
+                            <tr><td><strong>Corsi Aperti</strong></td><td>Lista dei corsi pubblicati con moduli disponibili</td></tr>
                             <tr><td><strong>Iscrizione Modulo</strong></td><td>Wizard guidato: dati, tag competenze, documenti, riepilogo</td></tr>
                             <tr><td><strong>Le Mie Iscrizioni</strong></td><td>Storico delle candidature con stato aggiornato</td></tr>
                             <tr><td><strong>Le Mie Assegnazioni</strong></td><td>Moduli assegnati con dettaglio ore contrattualizzate</td></tr>
@@ -1357,10 +1365,329 @@ $this->title = 'Manuale Amministratore';
             <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
         </section>
 
+        <!-- 24. GESTIONE SEMPLIFICATA -->
+        <section id="gestione-semplificata">
+            <div class="section-card">
+                <div class="section-card-header bg-blue-lt">
+                    <i class="ti ti-layout-grid"></i> 24. Gestione Semplificata
+                </div>
+                <div class="section-card-body">
+                    <p>La <strong>Gestione Semplificata</strong> e una nuova area progettata per gestire i corsi in modo rapido e intuitivo, senza dover navigare tra le voci avanzate del menu. E accessibile direttamente dal menu principale.</p>
+
+                    <h3>Schermata iniziale</h3>
+                    <p>All'accesso viene mostrata una griglia di card, una per ogni corso attivo nel sistema. Ogni card riporta:</p>
+                    <ul>
+                        <li>Titolo del corso e fonte di finanziamento</li>
+                        <li>Numero di moduli, docenti assegnati e studenti iscritti</li>
+                        <li>Stato del corso (attivo, pianificato, concluso)</li>
+                    </ul>
+
+                    <h3>Dashboard del corso</h3>
+                    <p>Cliccando su una card si apre la dashboard dedicata al corso. La navigazione interna avviene tramite una <strong>sidebar</strong> con le seguenti sezioni:</p>
+                    <table class="table campo-table">
+                        <thead><tr><th>Sezione</th><th>Contenuto</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Panoramica</strong></td><td>Statistiche riassuntive e alert attivi per il corso</td></tr>
+                            <tr><td><strong>Piano Formativo</strong></td><td>Elenco moduli con docente assegnato, ore e stato</td></tr>
+                            <tr><td><strong>Personale</strong></td><td>Docenti, coordinatori e tutor collegati al corso</td></tr>
+                            <tr><td><strong>Studenti</strong></td><td>Elenco iscritti con stato frequenza e graduatoria</td></tr>
+                            <tr><td><strong>Calendario</strong></td><td>Lezioni programmate con gestione presenze rapida</td></tr>
+                            <tr><td><strong>Contratti</strong></td><td>Contratti docenti con stato e avanzamento pagamenti</td></tr>
+                            <tr><td><strong>Borse di Studio</strong></td><td>Borse degli studenti con frequenza e stato erogazione</td></tr>
+                            <tr><td><strong>Import/Export</strong></td><td>Import dati Excel e export per reportistica</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Selettore rapido corso</h3>
+                    <p>In cima alla dashboard e presente un selettore a tendina che permette di passare da un corso all'altro senza tornare alla schermata iniziale. Questo velocizza notevolmente il lavoro quando si gestiscono piu corsi in parallelo.</p>
+
+                    <h3>Modalita avanzata</h3>
+                    <p>La Gestione Semplificata non sostituisce l'area amministrativa completa. Il link <strong>"Modalita avanzata"</strong> presente nella dashboard di ogni corso riporta direttamente alla vista dettaglio avanzata del progetto/avviso, con tutte le funzionalita standard.</p>
+
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Suggerimento</strong>: Usa la Gestione Semplificata per le operazioni quotidiane (verificare presenze, controllare contratti, monitorare borse). Usa la modalita avanzata per configurazioni e operazioni straordinarie.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 25. CANDIDATURA MULTI-MODULO -->
+        <section id="candidatura-multimodulo">
+            <div class="section-card">
+                <div class="section-card-header bg-azure-lt">
+                    <i class="ti ti-users-plus"></i> 25. Candidatura Multi-modulo
+                </div>
+                <div class="section-card-body">
+                    <p>La funzione <strong>Candidatura Multi-modulo</strong> consente di iscrivere un docente a piu moduli contemporaneamente, eliminando la necessita di creare istanze una alla volta.</p>
+
+                    <h3>Come accedere</h3>
+                    <p>La candidatura multi-modulo e accessibile da due punti:</p>
+                    <ul>
+                        <li><strong>Gestione Semplificata</strong>: Sezione "Piano Formativo" del corso → pulsante <strong>"Aggiungi Docente"</strong></li>
+                        <li><strong>Vista avanzata</strong>: Dettaglio avviso → pulsante <strong>"Candidatura Multi-modulo"</strong></li>
+                    </ul>
+
+                    <h3>Procedura</h3>
+                    <ol>
+                        <li>Seleziona il <strong>docente</strong> dall'albo (ricerca per nome, cognome o codice fiscale)</li>
+                        <li>Vengono mostrati tutti i <strong>moduli disponibili</strong> del corso/avviso</li>
+                        <li>Spunta i moduli per cui si desidera creare la candidatura</li>
+                        <li>Clicca <strong>"Conferma Candidatura"</strong></li>
+                    </ol>
+
+                    <h3>Risultato</h3>
+                    <p>Il sistema crea automaticamente un'<strong>istanza</strong> (candidatura) per ogni modulo selezionato. Le istanze vengono create in stato "in valutazione" e potranno essere valutate dalla CTS come di consueto.</p>
+
+                    <div class="alert-manuale bg-orange-lt">
+                        <i class="ti ti-alert-triangle text-orange"></i>
+                        <div><strong>Attenzione</strong>: Se per un modulo esiste gia un'istanza del docente selezionato, il sistema lo segnalera e saltara automaticamente quel modulo per evitare duplicati.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 26. METTI A BANDO -->
+        <section id="metti-a-bando">
+            <div class="section-card">
+                <div class="section-card-header bg-green-lt">
+                    <i class="ti ti-speakerphone"></i> 26. Metti a Bando
+                </div>
+                <div class="section-card-body">
+                    <p>La funzione <strong>Metti a Bando</strong> consente di pubblicare rapidamente piu moduli nell'area docenti direttamente dalla Gestione Semplificata, senza dover configurare manualmente ogni avviso.</p>
+
+                    <h3>Come usarla</h3>
+                    <ol>
+                        <li>Accedi alla <strong>Gestione Semplificata</strong> e apri il corso di interesse</li>
+                        <li>Vai alla sezione <strong>"Piano Formativo"</strong></li>
+                        <li>I moduli <strong>scoperti</strong> (senza docente assegnato) mostrano una <strong>checkbox</strong> sulla sinistra</li>
+                        <li>Seleziona i moduli che vuoi mettere a bando</li>
+                        <li>Clicca il pulsante <strong>"Metti a Bando"</strong></li>
+                        <li>Conferma l'operazione</li>
+                    </ol>
+
+                    <h3>Effetto dell'operazione</h3>
+                    <p>I moduli selezionati vengono pubblicati nell'area docenti e diventano visibili come bandi aperti. I docenti registrati potranno candidarsi normalmente attraverso il loro portale.</p>
+
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Nota</strong>: I moduli che hanno gia un docente assegnato non mostrano la checkbox e non possono essere messi a bando. Per pubblicare comunque un modulo gia assegnato, usa la gestione avvisi nell'area avanzata.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 27. ALERT DASHBOARD -->
+        <section id="alert-dashboard">
+            <div class="section-card">
+                <div class="section-card-header bg-orange-lt">
+                    <i class="ti ti-bell-exclamation"></i> 27. Alert Dashboard
+                </div>
+                <div class="section-card-body">
+                    <p>Il sistema genera automaticamente <strong>alert</strong> per segnalare situazioni che richiedono attenzione. Gli alert sono visibili nella <strong>dashboard principale</strong> e nella sezione <strong>Panoramica</strong> di ogni corso nella Gestione Semplificata.</p>
+
+                    <h3>Tipi di alert</h3>
+                    <table class="table campo-table">
+                        <thead><tr><th>Alert</th><th>Colore</th><th>Condizione</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Docenti non contrattualizzati</strong></td>
+                                <td><span class="badge bg-orange-lt text-orange">Arancione</span></td>
+                                <td>Docenti con assegnazione approvata ma contratto non ancora emesso</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Presenze non acquisite</strong></td>
+                                <td><span class="badge bg-red-lt text-red">Rosso</span></td>
+                                <td>Lezioni gia avvenute (data passata) prive di registro presenze</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frequenza borsa insufficiente</strong></td>
+                                <td><span class="badge bg-yellow-lt text-yellow">Giallo</span></td>
+                                <td>Studenti con borsa approvata ma frequenza inferiore all'80%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Come gestire gli alert</h3>
+                    <p>Ogni alert e cliccabile e porta direttamente alla sezione pertinente del sistema per risolvere la problematica segnalata:</p>
+                    <ul>
+                        <li>Alert docenti non contrattualizzati → lista assegnazioni senza contratto</li>
+                        <li>Alert presenze non acquisite → calendario con lezioni incomplete</li>
+                        <li>Alert frequenza borsa → lista borse con frequenza sotto soglia</li>
+                    </ul>
+
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Nota</strong>: Gli alert vengono aggiornati automaticamente a ogni caricamento della pagina. Non e necessario alcun aggiornamento manuale.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 28. ALLEGATI CONTRATTO -->
+        <section id="allegati-contratto">
+            <div class="section-card">
+                <div class="section-card-header bg-blue-lt">
+                    <i class="ti ti-paperclip"></i> 28. Allegati Contratto
+                </div>
+                <div class="section-card-body">
+                    <p>La sezione <strong>Allegati</strong> nel dettaglio contratto consente di archiviare digitalmente le scansioni dei contratti firmati a mano, tenendole associate al contratto nel sistema.</p>
+
+                    <h3>Come caricare un allegato</h3>
+                    <ol>
+                        <li>Apri il dettaglio di un contratto (<span class="menu-path">Gestione > Contratti > Dettaglio</span>)</li>
+                        <li>Individua la sezione <strong>"Allegati"</strong> nella pagina</li>
+                        <li>Clicca <strong>"Carica Allegato"</strong></li>
+                        <li>Seleziona il file dal tuo dispositivo</li>
+                        <li>Clicca <strong>"Carica"</strong></li>
+                    </ol>
+
+                    <h3>Formati supportati</h3>
+                    <table class="table campo-table">
+                        <thead><tr><th>Formato</th><th>Utilizzo tipico</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>PDF</strong></td><td>Scansione del contratto firmato</td></tr>
+                            <tr><td><strong>JPG / PNG</strong></td><td>Foto del contratto firmato (da smartphone)</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Gestione allegati</h3>
+                    <p>Gli allegati caricati sono elencati nella sezione con data di caricamento e nome file. Per ogni allegato sono disponibili le azioni:</p>
+                    <ul>
+                        <li><strong><i class="ti ti-download"></i> Scarica</strong>: scarica il file originale</li>
+                        <li><strong><i class="ti ti-trash"></i> Elimina</strong>: rimuove l'allegato dal sistema</li>
+                    </ul>
+
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Nota</strong>: Gli allegati sono visibili solo agli amministratori e non all'area docenti. Per il contratto firmato visibile al docente, usa la funzione "Carica Firmato" nella sezione <a href="#contratti-pdf">Generazione Contratti PDF</a> (Sez. 22).</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 29. EROGAZIONE BLOCCATA (BORSA DI STUDIO) -->
+        <section id="borsa-bloccata">
+            <div class="section-card">
+                <div class="section-card-header bg-red-lt">
+                    <i class="ti ti-lock"></i> 29. Borse di Studio — Erogazione Bloccata
+                </div>
+                <div class="section-card-body">
+                    <p>Le borse di studio possono trovarsi nello stato <strong>Erogazione Bloccata</strong> quando lo studente ha una frequenza inferiore all'80% delle ore del corso. La borsa rimane approvata ma l'erogazione e sospesa fino al recupero della frequenza.</p>
+
+                    <h3>Come funziona il calcolo automatico</h3>
+                    <p>Il sistema incrocia i dati di:</p>
+                    <ul>
+                        <li>Ore totali previste dal corso</li>
+                        <li>Presenze registrate nel calendario lezioni</li>
+                    </ul>
+                    <p>Se la percentuale di frequenza calcolata scende sotto l'<strong>80%</strong>, la borsa passa automaticamente allo stato <span class="badge bg-red text-red-fg">Erogazione Bloccata</span>.</p>
+
+                    <h3>Ricalcolo manuale</h3>
+                    <p>In caso di aggiornamento delle presenze, usa il pulsante <strong>"Ricalcola Frequenze"</strong> disponibile nella lista borse di studio per forzare un aggiornamento immediato di tutti i calcoli:</p>
+                    <ol>
+                        <li>Vai su <span class="menu-path">Gestione > Borse di Studio</span></li>
+                        <li>Clicca <strong><i class="ti ti-refresh"></i> Ricalcola Frequenze</strong></li>
+                        <li>Il sistema aggiorna le percentuali e gli stati per tutti gli studenti del progetto selezionato</li>
+                    </ol>
+
+                    <h3>Sblocco manuale</h3>
+                    <p>Se la situazione si risolve (es. assenze giustificate, aggiornamento presenze) e la frequenza torna sopra l'80%, il sistema sblocca automaticamente l'erogazione al prossimo ricalcolo. E possibile anche sbloccare manualmente una singola borsa aprendo il dettaglio e cliccando <strong>"Sblocca Erogazione"</strong>, specificando la motivazione.</p>
+
+                    <div class="alert-manuale bg-orange-lt">
+                        <i class="ti ti-alert-triangle text-orange"></i>
+                        <div><strong>Importante</strong>: Lo stato "Erogazione Bloccata" genera anche un alert nella Dashboard e nella Panoramica del corso nella Gestione Semplificata. Questi alert sono visibili nella sezione <a href="#alert-dashboard">Alert Dashboard</a> (Sez. 27).</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 30. EXPORT SEPA XML -->
+        <section id="export-sepa">
+            <div class="section-card">
+                <div class="section-card-header bg-azure-lt">
+                    <i class="ti ti-file-export"></i> 30. Export SEPA XML
+                </div>
+                <div class="section-card-body">
+                    <p>La funzione <strong>Export SEPA XML</strong> genera un file in formato <code>pain.001.001.03</code> compatibile con i principali sistemi bancari italiani ed europei, per il pagamento massivo delle borse di studio tramite bonifico.</p>
+
+                    <h3>Prerequisiti</h3>
+                    <p>Prima di utilizzare la funzione, assicurati di aver configurato i dati bancari della fondazione:</p>
+                    <ol>
+                        <li>Vai su <span class="menu-path">Configurazione > Dati Fondazione</span></li>
+                        <li>Nella sezione <strong>"Dati Bancari"</strong> (gruppo <code>banca</code>), inserisci:
+                            <ul>
+                                <li><strong>IBAN</strong> della fondazione (conto di addebito)</li>
+                                <li><strong>BIC/SWIFT</strong> della banca della fondazione</li>
+                            </ul>
+                        </li>
+                        <li>Salva le modifiche</li>
+                    </ol>
+
+                    <h3>Generare il file SEPA</h3>
+                    <ol>
+                        <li>Vai su <span class="menu-path">Gestione > Borse di Studio</span></li>
+                        <li>Seleziona le borse da includere nel pagamento (usa i filtri per progetto e stato)</li>
+                        <li>Clicca il pulsante <strong><i class="ti ti-file-export"></i> Export SEPA XML</strong></li>
+                        <li>Il file <code>pain.001.001.03</code> viene scaricato automaticamente</li>
+                    </ol>
+
+                    <h3>Utilizzo del file</h3>
+                    <p>Il file XML generato puo essere importato nel portale di home banking della fondazione per eseguire i bonifici in modo massivo. Le procedure di importazione variano a seconda della banca; fare riferimento al proprio sportello bancario per le istruzioni specifiche.</p>
+
+                    <div class="alert-manuale bg-orange-lt">
+                        <i class="ti ti-alert-triangle text-orange"></i>
+                        <div><strong>Attenzione</strong>: Verifica sempre che gli IBAN degli studenti siano aggiornati prima di generare il file SEPA. IBAN errati causano il rigetto del bonifico da parte della banca.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
+        <!-- 31. RIDENOMINAZIONE TERMINI -->
+        <section id="ridenominazione">
+            <div class="section-card">
+                <div class="section-card-header bg-default-lt">
+                    <i class="ti ti-tag"></i> 31. Ridenominazione Termini
+                </div>
+                <div class="section-card-body">
+                    <p>A partire dalla quarta riunione operativa, la terminologia del sistema e stata aggiornata per allinearsi al linguaggio utilizzato dai referenti istituzionali. Di seguito la tabella di corrispondenza:</p>
+
+                    <table class="table campo-table">
+                        <thead><tr><th>Termine precedente</th><th>Nuovo termine</th><th>Contesto</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Avviso / Bando</strong></td>
+                                <td><strong>Corso</strong></td>
+                                <td>Riferimento all'intero percorso formativo nella comunicazione con docenti e studenti</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Moduli / Corsi</strong></td>
+                                <td><strong>Moduli / Insegnamenti</strong></td>
+                                <td>Singola disciplina/materia all'interno di un corso</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Nota tecnica</strong>: La terminologia interna al database (tabelle <code>avviso</code>, <code>modulo</code>) e le URL del sistema non cambiano. La ridenominazione riguarda esclusivamente la comunicazione verso l'utente nell'interfaccia e nei manuali.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
         <!-- Footer -->
         <div class="text-center text-secondary py-4" style="border-top: 1px solid var(--tblr-border-color); margin-top: 2rem;">
             <p class="mb-1">Albatros Manager - Manuale Amministratore</p>
-            <p class="mb-0 small">Versione 1.1 - Marzo 2026</p>
+            <p class="mb-0 small">Versione 1.2 - Aprile 2026</p>
         </div>
     </div>
 </div>

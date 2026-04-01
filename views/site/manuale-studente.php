@@ -175,6 +175,7 @@ $this->title = 'Manuale Studente';
             <a class="nav-link" href="#consultare-corsi"><i class="ti ti-search"></i> Consultare i Corsi</a>
             <a class="nav-link" href="#iscriversi"><i class="ti ti-user-plus"></i> Iscriversi</a>
             <a class="nav-link" href="#percorso"><i class="ti ti-road"></i> Il Tuo Percorso</a>
+            <a class="nav-link" href="#borse-studio-studente"><i class="ti ti-school"></i> Borse di Studio</a>
         </div>
         <div class="sidebar-heading mt-4">Altri manuali</div>
         <div class="nav flex-column">
@@ -335,10 +336,62 @@ $this->title = 'Manuale Studente';
             <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
         </section>
 
+        <!-- 5. BORSE DI STUDIO -->
+        <section id="borse-studio-studente">
+            <div class="section-card">
+                <div class="section-card-header bg-azure-lt">
+                    <i class="ti ti-school"></i> 5. Borse di Studio
+                </div>
+                <div class="section-card-body">
+                    <p>Per i corsi finanziati da <strong>PNRR</strong>, e prevista l'erogazione di una <strong>borsa di studio</strong> a favore degli studenti frequentanti. L'importo e il numero di rate dipendono dal corso e dalla tua situazione personale (ISEE, disabilita, residenza).</p>
+
+                    <h3>Condizione per ricevere la borsa</h3>
+                    <p>Per mantenere attiva l'erogazione della borsa devi mantenere una <strong>frequenza minima dell'80%</strong> delle ore del corso. La percentuale viene calcolata automaticamente dal sistema in base alle presenze registrate dai tutor/segreteria.</p>
+
+                    <h3>Stati della borsa</h3>
+                    <table class="table campo-table">
+                        <thead><tr><th>Stato</th><th>Significato</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-orange text-orange-fg">In attesa</span></td>
+                                <td>La borsa e in fase di valutazione o in attesa dell'erogazione programmata</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-green text-green-fg">Approvata</span></td>
+                                <td>La borsa e stata approvata ed e in corso di erogazione trimestrale</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-red text-red-fg">Erogazione Bloccata</span></td>
+                                <td>La borsa e approvata ma la tua frequenza e al momento inferiore all'80%. L'erogazione e sospesa fino al recupero della soglia minima</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-default text-default-fg">Revocata</span></td>
+                                <td>La borsa e stata revocata (es. per ritiro dal corso)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>Cosa fare se la borsa e in stato "Erogazione Bloccata"</h3>
+                    <p>Se la tua borsa e bloccata per frequenza insufficiente:</p>
+                    <ul>
+                        <li>Verifica il tuo registro presenze nell'area riservata: potrebbero esserci errori nelle presenze registrate</li>
+                        <li>Se ritieni che vi sia un errore nel registro, contatta immediatamente la segreteria per la correzione</li>
+                        <li>Aumenta la frequenza alle lezioni restanti: una volta superata la soglia dell'80%, l'erogazione viene automaticamente sbloccata al prossimo ricalcolo</li>
+                    </ul>
+
+                    <div class="alert-manuale bg-orange-lt">
+                        <i class="ti ti-alert-triangle text-orange"></i>
+                        <div><strong>Importante</strong>: Le assenze ripetute possono portare al blocco definitivo dell'erogazione. Se hai difficolta a frequentare per motivi gravi (salute, lavoro, ecc.), comunicalo tempestivamente alla segreteria prima che la frequenza scenda sotto la soglia.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
         <!-- Footer -->
         <div class="text-center text-secondary py-4" style="border-top: 1px solid var(--tblr-border-color); margin-top: 2rem;">
             <p class="mb-1">Albatros Manager - Manuale Studente</p>
-            <p class="mb-0 small">Versione 1.0 - Febbraio 2026</p>
+            <p class="mb-0 small">Versione 1.1 - Aprile 2026</p>
         </div>
     </div>
 </div>

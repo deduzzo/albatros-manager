@@ -208,6 +208,7 @@ $this->title = 'Manuale Docente';
             <a class="nav-link" href="#rimborsi-docente"><i class="ti ti-receipt-refund"></i> Rimborsi Spese</a>
             <a class="nav-link" href="#contratti-docente"><i class="ti ti-file-text"></i> I Miei Contratti</a>
             <a class="nav-link" href="#documenti-docente"><i class="ti ti-file-invoice"></i> Documenti</a>
+            <a class="nav-link" href="#gestione-presenze-tutor"><i class="ti ti-clipboard-list"></i> Gestione Presenze (Tutor)</a>
         </div>
         <div class="sidebar-heading mt-4">Altri manuali</div>
         <div class="nav flex-column">
@@ -701,10 +702,71 @@ $this->title = 'Manuale Docente';
             <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
         </section>
 
+        <!-- 14. GESTIONE PRESENZE (TUTOR) -->
+        <section id="gestione-presenze-tutor">
+            <div class="section-card">
+                <div class="section-card-header bg-azure-lt">
+                    <i class="ti ti-clipboard-list"></i> 14. Gestione Presenze (solo Tutor)
+                </div>
+                <div class="section-card-body">
+                    <p>I docenti con ruolo <strong>Tutor</strong> hanno accesso a una funzionalita aggiuntiva: la gestione delle presenze delle lezioni per i corsi a cui sono associati. La voce <strong>"Gestione Presenze"</strong> compare nel menu di navigazione solo per i tutor.</p>
+
+                    <h3>Accesso</h3>
+                    <p>Clicca su <strong>"Gestione Presenze"</strong> nel menu dell'area docenti. Se non vedi questa voce, significa che il tuo profilo non e configurato come Tutor: contatta la segreteria per verificare il tuo ruolo.</p>
+
+                    <h3>Calendario lezioni</h3>
+                    <p>La pagina mostra il calendario delle lezioni di tutti i corsi a cui sei assegnato come tutor. Ogni lezione mostra:</p>
+                    <ul>
+                        <li>Data, orario e sede della lezione</li>
+                        <li>Modulo (insegnamento) di riferimento</li>
+                        <li>Stato delle presenze: <span class="badge bg-green text-green-fg">Compilato</span>, <span class="badge bg-red text-red-fg">Mancante</span>, <span class="badge bg-default text-default-fg">Non acquisito</span></li>
+                    </ul>
+                    <p>Le lezioni con presenze mancanti (data passata, presenze non compilate) sono evidenziate in rosso per facilitare il recupero.</p>
+
+                    <h3>Compilare le presenze</h3>
+                    <p>Per compilare il registro presenze di una lezione:</p>
+                    <ol>
+                        <li>Clicca sulla lezione nel calendario</li>
+                        <li>Si apre il registro con l'elenco degli studenti iscritti al modulo</li>
+                        <li>Per ogni studente, seleziona lo stato:</li>
+                    </ol>
+                    <table class="table campo-table">
+                        <thead><tr><th>Stato</th><th>Significato</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="badge bg-green text-green-fg">Presente</span></td><td>Lo studente ha partecipato alla lezione</td></tr>
+                            <tr><td><span class="badge bg-red text-red-fg">Assente</span></td><td>Lo studente era assente alla lezione</td></tr>
+                            <tr><td><span class="badge bg-default text-default-fg">Non acquisito</span></td><td>La presenza non e stata ancora rilevata o e in attesa di conferma</td></tr>
+                        </tbody>
+                    </table>
+                    <ol start="4">
+                        <li>Usa i pulsanti rapidi per compilare velocemente:
+                            <ul>
+                                <li><strong>"Tutti Presenti"</strong>: imposta tutti gli studenti come presenti</li>
+                                <li><strong>"Tutti Assenti"</strong>: imposta tutti gli studenti come assenti</li>
+                                <li><strong>"Reset"</strong>: riporta tutti gli studenti allo stato "Non acquisito"</li>
+                            </ul>
+                        </li>
+                        <li>Clicca <strong>"Salva Presenze"</strong> per confermare</li>
+                    </ol>
+
+                    <div class="alert-manuale bg-orange-lt">
+                        <i class="ti ti-alert-triangle text-orange"></i>
+                        <div><strong>Importante</strong>: Compila sempre le presenze entro la giornata della lezione o il giorno successivo. Le presenze incomplete influenzano il calcolo della frequenza degli studenti e, per i corsi PNRR, l'erogazione delle borse di studio.</div>
+                    </div>
+
+                    <div class="alert-manuale bg-azure-lt">
+                        <i class="ti ti-info-circle text-azure"></i>
+                        <div><strong>Nota</strong>: La compilazione delle presenze puo essere effettuata anche dall'amministrazione in qualsiasi momento. Se noti errori in un registro gia compilato, contatta la segreteria per la correzione.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="#" class="back-to-top"><i class="ti ti-arrow-up"></i> Torna all'indice</a>
+        </section>
+
         <!-- Footer -->
         <div class="text-center text-secondary py-4" style="border-top: 1px solid var(--tblr-border-color); margin-top: 2rem;">
             <p class="mb-1">Albatros Manager - Manuale Docente</p>
-            <p class="mb-0 small">Versione 1.1 - Marzo 2026</p>
+            <p class="mb-0 small">Versione 1.2 - Aprile 2026</p>
         </div>
     </div>
 </div>
