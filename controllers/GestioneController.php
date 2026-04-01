@@ -46,7 +46,7 @@ class GestioneController extends Controller
         $this->layout = 'gestione';
         $this->view->title = 'I tuoi Corsi';
 
-        $corsi = Avviso::find()
+        $corsi = Avviso::findWithDeleted()
             ->alias('a')
             ->with(['progetto'])
             ->andWhere(['a.deleted_at' => null])
@@ -56,25 +56,25 @@ class GestioneController extends Controller
         // Calcola stats per ogni corso
         $corsiStats = [];
         foreach ($corsi as $corso) {
-            $moduliTotali = Modulo::find()
+            $moduliTotali = Modulo::findWithDeleted()
                 ->andWhere(['avviso_id' => $corso->id, 'deleted_at' => null])
                 ->count();
 
-            $moduliAssegnati = Modulo::find()
+            $moduliAssegnati = Modulo::findWithDeleted()
                 ->alias('m')
                 ->innerJoin('assegnazione ass', 'ass.modulo_id = m.id AND ass.deleted_at IS NULL')
                 ->andWhere(['m.avviso_id' => $corso->id])
                 ->andWhere(['m.deleted_at' => null])
                 ->count('DISTINCT m.id');
 
-            $docentiDistinti = Assegnazione::find()
+            $docentiDistinti = Assegnazione::findWithDeleted()
                 ->alias('ass')
                 ->innerJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
                 ->andWhere(['m.avviso_id' => $corso->id])
                 ->andWhere(['ass.deleted_at' => null])
                 ->count('DISTINCT ass.docente_codice_fiscale');
 
-            $studentiDistinti = Iscrizione::find()
+            $studentiDistinti = Iscrizione::findWithDeleted()
                 ->alias('i')
                 ->innerJoin('modulo m', 'm.id = i.modulo_id AND m.deleted_at IS NULL')
                 ->andWhere(['m.avviso_id' => $corso->id])
@@ -154,7 +154,7 @@ class GestioneController extends Controller
         switch ($section) {
             case 'panoramica':
                 // Docenti assegnati senza contratto
-                $docentiSenzaContratto = Assegnazione::find()
+                $docentiSenzaContratto = Assegnazione::findWithDeleted()
                     ->alias('ass')
                     ->with(['docente', 'modulo'])
                     ->innerJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
@@ -165,7 +165,7 @@ class GestioneController extends Controller
                     ->all();
 
                 // Lezioni con presenze non acquisite (data passata, docente_presente IS NULL)
-                $lezioniSenzaPresenze = Calendario::find()
+                $lezioniSenzaPresenze = Calendario::findWithDeleted()
                     ->alias('cal')
                     ->with(['modulo'])
                     ->innerJoin('modulo m', 'm.id = cal.modulo_id AND m.deleted_at IS NULL')
@@ -177,20 +177,20 @@ class GestioneController extends Controller
                     ->all();
 
                 // Contatori per stat cards
-                $nModuli = Modulo::find()->andWhere(['avviso_id' => $corso->id, 'deleted_at' => null])->count();
-                $nDocenti = Assegnazione::find()
+                $nModuli = Modulo::findWithDeleted()->andWhere(['avviso_id' => $corso->id, 'deleted_at' => null])->count();
+                $nDocenti = Assegnazione::findWithDeleted()
                     ->alias('ass')
                     ->innerJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
                     ->andWhere(['m.avviso_id' => $corso->id])
                     ->andWhere(['ass.deleted_at' => null])
                     ->count('DISTINCT ass.docente_codice_fiscale');
-                $nStudenti = Iscrizione::find()
+                $nStudenti = Iscrizione::findWithDeleted()
                     ->alias('i')
                     ->innerJoin('modulo m', 'm.id = i.modulo_id AND m.deleted_at IS NULL')
                     ->andWhere(['m.avviso_id' => $corso->id])
                     ->andWhere(['i.deleted_at' => null])
                     ->count('DISTINCT i.allievo_codice_fiscale');
-                $nLezioni = Calendario::find()
+                $nLezioni = Calendario::findWithDeleted()
                     ->alias('cal')
                     ->innerJoin('modulo m', 'm.id = cal.modulo_id AND m.deleted_at IS NULL')
                     ->andWhere(['m.avviso_id' => $corso->id])
@@ -200,7 +200,7 @@ class GestioneController extends Controller
                 return compact('docentiSenzaContratto', 'lezioniSenzaPresenze', 'nModuli', 'nDocenti', 'nStudenti', 'nLezioni');
 
             case 'piano-formativo':
-                $moduli = Modulo::find()
+                $moduli = Modulo::findWithDeleted()
                     ->alias('m')
                     ->with(['assegnazioni.docente'])
                     ->andWhere(['m.avviso_id' => $corso->id])
@@ -210,7 +210,7 @@ class GestioneController extends Controller
                 return compact('moduli');
 
             case 'personale':
-                $assegnazioni = Assegnazione::find()
+                $assegnazioni = Assegnazione::findWithDeleted()
                     ->alias('ass')
                     ->with(['docente', 'modulo', 'contratto'])
                     ->innerJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
@@ -221,7 +221,7 @@ class GestioneController extends Controller
                 return compact('assegnazioni');
 
             case 'studenti':
-                $iscrizioni = Iscrizione::find()
+                $iscrizioni = Iscrizione::findWithDeleted()
                     ->alias('i')
                     ->with(['allievo'])
                     ->innerJoin('modulo m', 'm.id = i.modulo_id AND m.deleted_at IS NULL')
@@ -232,7 +232,7 @@ class GestioneController extends Controller
                 return compact('iscrizioni');
 
             case 'calendario':
-                $lezioni = Calendario::find()
+                $lezioni = Calendario::findWithDeleted()
                     ->alias('cal')
                     ->with(['modulo', 'docente'])
                     ->innerJoin('modulo m', 'm.id = cal.modulo_id AND m.deleted_at IS NULL')
@@ -243,7 +243,7 @@ class GestioneController extends Controller
                 return compact('lezioni');
 
             case 'contratti':
-                $contratti = Contratto::find()
+                $contratti = Contratto::findWithDeleted()
                     ->alias('c')
                     ->with(['assegnazione.docente', 'assegnazione.modulo'])
                     ->innerJoin('assegnazione ass', 'ass.id = c.assegnazione_id AND ass.deleted_at IS NULL')
@@ -255,7 +255,7 @@ class GestioneController extends Controller
                 return compact('contratti');
 
             case 'borse-studio':
-                $borse = BorsaStudio::find()
+                $borse = BorsaStudio::findWithDeleted()
                     ->alias('bs')
                     ->with(['allievo'])
                     ->andWhere(['bs.progetto_id' => $corso->progetto_id])
