@@ -223,6 +223,14 @@ $currentAction = Yii::$app->controller->action->id;
                                 <span class="nav-link-title">Rimborsi Spese</span>
                             </a>
                         </li>
+                        <?php if ($docente && $docente->tipo === \app\models\Docente::TIPO_TUTOR): ?>
+                        <li class="nav-item <?= in_array($currentAction, ['presenze', 'presenze-lezione']) ? 'active' : '' ?>">
+                            <a class="nav-link" href="<?= Url::to(['/docente-area/presenze']) ?>">
+                                <span class="nav-link-icon"><i class="ti ti-clipboard-check"></i></span>
+                                <span class="nav-link-title">Gestione Presenze</span>
+                            </a>
+                        </li>
+                        <?php endif; ?>
                         <li class="nav-item <?= $currentAction == 'profilo' ? 'active' : '' ?>">
                             <a class="nav-link" href="<?= Url::to(['/docente-area/profilo']) ?>">
                                 <span class="nav-link-icon"><i class="ti ti-user"></i></span>

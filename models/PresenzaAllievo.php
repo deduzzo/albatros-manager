@@ -39,7 +39,8 @@ class PresenzaAllievo extends BaseActiveRecord
             [['calendario_id', 'allievo_codice_fiscale'], 'required'],
             [['calendario_id'], 'integer'],
             [['allievo_codice_fiscale'], 'string', 'max' => 16],
-            [['presente', 'giustificato'], 'boolean'],
+            [['presente'], 'in', 'range' => [null, 0, 1], 'strict' => false],
+            [['giustificato'], 'boolean'],
             [['ora_ingresso', 'ora_uscita'], 'match', 'pattern' => '/^\d{2}:\d{2}(:\d{2})?$/', 'message' => 'Formato orario non valido (HH:MM o HH:MM:SS)'],
             [['ore_presenza'], 'number', 'min' => 0],
             [['note'], 'string'],
@@ -75,24 +76,24 @@ class PresenzaAllievo extends BaseActiveRecord
 
     public function getPresenzaBadgeClass()
     {
+        if ($this->presente === null) {
+            return 'bg-default-lt';
+        }
         if ($this->presente) {
-            return 'bg-green text-green-fg';
+            return $this->giustificato ? 'bg-orange-lt' : 'bg-green-lt';
         }
-        if ($this->giustificato) {
-            return 'bg-orange text-orange-fg';
-        }
-        return 'bg-red text-red-fg';
+        return 'bg-red-lt';
     }
 
     public function getPresenzaLabel()
     {
+        if ($this->presente === null) {
+            return 'Non acquisito';
+        }
         if ($this->presente) {
             return 'Presente';
         }
-        if ($this->giustificato) {
-            return 'Assente Giustificato';
-        }
-        return 'Assente';
+        return $this->giustificato ? 'Assente Giustificato' : 'Assente';
     }
 
     /**

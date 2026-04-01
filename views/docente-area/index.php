@@ -34,7 +34,7 @@ $this->title = 'Dashboard';
                     </div>
                 </div>
                 <div class="col-auto">
-                    <?= Html::a('<i class="ti ti-file-text me-2"></i> Vedi Bandi Aperti', ['bandi'], ['class' => 'btn btn-primary']) ?>
+                    <?= Html::a('<i class="ti ti-file-text me-2"></i> Vedi Corsi Aperti', ['bandi'], ['class' => 'btn btn-primary']) ?>
                 </div>
             </div>
         </div>
@@ -60,7 +60,7 @@ $this->title = 'Dashboard';
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
-                            <div class="subheader">Bandi aperti</div>
+                            <div class="subheader">Corsi aperti</div>
                         </div>
                         <div class="h1 mb-0 text-success"><?= $bandiAperti ?></div>
                     </div>
@@ -109,6 +109,30 @@ $this->title = 'Dashboard';
         </div>
         <?php endif; ?>
 
+        <!-- Card Gestione Presenze (solo tutor) -->
+        <?php if ($docente->tipo === \app\models\Docente::TIPO_TUTOR): ?>
+        <div class="row row-deck row-cards mb-4">
+            <div class="col-12">
+                <div class="card border-purple">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <span class="avatar avatar-lg bg-purple-lt me-3">
+                                <i class="ti ti-clipboard-check"></i>
+                            </span>
+                            <div>
+                                <h3 class="card-title mb-1">Gestione Presenze</h3>
+                                <div class="text-secondary">Compila le presenze degli studenti per le lezioni dei tuoi moduli.</div>
+                            </div>
+                            <div class="ms-auto">
+                                <?= Html::a('<i class="ti ti-arrow-right me-1"></i> Vai alle Presenze', Url::to(['/docente-area/presenze']), ['class' => 'btn btn-purple']) ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Azioni rapide -->
         <div class="row row-cards">
             <div class="col-lg-6">
@@ -123,7 +147,7 @@ $this->title = 'Dashboard';
                                     <i class="ti ti-file-text"></i>
                                 </span>
                                 <div>
-                                    <strong>Visualizza Bandi Aperti</strong>
+                                    <strong>Visualizza Corsi Aperti</strong>
                                     <div class="text-secondary small">Esplora le opportunità disponibili</div>
                                 </div>
                                 <i class="ti ti-chevron-right ms-auto"></i>

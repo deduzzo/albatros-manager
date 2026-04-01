@@ -55,6 +55,8 @@ class Calendario extends BaseActiveRecord
             [['aula'], 'string', 'max' => 50],
             [['argomento'], 'string', 'max' => 255],
             [['status'], 'in', 'range' => ['programmata', 'completata', 'annullata', 'recupero']],
+            [['docente_presente'], 'in', 'range' => [null, 0, 1], 'strict' => false],
+            [['docente_ore_effettive'], 'number', 'min' => 0],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
             [['created_by', 'updated_by', 'deleted_by'], 'integer'],
         ];
@@ -75,6 +77,8 @@ class Calendario extends BaseActiveRecord
             'descrizione_attivita' => 'Descrizione Attività',
             'status' => 'Stato',
             'note' => 'Note',
+            'docente_presente' => 'Presenza Docente',
+            'docente_ore_effettive' => 'Ore Effettive Docente',
         ];
     }
 
@@ -117,6 +121,18 @@ class Calendario extends BaseActiveRecord
             self::STATUS_RECUPERO => 'bg-orange text-orange-fg',
             default => 'bg-default text-default-fg',
         };
+    }
+
+    public function getDocentePresenzaLabel()
+    {
+        if ($this->docente_presente === null) return 'Non acquisito';
+        return $this->docente_presente ? 'Presente' : 'Assente';
+    }
+
+    public function getDocentePresenzaBadgeClass()
+    {
+        if ($this->docente_presente === null) return 'bg-default-lt';
+        return $this->docente_presente ? 'bg-green-lt' : 'bg-red-lt';
     }
 
     /**

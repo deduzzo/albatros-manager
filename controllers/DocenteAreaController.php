@@ -23,6 +23,9 @@ use app\models\TagCurriculum;
 use app\models\DocenteTag;
 use app\models\RimborsoSpesa;
 use app\models\RichiestaFatturazione;
+use app\models\Calendario;
+use app\models\PresenzaAllievo;
+use app\models\Iscrizione;
 use app\models\forms\DocenteLoginForm;
 use app\models\forms\DocenteRegistrazioneForm;
 use app\models\forms\IscrizioneForm;
@@ -78,7 +81,7 @@ class DocenteAreaController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida', 'rimborsi', 'nuovo-rimborso', 'modifica-rimborso', 'contratti', 'contratto-download', 'documenti', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password', 'changelog', 'changelog-modal', 'segna-changelog-letto', 'notifiche', 'notifica-view', 'segna-letta', 'segna-tutte-lette'],
+                        'actions' => ['index', 'logout', 'profilo', 'bandi', 'bando', 'iscrizione', 'le-mie-iscrizioni', 'iscrizione-view', 'i-miei-contratti', 'contratto-view', 'le-mie-assegnazioni', 'inserisci-ore', 'le-mie-ore', 'modifica-ore', 'elimina-ore', 'guida', 'rimborsi', 'nuovo-rimborso', 'modifica-rimborso', 'contratti', 'contratto-download', 'documenti', 'attiva-2fa', 'disattiva-2fa', 'verifica-2fa', 'cambia-password', 'changelog', 'changelog-modal', 'segna-changelog-letto', 'notifiche', 'notifica-view', 'segna-letta', 'segna-tutte-lette', 'presenze', 'presenze-lezione', 'salva-presenze'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -88,6 +91,7 @@ class DocenteAreaController extends Controller
                 'class' => VerbFilter::class,
                 'actions' => [
                     'elimina-ore' => ['POST'],
+                'salva-presenze' => ['POST'],
                 ],
             ],
             'forcePasswordChange' => [
@@ -1007,5 +1011,172 @@ class DocenteAreaController extends Controller
         }
 
         return $model;
+    }
+
+    /**
+     * Lista lezioni con presenze da compilare (area tutor)
+     */
+    public function actionPresenze()
+    {
+        $docente = Yii::$app->docenteUser->identity->docente;
+
+        $lezioni = Calendario::findWithDeleted()
+            ->alias('cal')
+            ->leftJoin('modulo m', 'm.id = cal.modulo_id AND m.deleted_at IS NULL')
+            ->leftJoin('assegnazione a', 'a.modulo_id = m.id AND a.docente_codice_fiscale = :cf AND a.deleted_at IS NULL', [':cf' => $docente->codice_fiscale])
+            ->leftJoin('presenza_allievo pa', 'pa.calendario_id = cal.id AND pa.deleted_at IS NULL')
+            ->where(['cal.deleted_at' => null])
+            ->andWhere(['OR',
+                ['cal.docente_codice_fiscale' => $docente->codice_fiscale],
+                ['NOT', ['a.id' => null]],
+            ])
+            ->select(['cal.*', 'COUNT(DISTINCT pa.id) AS presenze_acquisite', 'COUNT(DISTINCT a.id) AS ha_assegnazione'])
+            ->groupBy('cal.id')
+            ->orderBy(['cal.data' => SORT_DESC, 'cal.ora_inizio' => SORT_DESC])
+            ->asArray()
+            ->all();
+
+        // Conta iscritti per modulo (per badge X/Y)
+        $moduliIscritti = [];
+        foreach ($lezioni as $lezione) {
+            $modId = $lezione['modulo_id'];
+            if (!isset($moduliIscritti[$modId])) {
+                $moduliIscritti[$modId] = Iscrizione::find()
+                    ->where(['modulo_id' => $modId])
+                    ->andWhere(['deleted_at' => null])
+                    ->count();
+            }
+        }
+
+        // Ricarica come oggetti per usare le relazioni
+        $calendarioIds = array_column($lezioni, 'id');
+        $calendari = [];
+        if (!empty($calendarioIds)) {
+            $calendariObj = Calendario::findWithDeleted()
+                ->alias('cal')
+                ->where(['cal.id' => $calendarioIds, 'cal.deleted_at' => null])
+                ->all();
+            foreach ($calendariObj as $c) {
+                $calendari[$c->id] = $c;
+            }
+        }
+
+        return $this->render('presenze', [
+            'docente' => $docente,
+            'lezioni' => $lezioni,
+            'calendari' => $calendari,
+            'moduliIscritti' => $moduliIscritti,
+        ]);
+    }
+
+    /**
+     * Form presenze per una singola lezione
+     */
+    public function actionPresenzeLezione($calendario_id)
+    {
+        $docente = Yii::$app->docenteUser->identity->docente;
+
+        $calendario = Calendario::findWithDeleted()
+            ->alias('cal')
+            ->leftJoin('modulo m', 'm.id = cal.modulo_id AND m.deleted_at IS NULL')
+            ->leftJoin('assegnazione a', 'a.modulo_id = m.id AND a.docente_codice_fiscale = :cf AND a.deleted_at IS NULL', [':cf' => $docente->codice_fiscale])
+            ->where(['cal.id' => $calendario_id, 'cal.deleted_at' => null])
+            ->andWhere(['OR',
+                ['cal.docente_codice_fiscale' => $docente->codice_fiscale],
+                ['NOT', ['a.id' => null]],
+            ])
+            ->one();
+
+        if (!$calendario) {
+            throw new NotFoundHttpException('Lezione non trovata o non accessibile.');
+        }
+
+        // Iscrizioni attive del modulo
+        $iscrizioni = Iscrizione::findWithDeleted()
+            ->alias('i')
+            ->leftJoin('allievo al', 'al.codice_fiscale = i.allievo_codice_fiscale AND al.deleted_at IS NULL')
+            ->where(['i.modulo_id' => $calendario->modulo_id, 'i.deleted_at' => null])
+            ->orderBy(['al.cognome' => SORT_ASC, 'al.nome' => SORT_ASC])
+            ->with('allievo')
+            ->all();
+
+        // Presenze esistenti indicizzate per CF
+        $presenzeEsistenti = [];
+        $presenzeRows = PresenzaAllievo::findWithDeleted()
+            ->where(['calendario_id' => $calendario_id, 'deleted_at' => null])
+            ->all();
+        foreach ($presenzeRows as $p) {
+            $presenzeEsistenti[$p->allievo_codice_fiscale] = $p;
+        }
+
+        return $this->render('_presenze-lezione', [
+            'docente' => $docente,
+            'calendario' => $calendario,
+            'iscrizioni' => $iscrizioni,
+            'presenzeEsistenti' => $presenzeEsistenti,
+        ]);
+    }
+
+    /**
+     * Salva presenze docente + studenti per una lezione (POST)
+     */
+    public function actionSalvaPresenze($calendario_id)
+    {
+        $docente = Yii::$app->docenteUser->identity->docente;
+
+        $calendario = Calendario::findWithDeleted()
+            ->alias('cal')
+            ->leftJoin('modulo m', 'm.id = cal.modulo_id AND m.deleted_at IS NULL')
+            ->leftJoin('assegnazione a', 'a.modulo_id = m.id AND a.docente_codice_fiscale = :cf AND a.deleted_at IS NULL', [':cf' => $docente->codice_fiscale])
+            ->where(['cal.id' => $calendario_id, 'cal.deleted_at' => null])
+            ->andWhere(['OR',
+                ['cal.docente_codice_fiscale' => $docente->codice_fiscale],
+                ['NOT', ['a.id' => null]],
+            ])
+            ->one();
+
+        if (!$calendario) {
+            throw new NotFoundHttpException('Lezione non trovata o non accessibile.');
+        }
+
+        $post = Yii::$app->request->post();
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            // Salva presenza docente
+            $docentePresente = $post['docente_presente'] ?? '';
+            $calendario->docente_presente = ($docentePresente === '') ? null : (int)$docentePresente;
+            $calendario->docente_ore_effettive = isset($post['docente_ore_effettive']) && $post['docente_ore_effettive'] !== '' ? (float)$post['docente_ore_effettive'] : null;
+            $calendario->save(false);
+
+            // Salva presenze studenti
+            $studenti = $post['studenti'] ?? [];
+            foreach ($studenti as $cf => $dati) {
+                $presenza = PresenzaAllievo::find()
+                    ->where(['calendario_id' => $calendario_id, 'allievo_codice_fiscale' => $cf, 'deleted_at' => null])
+                    ->one();
+
+                if (!$presenza) {
+                    $presenza = new PresenzaAllievo();
+                    $presenza->calendario_id = (int)$calendario_id;
+                    $presenza->allievo_codice_fiscale = $cf;
+                }
+
+                $presenteVal = $dati['presente'] ?? '';
+                $presenza->presente = ($presenteVal === '') ? null : (int)$presenteVal;
+                $presenza->ore_presenza = isset($dati['ore_presenza']) && $dati['ore_presenza'] !== '' ? (float)$dati['ore_presenza'] : null;
+                $presenza->note = $dati['note'] ?? null;
+                $presenza->save(false);
+            }
+
+            $transaction->commit();
+            Yii::$app->session->setFlash('success', 'Presenze salvate con successo.');
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            Yii::error($e->getMessage(), 'presenze');
+            Yii::$app->session->setFlash('error', 'Errore nel salvataggio delle presenze: ' . $e->getMessage());
+        }
+
+        return $this->redirect(['/docente-area/presenze']);
     }
 }
