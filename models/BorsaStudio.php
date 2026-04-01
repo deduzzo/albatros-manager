@@ -52,6 +52,10 @@ class BorsaStudio extends BaseActiveRecord
     const STATUS_COMPLETATA = 'completata';
     const STATUS_REVOCATA = 'revocata';
     const STATUS_SOSPESA = 'sospesa';
+    const STATUS_EROGAZIONE_BLOCCATA = 'erogazione_bloccata';
+
+    // Soglia minima di frequenza per erogazione
+    const SOGLIA_FREQUENZA = 80;
 
     // Costanti tipologia sede
     const TIPOLOGIA_IN_SEDE = 'in_sede';
@@ -92,7 +96,7 @@ class BorsaStudio extends BaseActiveRecord
             [['maggiorazione_tipo'], 'string', 'max' => 50],
             [['iban_studente'], 'string', 'max' => 34],
             [['verifiche_superate'], 'boolean'],
-            [['status'], 'in', 'range' => [self::STATUS_RICHIESTA, self::STATUS_APPROVATA, self::STATUS_IN_EROGAZIONE, self::STATUS_COMPLETATA, self::STATUS_REVOCATA, self::STATUS_SOSPESA]],
+            [['status'], 'in', 'range' => [self::STATUS_RICHIESTA, self::STATUS_APPROVATA, self::STATUS_IN_EROGAZIONE, self::STATUS_COMPLETATA, self::STATUS_REVOCATA, self::STATUS_SOSPESA, self::STATUS_EROGAZIONE_BLOCCATA]],
             [['motivo_revoca', 'note'], 'string'],
             [['motivo_revoca'], 'required', 'when' => function ($model) {
                 return $model->status === self::STATUS_REVOCATA;
@@ -214,6 +218,7 @@ class BorsaStudio extends BaseActiveRecord
             self::STATUS_COMPLETATA => 'Completata',
             self::STATUS_REVOCATA => 'Revocata',
             self::STATUS_SOSPESA => 'Sospesa',
+            self::STATUS_EROGAZIONE_BLOCCATA => 'Erogazione Bloccata',
         ];
     }
 
@@ -239,6 +244,7 @@ class BorsaStudio extends BaseActiveRecord
             self::STATUS_COMPLETATA => 'bg-teal text-teal-fg',
             self::STATUS_REVOCATA => 'bg-red text-red-fg',
             self::STATUS_SOSPESA => 'bg-orange text-orange-fg',
+            self::STATUS_EROGAZIONE_BLOCCATA => 'bg-orange text-orange-fg',
             default => 'bg-default text-default-fg',
         };
     }
@@ -394,5 +400,47 @@ class BorsaStudio extends BaseActiveRecord
     public function verificaRequisitiMerito($frequenzaMinima = 80.0)
     {
         return $this->percentuale_frequenza >= $frequenzaMinima && $this->verifiche_superate;
+    }
+
+    /**
+     * Ricalcola la percentuale di frequenza dello studente nel progetto
+     * e aggiorna lo status in base alla soglia minima.
+     * @return bool
+     */
+    public function ricalcolaFrequenza()
+    {
+        // BorsaStudio.progetto_id punta a progetto, risaliamo agli avvisi
+        $avvisoIds = \app\models\Avviso::find()
+            ->select('id')
+            ->where(['progetto_id' => $this->progetto_id, 'deleted_at' => null])
+            ->column();
+
+        $oreTotali = \app\models\Calendario::find()
+            ->alias('c')
+            ->innerJoin('{{%modulo}} m', 'm.id = c.modulo_id AND m.deleted_at IS NULL')
+            ->where(['m.avviso_id' => $avvisoIds, 'c.deleted_at' => null])
+            ->sum('c.ore') ?: 0;
+
+        $orePresenza = \app\models\PresenzaAllievo::find()
+            ->alias('pa')
+            ->innerJoin('{{%calendario}} c', 'c.id = pa.calendario_id AND c.deleted_at IS NULL')
+            ->innerJoin('{{%modulo}} m', 'm.id = c.modulo_id AND m.deleted_at IS NULL')
+            ->where([
+                'pa.allievo_codice_fiscale' => $this->allievo_codice_fiscale,
+                'pa.presente' => 1,
+                'pa.deleted_at' => null,
+                'm.avviso_id' => $avvisoIds,
+            ])
+            ->sum('pa.ore_presenza') ?: 0;
+
+        $this->percentuale_frequenza = $oreTotali > 0 ? round($orePresenza / $oreTotali * 100, 1) : 0;
+
+        if ($this->status === self::STATUS_APPROVATA && $this->percentuale_frequenza < self::SOGLIA_FREQUENZA) {
+            $this->status = self::STATUS_EROGAZIONE_BLOCCATA;
+        } elseif ($this->status === self::STATUS_EROGAZIONE_BLOCCATA && $this->percentuale_frequenza >= self::SOGLIA_FREQUENZA) {
+            $this->status = self::STATUS_APPROVATA;
+        }
+
+        return $this->save(false);
     }
 }

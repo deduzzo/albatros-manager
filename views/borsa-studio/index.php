@@ -24,6 +24,8 @@ $formatter = Yii::$app->formatter;
                     <div class="text-muted mt-1">Gestione borse di studio PNRR per studenti</div>
                 </div>
                 <div class="col-auto ms-auto d-print-none">
+                    <?= Html::a('<i class="ti ti-refresh me-1"></i> Ricalcola Frequenze', ['ricalcola-frequenze'], ['class' => 'btn btn-secondary me-2']) ?>
+                    <?= Html::a('<i class="ti ti-file-type-xml me-1"></i> Export SEPA XML', ['export-sepa'], ['class' => 'btn btn-azure me-2']) ?>
                     <?= Html::a('<i class="ti ti-download me-1"></i> Export Excel', ['export'], ['class' => 'btn btn-warning me-2']) ?>
                     <?= Html::a('<i class="ti ti-plus me-1"></i> Nuova Borsa', ['create'], ['class' => 'btn btn-success']) ?>
                 </div>

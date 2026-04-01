@@ -350,6 +350,63 @@ class BorsaStudioController extends Controller
     }
 
     /**
+     * Ricalcola le frequenze per tutte le borse approvate/bloccate
+     */
+    public function actionRicalcolaFrequenze($progetto_id = null)
+    {
+        $query = BorsaStudio::find()->where(['in', 'status', [
+            BorsaStudio::STATUS_APPROVATA,
+            BorsaStudio::STATUS_EROGAZIONE_BLOCCATA,
+        ]]);
+        if ($progetto_id) {
+            $query->andWhere(['progetto_id' => $progetto_id]);
+        }
+        $borse = $query->all();
+        $count = 0;
+        foreach ($borse as $borsa) {
+            $borsa->ricalcolaFrequenza();
+            $count++;
+        }
+        Yii::$app->session->setFlash('success', "Frequenze ricalcolate per {$count} borse di studio.");
+        return $this->redirect(Yii::$app->request->referrer ?: ['index']);
+    }
+
+    /**
+     * Export SEPA XML pain.001 per pagamento massivo borse di studio
+     */
+    public function actionExportSepa($progetto_id = null)
+    {
+        $query = BorsaStudio::find()
+            ->where(['status' => BorsaStudio::STATUS_APPROVATA])
+            ->andWhere(['not', ['iban_studente' => null]])
+            ->andWhere(['!=', 'iban_studente', ''])
+            ->with(['allievo']);
+        if ($progetto_id) {
+            $query->andWhere(['progetto_id' => $progetto_id]);
+        }
+        $borse = $query->all();
+        if (empty($borse)) {
+            Yii::$app->session->setFlash('warning', 'Nessuna borsa approvata con IBAN trovata.');
+            return $this->redirect(Yii::$app->request->referrer ?: ['index']);
+        }
+        $pagamenti = [];
+        foreach ($borse as $borsa) {
+            $allievo = $borsa->allievo;
+            $pagamenti[] = [
+                'beneficiario' => $allievo->cognome . ' ' . $allievo->nome,
+                'iban' => $borsa->iban_studente,
+                'importo' => (float)$borsa->importo_finale,
+                'causale' => 'Borsa di studio A.F. ' . $borsa->anno_formativo . ' - ' . $allievo->cognome . ' ' . $allievo->nome,
+            ];
+        }
+        $xml = \app\components\SepaXmlGenerator::genera($pagamenti);
+        Yii::$app->response->format = Response::FORMAT_RAW;
+        Yii::$app->response->headers->set('Content-Type', 'application/xml');
+        Yii::$app->response->headers->set('Content-Disposition', 'attachment; filename="SEPA_BorseStudio_' . date('Y-m-d') . '.xml"');
+        return $xml;
+    }
+
+    /**
      * AJAX: studenti iscritti a un progetto (per cascading dropdown)
      */
     public function actionStudentiProgetto($progetto_id)
