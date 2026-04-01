@@ -45,6 +45,9 @@ $sediCount = \app\models\Sede::find()->count();
             </div>
         </div>
 
+        <!-- Alert Operativi -->
+        <?= \app\components\widgets\AlertWidget::widget(['tipo' => 'tutti']) ?>
+
         <!-- Financial Stats -->
         <div class="row row-deck row-cards mb-4">
             <div class="col-sm-6 col-lg-3">
