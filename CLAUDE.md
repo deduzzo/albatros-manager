@@ -54,6 +54,8 @@ In DEBUG mode, docenti/studenti accedono con solo CF (password vuota), auto-crea
 **Rendicontazione Ore**: Docente inserisce ore giornaliere (data, ore, inizio/fine, note, firma) → status `inserito` → Admin approva/rifiuta → se ore > contrattualizzate → workflow ore extra su Pagamento.
 - Stati: `inserito` (giallo), `approvato` (verde), `rifiutato` (rosso, motivazione obbligatoria)
 
+**Area Tutor**: Docenti con `tipo = 'tutor'` vedono voci aggiuntive: Gestione Presenze (inserimento presenze per lezione a 3 stati: presente/assente/non acquisito).
+
 ## Area Studenti
 
 | Campo | Valore |
@@ -68,6 +70,16 @@ In DEBUG mode, docenti/studenti accedono con solo CF (password vuota), auto-crea
 **Workflow Candidature**: Registrazione → Login → Candidatura → `candidato` → Admin valuta con criteri pesati → Graduatoria → `ammesso`/`non_ammesso` → `frequentante` → `completato`
 
 **Stati iscrizione**: `candidato` (azure), `in_valutazione` (orange), `ammesso` (green), `ammesso_con_riserva` (lime), `non_ammesso` (red), `frequentante` (blue), `completato` (teal), `ritirato` (default)
+
+## Vista Semplificata (Gestione)
+
+| Campo | Valore |
+|-------|--------|
+| **URL** | `/gestione` |
+| **Layout** | `views/layouts/gestione.php` |
+| **Controller** | `GestioneController.php` |
+
+**Funzionalità**: Home griglia corsi, Dashboard corso con sidebar (Panoramica, Piano Formativo, Personale, Studenti, Calendario, Contratti, Borse di Studio, Import/Export), Candidatura multi-modulo, Metti a bando moduli scoperti. Selettore rapido corso in alto. Riusa viste CRUD esistenti con filtro per corso.
 
 ## Criteri Valutazione Studenti
 
@@ -142,7 +154,7 @@ docker exec -w /app albatros-php composer require package
 | **CORSO** | Percorso formativo per studenti | `progetto` | Vista studente |
 | **PROGETTO** | Contenitore finanziato (FSE/PNRR/MIM) | `progetto` | Vista admin |
 | **MATERIA/MODULO** | Singola disciplina | `modulo` | Vista docente |
-| **BANDO/AVVISO** | Selezione pubblica docenti | `avviso` | Vista docente |
+| **CORSO** (già Avviso/Bando) | Selezione pubblica docenti (ridenominato in UI) | `avviso` | Vista docente/gestione |
 
 ## Struttura Database
 
@@ -154,8 +166,9 @@ FONTE_FINANZIAMENTO (FSE, PNRR, MIM)
          └── MODULO (= materia/insegnamento)
              ├── ISTANZA (candidature docenti) → ASSEGNAZIONE → CONTRATTO → PAGAMENTO
              │                                    └── RIMBORSO_SPESA → RIMBORSO_SPESA_DETTAGLIO (→ VOCE_SPESA)
-             ├── CALENDARIO (lezioni) → PRESENZA_ALLIEVO
+             ├── CALENDARIO (lezioni, docente_presente, docente_ore_effettive) → PRESENZA_ALLIEVO
              ├── ISCRIZIONE (studenti) → PUNTEGGIO_ISCRIZIONE
+             ├── BORSA_STUDIO (status: erogazione_bloccata quando frequenza < 80%)
              └── VALUTAZIONE_DOCENTE
 ```
 
@@ -209,15 +222,16 @@ class NuovoModel extends BaseActiveRecord {
 ```
 components/  → assets/ (TablerAsset, ApexChartsAsset), base/ (BaseActiveRecord),
                behaviors/ (SoftDelete, AuditLog, Audit), traits/ (SoftDeleteTrait),
-               widgets/ (AppGridView, AppActiveForm, Alert)
+               widgets/ (AppGridView, AppActiveForm, Alert, AlertWidget),
+               SepaXmlGenerator.php
 config/      → db.php, web.php
 models/      → 23 model + *Search.php + forms/ (AllievoLoginForm, AllievoRegistrazioneForm)
-views/       → layouts/ (main, login, docente, studente, studenti-demo, header, menu, footer)
-               site/, {entita}/, docente-area/, studente-area/, studenti/,
+views/       → layouts/ (main, login, docente, studente, gestione, studenti-demo, header, menu, footer)
+               site/, {entita}/, docente-area/, studente-area/, studenti/, gestione/,
                configurazione/, criterio-valutazione/, audit-log/, rendicontazione-ore/, report/
-controllers/ → 25 controller (Site, Import, CRUD entita, DocenteArea, StudenteArea, Studenti,
-               Configurazione, CriterioValutazione, AuditLog, Report, TagCategoria, TagCurriculum,
-               RendicontazioneOre, ValutazionePublic)
+controllers/ → 26 controller (Site, Import, CRUD entita, DocenteArea, StudenteArea, Studenti,
+               Gestione, Configurazione, CriterioValutazione, AuditLog, Report, TagCategoria,
+               TagCurriculum, RendicontazioneOre, ValutazionePublic)
 docs/        → schema-er.html, CRUD_GUIDELINES.md, AGENT_TEAM_CONFIG.md, MAPPA_FEATURE_MANUALE.md
 import/      → README.md, TEMPLATE_IMPORT_DATI.xlsx, file esempio
 ```
@@ -271,6 +285,17 @@ File `CHANGELOG.md` nel root, parsato e mostrato nel portale. Filtrato per tipo 
 - Tracking: campo `last_changelog_seen` su utente/docente_auth/allievo_auth.
 
 > **REGOLA**: Ad ogni nuova feature, aggiornare `CHANGELOG.md` con le voci appropriate e i tag per tipo utente.
+
+### Alert Dashboard (AlertWidget)
+Widget `components/widgets/AlertWidget.php` — riutilizzabile con parametri `tipo` (contratti/presenze/borse/tutti), `corso_id` (filtro), `compact` (badge).
+Mostra alert per: docenti non contrattualizzati, presenze non acquisite, borse con frequenza < 80%.
+
+### Export SEPA XML
+Componente `components/SepaXmlGenerator.php` — genera XML pain.001.001.03 per bonifici SEPA.
+Configurazione banca in tabella `configurazione` gruppo `banca`: banca_iban_fondazione, banca_bic, banca_creditor_id, banca_nome_istituto.
+
+### Allegati Contratto
+Campo `allegati_path` (JSON) su `Contratto`. Metodi `getAllegati()`, `aggiungiAllegato()`. Upload in `uploads/contratti/allegati/`.
 
 ### Sistema Notifiche
 Admin invia notifiche HTML (Summernote Lite) a tutti/categoria/singolo utente. Controller: `NotificaController` (admin CRUD), `NotificheActionsTrait` (tutti).

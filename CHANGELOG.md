@@ -3,22 +3,38 @@
 Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
-### Novità {admin}
+
+## [v1.0.31] - 2026-04-01
+
+### Aggiunto {admin}
+- Gestione Semplificata: nuova area corso-centrica con dashboard, piano formativo, personale, studenti, calendario, contratti, borse di studio
 - Gestione Semplificata: nuova area con layout dedicato (accent indigo/viola) per gestione operativa dei corsi
 - Gestione Semplificata: home con griglia card corsi, statistiche moduli/docenti/studenti e progress bar assegnamento
 - Gestione Semplificata: sidebar navigazione con 8 sezioni (Panoramica, Piano Formativo, Personale, Studenti, Calendario, Contratti, Borse di Studio, Import/Export)
 - Gestione Semplificata: selettore rapido corso nel navbar per navigazione veloce tra corsi
 - Menu principale: aggiunto accesso rapido a Gestione Semplificata come prima voce
+- Candidatura multi-modulo: inserimento istanze docente su più moduli contemporaneamente
+- Alert automatici in dashboard: docenti non contrattualizzati, presenze mancanti, borse con frequenza insufficiente
+- Borse di studio: export SEPA XML (pain.001) per pagamento massivo tramite bonifico bancario
+- Borse di studio: pulsante "Export SEPA XML" nella lista borse per generare file da inviare alla banca
 - Borse di studio: nuovo stato "Erogazione Bloccata" per studenti sotto la soglia di frequenza (80%)
 - Borse di studio: pulsante "Ricalcola Frequenze" per aggiornare automaticamente la frequenza reale da calendario/presenze
-- Borse di studio: export SEPA XML pain.001 per pagamento massivo tramite bonifico bancario
-- Borse di studio: pulsante "Export SEPA XML" nella lista borse per generare file da inviare alla banca
-
 - Contratti: upload allegati scansione (PDF/JPG/PNG) per contratti firmati a mano, visualizzabili nella vista contratto
-- Dashboard admin: alert operativi automatici per docenti da contrattualizzare, presenze non acquisite e borse bloccate
+
+### Aggiunto {docente}
+- Area Tutor: gestione presenze per lezione con 3 stati (presente/assente/non acquisito)
+- Dashboard tutor differenziata con link rapido a gestione presenze
+
+### Modificato {tutti}
+- Terminologia aggiornata: "Avviso/Bando" → "Corso", "Moduli/Corsi" → "Moduli/Insegnamenti"
+- Migliorata validazione form con feedback visivo errori su tutti i campi
+
+### Corretto {tutti}
+- Fix validazione form: campi con errore ora mostrano bordo rosso e messaggio di errore (era bug CSS has-error vs is-invalid)
 
 ### Tecnico {admin}
 - `AlertWidget`: widget riutilizzabile per alert operativi (contratti/presenze/borse), supporta modalità compatta e filtro per corso
+- `SepaXmlGenerator`: componente per generazione XML pain.001.001.03 per bonifici SEPA
 - Migration: aggiunto `docente_presente` (3 stati: null/1/0) e `docente_ore_effettive` alla tabella `calendario`
 - Migration: campo `presente` in `presenza_allievo` ora nullable (3 stati: null=non acquisito, 1=presente, 0=assente)
 - Migration: aggiunto `allegati_path` (JSON) alla tabella `contratto` per allegati multipli
