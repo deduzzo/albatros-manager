@@ -3,6 +3,12 @@
 Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
+### Tecnico {admin}
+- Migration: aggiunto `docente_presente` (3 stati: null/1/0) e `docente_ore_effettive` alla tabella `calendario`
+- Migration: campo `presente` in `presenza_allievo` ora nullable (3 stati: null=non acquisito, 1=presente, 0=assente)
+- Migration: aggiunto `allegati_path` (JSON) alla tabella `contratto` per allegati multipli
+- Migration: aggiunto valore `erogazione_bloccata` all'ENUM `status` della tabella `borsa_studio`
+- Migration: aggiunte 4 configurazioni gruppo `banca` (IBAN fondazione, BIC, Creditor ID, nome istituto)
 
 ## [v1.0.30] - 2026-03-30
 ## [v1.0.29] - 2026-03-28
