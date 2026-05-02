@@ -149,15 +149,15 @@ $this->title = 'Guida Interattiva';
         </div>
     </div>
 
-    <!-- Step 3: Progetti e Bandi -->
+    <!-- Step 3: Progetti e Corsi -->
     <div class="wizard-admin-panel" id="step-admin-3" style="display: none;">
         <div class="card">
             <div class="card-body">
                 <div class="text-center mb-4">
                     <i class="ti ti-briefcase" style="font-size: 3rem; color: var(--tblr-purple);"></i>
-                    <h2 class="mt-3 mb-2">Progetti e Bandi</h2>
+                    <h2 class="mt-3 mb-2">Progetti e Corsi</h2>
                     <p class="text-secondary">
-                        Gestisci l'intero ciclo: crea progetti, pubblica bandi, definisci moduli e requisiti.
+                        Gestisci l'intero ciclo: crea progetti, pubblica corsi, definisci moduli e requisiti.
                     </p>
                 </div>
                 <div class="card mb-3">

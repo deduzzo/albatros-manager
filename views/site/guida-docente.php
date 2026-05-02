@@ -17,7 +17,7 @@ $this->title = 'Guida Interattiva - Area Docenti';
     <!-- Steps Progress -->
     <div class="steps steps-green mb-4" id="guide-steps">
         <a href="#" class="step-item active" data-step="1">Il Tuo Profilo</a>
-        <a href="#" class="step-item" data-step="2">Bandi e Iscrizioni</a>
+        <a href="#" class="step-item" data-step="2">Corsi e Iscrizioni</a>
         <a href="#" class="step-item" data-step="3">Assegnazioni e Ore</a>
         <a href="#" class="step-item" data-step="4">Pagamenti</a>
     </div>
@@ -32,7 +32,7 @@ $this->title = 'Guida Interattiva - Area Docenti';
             </div>
             <h2>Benvenuto nella tua Area Riservata!</h2>
             <p class="text-secondary mx-auto" style="max-width: 600px;">
-                Da qui puoi gestire il tuo profilo, consultare i bandi aperti, candidarti per i moduli formativi,
+                Da qui puoi gestire il tuo profilo, consultare i corsi aperti, candidarti per i moduli formativi,
                 inserire le ore lavorate e seguire lo stato dei pagamenti.
             </p>
             <div class="mt-4">
@@ -68,7 +68,7 @@ $this->title = 'Guida Interattiva - Area Docenti';
         </div>
     </div>
 
-    <!-- Step 2: Bandi -->
+    <!-- Step 2: Corsi -->
     <div class="card guide-step" id="step-2" style="display: none;">
         <div class="card-body text-center py-5">
             <div class="mb-4">
@@ -96,7 +96,7 @@ $this->title = 'Guida Interattiva - Area Docenti';
                             <span class="badge bg-green-lt me-3 mt-1">2</span>
                             <div>
                                 <strong>Scegli un modulo</strong>
-                                <div class="text-secondary small">Clicca su un bando per vedere i moduli disponibili e i requisiti</div>
+                                <div class="text-secondary small">Clicca su un corso per vedere i moduli disponibili e i requisiti</div>
                             </div>
                         </div>
                     </div>

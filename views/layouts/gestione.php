@@ -194,10 +194,67 @@ $corsiList = Avviso::find()
         </div>
     </header>
 
+    <?php
+    // Calcola contatori alert per la sidebar (solo se c'e un corso selezionato)
+    $alertCounts = [
+        'panoramica'      => 0,
+        'piano-formativo' => 0,
+        'personale'       => 0,
+        'studenti'        => 0,
+        'calendario'      => 0,
+        'contratti'       => 0,
+        'borse-studio'    => 0,
+        'import-export'   => 0,
+    ];
+
+    if ($corsoId) {
+        $corsoModel = Avviso::findOne($corsoId);
+
+        // personale: docenti assegnati senza contratto attivo
+        $alertCounts['personale'] = (int) \app\models\Assegnazione::find()
+            ->alias('a')
+            ->innerJoin('{{%modulo}} m', 'm.id = a.modulo_id AND m.deleted_at IS NULL')
+            ->leftJoin('{{%contratto}} co', 'co.assegnazione_id = a.id AND co.deleted_at IS NULL')
+            ->where(['a.deleted_at' => null, 'co.id' => null, 'm.avviso_id' => $corsoId])
+            ->count();
+
+        // calendario: presenze docente non acquisite (data passata, docente_presente IS NULL)
+        $alertCounts['calendario'] = (int) \app\models\Calendario::find()
+            ->alias('c')
+            ->innerJoin('{{%modulo}} m', 'm.id = c.modulo_id AND m.deleted_at IS NULL')
+            ->where(['c.deleted_at' => null, 'c.docente_presente' => null, 'm.avviso_id' => $corsoId])
+            ->andWhere(['<', 'c.data', date('Y-m-d')])
+            ->count();
+
+        // piano-formativo: moduli scoperti (senza assegnazione attiva)
+        $alertCounts['piano-formativo'] = (int) \app\models\Modulo::find()
+            ->alias('m')
+            ->leftJoin('{{%assegnazione}} a', 'a.modulo_id = m.id AND a.deleted_at IS NULL')
+            ->where(['m.deleted_at' => null, 'a.id' => null, 'm.avviso_id' => $corsoId])
+            ->count();
+
+        // borse-studio: borse con erogazione bloccata sul progetto del corso
+        if ($corsoModel) {
+            $alertCounts['borse-studio'] = (int) \app\models\BorsaStudio::find()
+                ->where([
+                    'progetto_id' => $corsoModel->progetto_id,
+                    'status'      => \app\models\BorsaStudio::STATUS_EROGAZIONE_BLOCCATA,
+                    'deleted_at'  => null,
+                ])
+                ->count();
+        }
+
+        // panoramica: somma di tutti gli alert
+        $alertCounts['panoramica'] = $alertCounts['personale']
+            + $alertCounts['calendario']
+            + $alertCounts['borse-studio']
+            + $alertCounts['piano-formativo'];
+    }
+    ?>
     <?php if ($corsoId): ?>
     <!-- Layout con sidebar -->
     <div class="gestione-layout">
-        <?= $this->render('_gestione_sidebar', ['corsoId' => $corsoId, 'currentSection' => $currentSection]) ?>
+        <?= $this->render('_gestione_sidebar', ['corsoId' => $corsoId, 'currentSection' => $currentSection, 'alertCounts' => $alertCounts]) ?>
         <div class="gestione-content">
             <!-- Flash Messages -->
             <?php foreach (Yii::$app->session->getAllFlashes() as $type => $messages): ?>

@@ -223,7 +223,7 @@ $this->title = 'Manuale Amministratore';
             <a class="nav-link" href="#dashboard"><i class="ti ti-home"></i> Dashboard</a>
             <a class="nav-link" href="#configurazione"><i class="ti ti-settings"></i> Configurazione Base</a>
             <a class="nav-link" href="#progetti"><i class="ti ti-folder"></i> Gestione Progetti</a>
-            <a class="nav-link" href="#avvisi"><i class="ti ti-file-text"></i> Avvisi e Bandi</a>
+            <a class="nav-link" href="#avvisi"><i class="ti ti-file-text"></i> Corsi</a>
             <a class="nav-link" href="#moduli"><i class="ti ti-book"></i> Moduli Formativi</a>
             <a class="nav-link" href="#docenti"><i class="ti ti-users"></i> Gestione Docenti</a>
             <a class="nav-link" href="#selezione"><i class="ti ti-clipboard-check"></i> Processo di Selezione</a>
@@ -1663,7 +1663,7 @@ $this->title = 'Manuale Amministratore';
                         <thead><tr><th>Termine precedente</th><th>Nuovo termine</th><th>Contesto</th></tr></thead>
                         <tbody>
                             <tr>
-                                <td><strong>Avviso / Bando</strong></td>
+                                <td><strong>Corso</strong></td>
                                 <td><strong>Corso</strong></td>
                                 <td>Riferimento all'intero percorso formativo nella comunicazione con docenti e studenti</td>
                             </tr>

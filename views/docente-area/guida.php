@@ -94,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
 
-        <!-- Step 2: Bandi e Iscrizioni -->
+        <!-- Step 2: Corsi e Iscrizioni -->
         <div class="wizard-docente-panel" id="step-docente-2" style="display: none;">
             <div class="card">
                 <div class="card-body">
