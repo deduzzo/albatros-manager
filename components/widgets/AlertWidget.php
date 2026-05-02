@@ -88,7 +88,11 @@ class AlertWidget extends Widget
         $query = BorsaStudio::find()
             ->where(['status' => BorsaStudio::STATUS_EROGAZIONE_BLOCCATA, 'deleted_at' => null]);
         if ($this->corso_id) {
-            $query->andWhere(['progetto_id' => $this->corso_id]);
+            $avviso = \app\models\Avviso::findOne($this->corso_id);
+            if ($avviso === null) {
+                return 0;
+            }
+            $query->andWhere(['progetto_id' => $avviso->progetto_id]);
         }
         return (int) $query->count();
     }

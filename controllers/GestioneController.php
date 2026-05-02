@@ -15,6 +15,7 @@ use app\models\Istanza;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 
 /**
  * GestioneController - Vista Semplificata per la gestione dei corsi.
@@ -35,6 +36,13 @@ class GestioneController extends Controller
                     ],
                 ],
             ],
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'metti-a-bando' => ['POST'],
+                    'nuova-candidatura' => ['GET', 'POST'],
+                ],
+            ],
         ];
     }
 
@@ -53,39 +61,60 @@ class GestioneController extends Controller
             ->orderBy(['a.codice_avviso' => SORT_ASC])
             ->all();
 
-        // Calcola stats per ogni corso
+        // Calcola stats per ogni corso con 4 query aggregate (no N+1)
+        $moduliTotaliMap = [];
+        foreach (Modulo::findWithDeleted()
+                     ->select(['avviso_id', 'cnt' => 'COUNT(*)'])
+                     ->where(['deleted_at' => null])
+                     ->groupBy('avviso_id')
+                     ->asArray()
+                     ->all() as $row) {
+            $moduliTotaliMap[(int) $row['avviso_id']] = (int) $row['cnt'];
+        }
+
+        $moduliAssegnatiMap = [];
+        foreach (Modulo::findWithDeleted()
+                     ->alias('m')
+                     ->select(['m.avviso_id', 'cnt' => 'COUNT(DISTINCT m.id)'])
+                     ->innerJoin('assegnazione ass', 'ass.modulo_id = m.id AND ass.deleted_at IS NULL')
+                     ->andWhere(['m.deleted_at' => null])
+                     ->groupBy('m.avviso_id')
+                     ->asArray()
+                     ->all() as $row) {
+            $moduliAssegnatiMap[(int) $row['avviso_id']] = (int) $row['cnt'];
+        }
+
+        $docentiMap = [];
+        foreach (Assegnazione::findWithDeleted()
+                     ->alias('ass')
+                     ->select(['m.avviso_id', 'cnt' => 'COUNT(DISTINCT ass.docente_codice_fiscale)'])
+                     ->innerJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
+                     ->andWhere(['ass.deleted_at' => null])
+                     ->groupBy('m.avviso_id')
+                     ->asArray()
+                     ->all() as $row) {
+            $docentiMap[(int) $row['avviso_id']] = (int) $row['cnt'];
+        }
+
+        $studentiMap = [];
+        foreach (Iscrizione::findWithDeleted()
+                     ->alias('i')
+                     ->select(['m.avviso_id', 'cnt' => 'COUNT(DISTINCT i.allievo_codice_fiscale)'])
+                     ->innerJoin('modulo m', 'm.id = i.modulo_id AND m.deleted_at IS NULL')
+                     ->andWhere(['i.deleted_at' => null])
+                     ->groupBy('m.avviso_id')
+                     ->asArray()
+                     ->all() as $row) {
+            $studentiMap[(int) $row['avviso_id']] = (int) $row['cnt'];
+        }
+
         $corsiStats = [];
         foreach ($corsi as $corso) {
-            $moduliTotali = Modulo::findWithDeleted()
-                ->andWhere(['avviso_id' => $corso->id, 'deleted_at' => null])
-                ->count();
-
-            $moduliAssegnati = Modulo::findWithDeleted()
-                ->alias('m')
-                ->innerJoin('assegnazione ass', 'ass.modulo_id = m.id AND ass.deleted_at IS NULL')
-                ->andWhere(['m.avviso_id' => $corso->id])
-                ->andWhere(['m.deleted_at' => null])
-                ->count('DISTINCT m.id');
-
-            $docentiDistinti = Assegnazione::findWithDeleted()
-                ->alias('ass')
-                ->innerJoin('modulo m', 'm.id = ass.modulo_id AND m.deleted_at IS NULL')
-                ->andWhere(['m.avviso_id' => $corso->id])
-                ->andWhere(['ass.deleted_at' => null])
-                ->count('DISTINCT ass.docente_codice_fiscale');
-
-            $studentiDistinti = Iscrizione::findWithDeleted()
-                ->alias('i')
-                ->innerJoin('modulo m', 'm.id = i.modulo_id AND m.deleted_at IS NULL')
-                ->andWhere(['m.avviso_id' => $corso->id])
-                ->andWhere(['i.deleted_at' => null])
-                ->count('DISTINCT i.allievo_codice_fiscale');
-
             $corsiStats[$corso->id] = [
-                'moduliTotali'   => (int) $moduliTotali,
-                'moduliAssegnati' => (int) $moduliAssegnati,
-                'docenti'        => (int) $docentiDistinti,
-                'studenti'       => (int) $studentiDistinti,
+                'moduliTotali'    => $moduliTotaliMap[$corso->id] ?? 0,
+                'moduliAssegnati' => $moduliAssegnatiMap[$corso->id] ?? 0,
+                'docenti'         => $docentiMap[$corso->id] ?? 0,
+                'studenti'        => $studentiMap[$corso->id] ?? 0,
             ];
         }
 
@@ -330,6 +359,52 @@ class GestioneController extends Controller
         }
 
         return $this->render('_candidatura-multi', compact('corso', 'moduli', 'docenti'));
+    }
+
+    /**
+     * Mette a bando i moduli scoperti selezionati per il corso indicato.
+     * Setta status modulo = APERTO e, se il corso è in BOZZA, lo porta a PUBBLICATO.
+     */
+    public function actionMettiABando($corso_id)
+    {
+        $corso = $this->findCorso($corso_id);
+        $moduliIds = Yii::$app->request->post('moduli', []);
+
+        if (!is_array($moduliIds) || empty($moduliIds)) {
+            Yii::$app->session->setFlash('error', 'Selezionare almeno un modulo da mettere a bando.');
+            return $this->redirect(['/gestione/sezione', 'id' => $corso_id, 'section' => 'piano-formativo']);
+        }
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $count = 0;
+            foreach ($moduliIds as $moduloId) {
+                $modulo = Modulo::findOne(['id' => (int) $moduloId, 'deleted_at' => null]);
+                if ($modulo === null || (int) $modulo->avviso_id !== (int) $corso_id) {
+                    continue;
+                }
+                $modulo->status = Modulo::STATUS_APERTO;
+                if (!$modulo->withAuditNote('Messo a bando da Gestione Semplificata')->save()) {
+                    throw new \Exception('Errore salvataggio modulo ' . $modulo->id . ': ' . implode(', ', $modulo->getFirstErrors()));
+                }
+                $count++;
+            }
+
+            if ($corso->status === Avviso::STATUS_BOZZA) {
+                $corso->status = Avviso::STATUS_PUBBLICATO;
+                if (!$corso->withAuditNote('Messo a bando da Gestione Semplificata')->save()) {
+                    throw new \Exception('Errore salvataggio corso: ' . implode(', ', $corso->getFirstErrors()));
+                }
+            }
+
+            $transaction->commit();
+            Yii::$app->session->setFlash('success', "Messi a bando {$count} modulo/i.");
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            Yii::$app->session->setFlash('error', 'Errore durante l\'operazione: ' . $e->getMessage());
+        }
+
+        return $this->redirect(['/gestione/sezione', 'id' => $corso_id, 'section' => 'piano-formativo']);
     }
 
     protected function findCorso($id): Avviso

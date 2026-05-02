@@ -4,6 +4,12 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+### Risolto {admin}
+- Gestione Semplificata: implementata action `metti-a-bando` mancante (POST) per pubblicare moduli scoperti dal Piano Formativo, con transazione DB e auto-pubblicazione del corso se in bozza
+- Gestione Semplificata: aggiunto VerbFilter per restringere `metti-a-bando` a POST
+- Gestione Semplificata: eliminato N+1 in `actionIndex` (4 query aggregate al posto di 4×N)
+- AlertWidget: corretto filtro borse di studio quando `corso_id` è un id Avviso (lookup su `progetto_id`)
+
 ## [v1.0.31] - 2026-04-01
 
 ### Aggiunto {admin}
