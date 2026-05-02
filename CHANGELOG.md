@@ -4,6 +4,7 @@ Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
 
+## [v1.0.31] - 2026-05-02
 ### Aggiunto {admin}
 - Gestione Semplificata: badge rossi nella sidebar del corso con conteggio alert per sezione (Piano Formativo, Personale, Calendario, Borse di Studio, Panoramica come totale)
 - Gestione Semplificata: scorciatoie e CTA inline in tutte le viste sezione per ridurre i click verso la vista avanzata
