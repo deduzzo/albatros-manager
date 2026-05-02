@@ -25,6 +25,7 @@ Tutte le modifiche al portale Albatros Manager.
 
 ### Documentazione {tutti}
 - Cleanup residui terminologia "Avviso/Bando" → "Corso" in manuale admin (sidebar nav + tabella ridenominazione) e nelle guide interattive admin/docente
+- Aggiunti verbali quarta riunione e relativi plan/spec di implementazione (uso interno sviluppo)
 
 ## [v1.0.31] - 2026-04-01
 
