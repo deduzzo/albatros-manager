@@ -94,6 +94,32 @@ use yii\helpers\Html;
         </div>
     </div>
 
+    <!-- Import PDF Domande Borse -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span class="bg-yellow-lt p-3 rounded-2">
+                        <i class="ti ti-file-import text-yellow" style="font-size:1.5rem;"></i>
+                    </span>
+                    <div>
+                        <h4 class="mb-0" style="font-size:1rem;">Import PDF Domande Borse</h4>
+                        <p class="text-muted mb-0" style="font-size:0.8rem;">Carica le domande di borsa di studio in formato PDF</p>
+                    </div>
+                </div>
+                <p class="text-secondary mb-3" style="font-size:0.875rem;">
+                    Importa massivamente le domande di borsa di studio dei singoli studenti
+                    a partire dai PDF compilati.
+                </p>
+                <a href="<?= Url::to(['/borsa-studio/import-pdf', 'progetto_id' => $corso->progetto_id]) ?>"
+                   class="btn btn-sm btn-outline-warning">
+                    <i class="ti ti-upload me-1"></i> Import PDF
+                    <span class="badge bg-yellow-lt text-yellow ms-2">In lavorazione</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Vista Avanzata -->
     <div class="col-md-6">
         <div class="card h-100">

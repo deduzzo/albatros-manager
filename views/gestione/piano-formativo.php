@@ -30,7 +30,7 @@ $statusLabels = [
         <p class="text-secondary mb-0" style="font-size:0.875rem;"><?= Html::encode($corso->codice_avviso . ' — ' . $corso->titolo) ?></p>
     </div>
     <div class="d-flex gap-2">
-        <a href="<?= Url::to(['/istanza/create', 'avviso_id' => $corso->id]) ?>" class="btn btn-sm" style="background:#4263eb; color:#fff; border-color:#4263eb;">
+        <a href="<?= Url::to(['/gestione/nuova-candidatura', 'corso_id' => $corso->id]) ?>" class="btn btn-sm" style="background:#4263eb; color:#fff; border-color:#4263eb;">
             <i class="ti ti-user-plus me-1"></i> Nuova Candidatura
         </a>
         <a href="<?= Url::to(['/modulo/create', 'avviso_id' => $corso->id]) ?>" class="btn btn-sm btn-outline-secondary">
@@ -79,6 +79,7 @@ $statusLabels = [
                                 if (!$a->deleted_at) { $assegnazione = $a; break; }
                             }
                             $scoperto = $assegnazione === null;
+                            $contratto = $assegnazione ? $assegnazione->contratto : null;
                             ?>
                             <tr>
                                 <td>
@@ -122,6 +123,24 @@ $statusLabels = [
                                            class="btn btn-sm btn-ghost-secondary" title="Modifica">
                                             <i class="ti ti-pencil"></i>
                                         </a>
+                                        <?php if ($scoperto): ?>
+                                            <a href="<?= Url::to(['/istanza/create', 'avviso_id' => $corso->id, 'modulo_id' => $modulo->id]) ?>"
+                                               class="btn btn-sm btn-ghost-primary" title="Candidatura singola per questo modulo">
+                                                <i class="ti ti-user-plus"></i>
+                                            </a>
+                                        <?php elseif ($assegnazione): ?>
+                                            <?php if ($contratto): ?>
+                                                <a href="<?= Url::to(['/contratto/view', 'id' => $contratto->id]) ?>"
+                                                   class="btn btn-sm btn-ghost-secondary" title="Vai al contratto">
+                                                    <i class="ti ti-file-text"></i>
+                                                </a>
+                                            <?php else: ?>
+                                                <a href="<?= Url::to(['/contratto/create', 'assegnazione_id' => $assegnazione->id]) ?>"
+                                                   class="btn btn-sm btn-ghost-warning" title="Genera contratto">
+                                                    <i class="ti ti-file-plus"></i>
+                                                </a>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                             </tr>

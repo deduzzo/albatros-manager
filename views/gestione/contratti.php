@@ -8,22 +8,6 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-$statusColors = [
-    'bozza'     => 'bg-orange-lt text-orange',
-    'firmato'   => 'bg-blue-lt text-blue',
-    'attivo'    => 'bg-green-lt text-green',
-    'sospeso'   => 'bg-yellow-lt text-yellow',
-    'concluso'  => 'bg-teal-lt text-teal',
-    'annullato' => 'bg-red-lt text-red',
-];
-$statusLabels = [
-    'bozza'     => 'Bozza',
-    'firmato'   => 'Firmato',
-    'attivo'    => 'Attivo',
-    'sospeso'   => 'Sospeso',
-    'concluso'  => 'Concluso',
-    'annullato' => 'Annullato',
-];
 $tipoLabels = [
     'cococo'      => 'CoCoCo',
     'partita_iva' => 'Partita IVA',
@@ -36,9 +20,14 @@ $tipoLabels = [
         <h2 class="mb-1" style="font-size:1.3rem; font-weight:700; color:#1e293b;">Contratti</h2>
         <p class="text-secondary mb-0" style="font-size:0.875rem;"><?= Html::encode($corso->codice_avviso . ' — ' . $corso->titolo) ?></p>
     </div>
-    <a href="<?= Url::to(['/contratto/index']) ?>" class="btn btn-sm btn-outline-secondary">
-        <i class="ti ti-external-link me-1"></i> Vista avanzata
-    </a>
+    <div class="d-flex gap-2">
+        <a href="<?= Url::to(['/gestione/sezione', 'id' => $corso->id, 'section' => 'personale']) ?>" class="btn btn-sm btn-outline-primary">
+            <i class="ti ti-users me-1"></i> Vai al personale
+        </a>
+        <a href="<?= Url::to(['/contratto/index']) ?>" class="btn btn-sm btn-outline-secondary">
+            <i class="ti ti-external-link me-1"></i> Vista avanzata
+        </a>
+    </div>
 </div>
 
 <?php if (empty($contratti)): ?>
@@ -46,7 +35,10 @@ $tipoLabels = [
         <div class="card-body text-center py-5">
             <i class="ti ti-file-off text-secondary" style="font-size:3rem;"></i>
             <h3 class="mt-3 text-secondary">Nessun contratto</h3>
-            <p class="text-muted">Non ci sono contratti per questo corso.</p>
+            <p class="text-muted mb-4">Non ci sono contratti per questo corso. I contratti si generano dalla sezione Personale.</p>
+            <a class="btn btn-primary" href="<?= Url::to(['/gestione/sezione', 'id' => $corso->id, 'section' => 'personale']) ?>">
+                <i class="ti ti-users me-1"></i> Vai al personale per generare contratti
+            </a>
         </div>
     </div>
 <?php else: ?>
@@ -87,8 +79,8 @@ $tipoLabels = [
                                 </span>
                             </td>
                             <td>
-                                <span class="badge <?= $statusColors[$contratto->status] ?? 'bg-default-lt' ?>">
-                                    <?= $statusLabels[$contratto->status] ?? $contratto->status ?>
+                                <span class="badge <?= $contratto->getStatusBadgeClass() ?>">
+                                    <?= Html::encode($contratto->getStatusLabel()) ?>
                                 </span>
                             </td>
                             <td class="text-end fw-semibold">
@@ -96,6 +88,14 @@ $tipoLabels = [
                             </td>
                             <td>
                                 <div class="d-flex gap-1">
+                                    <a href="<?= Url::to(['/contratto/view', 'id' => $contratto->id]) ?>"
+                                       class="btn btn-sm btn-ghost-secondary" title="Dettaglio">
+                                        <i class="ti ti-eye"></i>
+                                    </a>
+                                    <a href="<?= Url::to(['/contratto/update', 'id' => $contratto->id]) ?>"
+                                       class="btn btn-sm btn-ghost-secondary" title="Modifica">
+                                        <i class="ti ti-pencil"></i>
+                                    </a>
                                     <a href="<?= Url::to(['/contratto/genera', 'id' => $contratto->id]) ?>"
                                        class="btn btn-sm btn-ghost-secondary" title="Genera contratto">
                                         <i class="ti ti-file-arrow-right"></i>
@@ -106,9 +106,13 @@ $tipoLabels = [
                                             <i class="ti ti-download"></i>
                                         </a>
                                     <?php endif; ?>
-                                    <a href="<?= Url::to(['/contratto/view', 'id' => $contratto->id]) ?>"
-                                       class="btn btn-sm btn-ghost-secondary" title="Vista avanzata">
-                                        <i class="ti ti-eye"></i>
+                                    <a href="<?= Url::to(['/contratto/upload-firmato', 'id' => $contratto->id]) ?>"
+                                       class="btn btn-sm btn-ghost-secondary" title="Carica firmato">
+                                        <i class="ti ti-upload"></i>
+                                    </a>
+                                    <a href="<?= Url::to(['/contratto/upload-allegato', 'id' => $contratto->id]) ?>"
+                                       class="btn btn-sm btn-ghost-secondary" title="Allegati">
+                                        <i class="ti ti-paperclip"></i>
                                     </a>
                                 </div>
                             </td>

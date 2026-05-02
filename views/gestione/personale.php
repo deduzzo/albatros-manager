@@ -7,23 +7,6 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
-
-$contractStatusColors = [
-    'bozza'     => 'bg-orange-lt text-orange',
-    'firmato'   => 'bg-blue-lt text-blue',
-    'attivo'    => 'bg-green-lt text-green',
-    'sospeso'   => 'bg-yellow-lt text-yellow',
-    'concluso'  => 'bg-teal-lt text-teal',
-    'annullato' => 'bg-red-lt text-red',
-];
-$contractStatusLabels = [
-    'bozza'     => 'Bozza',
-    'firmato'   => 'Firmato',
-    'attivo'    => 'Attivo',
-    'sospeso'   => 'Sospeso',
-    'concluso'  => 'Concluso',
-    'annullato' => 'Annullato',
-];
 ?>
 
 <div class="d-flex align-items-center justify-content-between mb-4">
@@ -31,9 +14,14 @@ $contractStatusLabels = [
         <h2 class="mb-1" style="font-size:1.3rem; font-weight:700; color:#1e293b;">Personale</h2>
         <p class="text-secondary mb-0" style="font-size:0.875rem;"><?= Html::encode($corso->codice_avviso . ' — ' . $corso->titolo) ?></p>
     </div>
-    <a href="<?= Url::to(['/assegnazione/index', 'AssegnazioneSearch[avviso_id]' => $corso->id]) ?>" class="btn btn-sm btn-outline-secondary">
-        <i class="ti ti-external-link me-1"></i> Vista avanzata
-    </a>
+    <div class="d-flex gap-2">
+        <a href="<?= Url::to(['/gestione/nuova-candidatura', 'corso_id' => $corso->id]) ?>" class="btn btn-sm" style="background:#4263eb; color:#fff; border-color:#4263eb;">
+            <i class="ti ti-user-plus me-1"></i> Nuova Candidatura
+        </a>
+        <a href="<?= Url::to(['/assegnazione/index', 'AssegnazioneSearch[avviso_id]' => $corso->id]) ?>" class="btn btn-sm btn-outline-secondary">
+            <i class="ti ti-external-link me-1"></i> Vista avanzata
+        </a>
+    </div>
 </div>
 
 <?php if (empty($assegnazioni)): ?>
@@ -41,7 +29,10 @@ $contractStatusLabels = [
         <div class="card-body text-center py-5">
             <i class="ti ti-users-off text-secondary" style="font-size:3rem;"></i>
             <h3 class="mt-3 text-secondary">Nessuna assegnazione</h3>
-            <p class="text-muted">Non ci sono docenti assegnati per questo corso.</p>
+            <p class="text-muted mb-4">Non ci sono docenti assegnati per questo corso.</p>
+            <a class="btn btn-primary" href="<?= Url::to(['/gestione/nuova-candidatura', 'corso_id' => $corso->id]) ?>">
+                <i class="ti ti-user-plus me-1"></i> Inserisci prima candidatura
+            </a>
         </div>
     </div>
 <?php else: ?>
@@ -87,20 +78,37 @@ $contractStatusLabels = [
                             </td>
                             <td>
                                 <?php if ($contratto): ?>
-                                    <span class="badge <?= $contractStatusColors[$contratto->status] ?? 'bg-default-lt' ?>">
-                                        <?= $contractStatusLabels[$contratto->status] ?? $contratto->status ?>
+                                    <span class="badge <?= $contratto->getStatusBadgeClass() ?>">
+                                        <?= Html::encode($contratto->getStatusLabel()) ?>
                                     </span>
                                 <?php else: ?>
-                                    <span class="badge bg-orange-lt text-orange">
+                                    <span class="badge bg-orange text-orange-fg">
                                         <i class="ti ti-alert-circle me-1"></i>Mancante
                                     </span>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <a href="<?= Url::to(['/assegnazione/view', 'id' => $ass->id]) ?>"
-                                   class="btn btn-sm btn-ghost-secondary" title="Dettaglio assegnazione">
-                                    <i class="ti ti-eye"></i>
-                                </a>
+                                <div class="d-flex gap-1">
+                                    <a href="<?= Url::to(['/assegnazione/view', 'id' => $ass->id]) ?>"
+                                       class="btn btn-sm btn-ghost-secondary" title="Dettaglio assegnazione">
+                                        <i class="ti ti-eye"></i>
+                                    </a>
+                                    <a href="<?= Url::to(['/assegnazione/update', 'id' => $ass->id]) ?>"
+                                       class="btn btn-sm btn-ghost-secondary" title="Modifica assegnazione">
+                                        <i class="ti ti-pencil"></i>
+                                    </a>
+                                    <?php if (!$contratto): ?>
+                                        <a href="<?= Url::to(['/contratto/create', 'assegnazione_id' => $ass->id]) ?>"
+                                           class="btn btn-sm btn-warning" title="Genera contratto">
+                                            <i class="ti ti-file-plus"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="<?= Url::to(['/contratto/view', 'id' => $contratto->id]) ?>"
+                                           class="btn btn-sm btn-ghost-secondary" title="Vai al contratto">
+                                            <i class="ti ti-file-text"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

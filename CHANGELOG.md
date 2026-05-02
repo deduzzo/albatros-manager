@@ -6,6 +6,16 @@ Tutte le modifiche al portale Albatros Manager.
 
 ### Aggiunto {admin}
 - Gestione Semplificata: badge rossi nella sidebar del corso con conteggio alert per sezione (Piano Formativo, Personale, Calendario, Borse di Studio, Panoramica come totale)
+- Gestione Semplificata: scorciatoie e CTA inline in tutte le viste sezione per ridurre i click verso la vista avanzata
+  - Panoramica: stat cards cliccabili verso le rispettive sezioni; pulsanti "Genera contratto" e "Acquisisci" inline negli alert
+  - Piano Formativo: candidatura singola per moduli scoperti; collegamento a contratto (visualizza/genera) per moduli assegnati
+  - Personale: pulsante "Nuova Candidatura" + CTA empty state; azioni inline edit assegnazione, genera/visualizza contratto
+  - Studenti: pulsanti header "Valuta tutti" e "Graduatoria"; azione "Valuta" inline per status candidato/in_valutazione
+  - Calendario: pulsante "Nuova Lezione"; azioni inline "Acquisisci presenze" e "Presenze allievi"
+  - Contratti: azioni inline edit, upload firmato, allegati; pulsante "Vai al personale"
+  - Borse di Studio: pulsante "Ricalcola Frequenze"; colonna Azioni con view/update/eroga; tooltip su erogazione bloccata
+  - Import/Export: nuova card "Import PDF Domande Borse" (in lavorazione)
+- Gestione Semplificata: uso uniforme dei metodi `Contratto::getStatusLabel()` / `getStatusBadgeClass()` per badge stato contratto (classi Tabler native)
 
 ### Risolto {admin}
 - Gestione Semplificata: implementata action `metti-a-bando` mancante (POST) per pubblicare moduli scoperti dal Piano Formativo, con transazione DB e auto-pubblicazione del corso se in bozza

@@ -39,6 +39,17 @@ $tipologiaLabels = [
         <p class="text-secondary mb-0" style="font-size:0.875rem;"><?= Html::encode($corso->codice_avviso . ' — ' . $corso->titolo) ?></p>
     </div>
     <div class="d-flex gap-2">
+        <?= Html::a(
+            '<i class="ti ti-refresh me-1"></i> Ricalcola Frequenze',
+            ['/borsa-studio/ricalcola-frequenze', 'progetto_id' => $corso->progetto_id],
+            [
+                'class' => 'btn btn-sm btn-outline-primary',
+                'data' => [
+                    'method' => 'post',
+                    'confirm' => 'Ricalcolare le percentuali di frequenza per tutte le borse di questo corso?',
+                ],
+            ]
+        ) ?>
         <a href="<?= Url::to(['/borsa-studio/export-sepa', 'progetto_id' => $corso->progetto_id]) ?>"
            class="btn btn-sm btn-outline-secondary">
             <i class="ti ti-file-export me-1"></i> Export SEPA
@@ -55,7 +66,10 @@ $tipologiaLabels = [
         <div class="card-body text-center py-5">
             <i class="ti ti-award-off text-secondary" style="font-size:3rem;"></i>
             <h3 class="mt-3 text-secondary">Nessuna borsa di studio</h3>
-            <p class="text-muted">Non ci sono borse di studio per questo corso.</p>
+            <p class="text-muted mb-4">Non ci sono borse di studio per questo corso.</p>
+            <a class="btn btn-primary" href="<?= Url::to(['/borsa-studio/create']) ?>">
+                <i class="ti ti-plus me-1"></i> Crea prima borsa
+            </a>
         </div>
     </div>
 <?php else: ?>
@@ -70,6 +84,7 @@ $tipologiaLabels = [
                         <th class="text-end">Importo Finale</th>
                         <th>Stato</th>
                         <th class="text-end">% Frequenza</th>
+                        <th>Azioni</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,9 +109,18 @@ $tipologiaLabels = [
                                 € <?= number_format($borsa->importo_finale, 2, ',', '.') ?>
                             </td>
                             <td>
-                                <span class="badge <?= $statusColors[$borsa->status] ?? 'bg-default-lt' ?>">
-                                    <?= $statusLabels[$borsa->status] ?? $borsa->status ?>
-                                </span>
+                                <?php if ($borsa->status === 'erogazione_bloccata'): ?>
+                                    <span class="badge <?= $statusColors[$borsa->status] ?? 'bg-default-lt' ?>"
+                                          data-bs-toggle="tooltip"
+                                          title="<?= Html::encode($borsa->note ?: 'Erogazione bloccata: frequenza < 80%') ?>">
+                                        <?= $statusLabels[$borsa->status] ?? $borsa->status ?>
+                                        <i class="ti ti-info-circle ms-1"></i>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge <?= $statusColors[$borsa->status] ?? 'bg-default-lt' ?>">
+                                        <?= $statusLabels[$borsa->status] ?? $borsa->status ?>
+                                    </span>
+                                <?php endif; ?>
                             </td>
                             <td class="text-end">
                                 <?php if ($borsa->percentuale_frequenza !== null): ?>
@@ -106,6 +130,32 @@ $tipologiaLabels = [
                                 <?php else: ?>
                                     <span class="text-muted">—</span>
                                 <?php endif; ?>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="<?= Url::to(['/borsa-studio/view', 'id' => $borsa->id]) ?>"
+                                       class="btn btn-sm btn-ghost-secondary" title="Dettaglio">
+                                        <i class="ti ti-eye"></i>
+                                    </a>
+                                    <a href="<?= Url::to(['/borsa-studio/update', 'id' => $borsa->id]) ?>"
+                                       class="btn btn-sm btn-ghost-secondary" title="Modifica">
+                                        <i class="ti ti-pencil"></i>
+                                    </a>
+                                    <?php if ($borsa->status === 'approvata'): ?>
+                                        <?= Html::a(
+                                            '<i class="ti ti-cash"></i>',
+                                            ['/borsa-studio/eroga', 'id' => $borsa->id],
+                                            [
+                                                'class' => 'btn btn-sm btn-ghost-success',
+                                                'title' => 'Eroga borsa',
+                                                'data' => [
+                                                    'method' => 'post',
+                                                    'confirm' => 'Confermare l\'erogazione della borsa?',
+                                                ],
+                                            ]
+                                        ) ?>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

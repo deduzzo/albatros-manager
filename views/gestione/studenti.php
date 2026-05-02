@@ -37,9 +37,17 @@ $statusLabels = [
         <h2 class="mb-1" style="font-size:1.3rem; font-weight:700; color:#1e293b;">Studenti</h2>
         <p class="text-secondary mb-0" style="font-size:0.875rem;"><?= Html::encode($corso->codice_avviso . ' — ' . $corso->titolo) ?></p>
     </div>
-    <a href="<?= Url::to(['/iscrizione/candidature', 'avviso_id' => $corso->id]) ?>" class="btn btn-sm btn-outline-secondary">
-        <i class="ti ti-external-link me-1"></i> Vista avanzata
-    </a>
+    <div class="d-flex gap-2">
+        <a href="<?= Url::to(['/iscrizione/candidature', 'avviso_id' => $corso->id]) ?>" class="btn btn-sm" style="background:#4263eb; color:#fff; border-color:#4263eb;">
+            <i class="ti ti-checklist me-1"></i> Valuta tutti
+        </a>
+        <a href="<?= Url::to(['/iscrizione/graduatoria-studenti', 'avviso_id' => $corso->id]) ?>" class="btn btn-sm btn-outline-primary">
+            <i class="ti ti-trophy me-1"></i> Graduatoria
+        </a>
+        <a href="<?= Url::to(['/iscrizione/candidature', 'avviso_id' => $corso->id]) ?>" class="btn btn-sm btn-outline-secondary">
+            <i class="ti ti-external-link me-1"></i> Vista avanzata
+        </a>
+    </div>
 </div>
 
 <?php if (empty($iscrizioni)): ?>
@@ -47,7 +55,10 @@ $statusLabels = [
         <div class="card-body text-center py-5">
             <i class="ti ti-school text-secondary" style="font-size:3rem;"></i>
             <h3 class="mt-3 text-secondary">Nessuno studente</h3>
-            <p class="text-muted">Non ci sono iscrizioni per questo corso.</p>
+            <p class="text-muted mb-4">Non ci sono iscrizioni per questo corso.</p>
+            <a class="btn btn-primary" href="<?= Url::to(['/iscrizione/candidature', 'avviso_id' => $corso->id]) ?>">
+                <i class="ti ti-checklist me-1"></i> Vedi candidature
+            </a>
         </div>
     </div>
 <?php else: ?>
@@ -85,16 +96,24 @@ $statusLabels = [
                                 </span>
                             </td>
                             <td>
-                                <?php if ($allievo): ?>
-                                    <a href="<?= Url::to(['/allievo/view', 'cf' => $allievo->codice_fiscale]) ?>"
-                                       class="btn btn-sm btn-ghost-secondary" title="Dettaglio studente">
-                                        <i class="ti ti-eye"></i>
+                                <div class="d-flex gap-1">
+                                    <?php if ($allievo): ?>
+                                        <a href="<?= Url::to(['/allievo/view', 'cf' => $allievo->codice_fiscale]) ?>"
+                                           class="btn btn-sm btn-ghost-secondary" title="Dettaglio studente">
+                                            <i class="ti ti-eye"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    <a href="<?= Url::to(['/iscrizione/view', 'id' => $iscrizione->id]) ?>"
+                                       class="btn btn-sm btn-ghost-secondary" title="Dettaglio iscrizione">
+                                        <i class="ti ti-clipboard-list"></i>
                                     </a>
-                                <?php endif; ?>
-                                <a href="<?= Url::to(['/iscrizione/view', 'id' => $iscrizione->id]) ?>"
-                                   class="btn btn-sm btn-ghost-secondary" title="Dettaglio iscrizione">
-                                    <i class="ti ti-clipboard-list"></i>
-                                </a>
+                                    <?php if (in_array($iscrizione->status, ['candidato', 'in_valutazione'], true)): ?>
+                                        <a href="<?= Url::to(['/iscrizione/valuta', 'id' => $iscrizione->id]) ?>"
+                                           class="btn btn-sm btn-ghost-primary" title="Valuta candidatura">
+                                            <i class="ti ti-checklist"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

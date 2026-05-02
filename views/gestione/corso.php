@@ -35,6 +35,9 @@ use yii\helpers\Url;
                             <?php if ($ass->modulo): ?>
                                 — <em><?= Html::encode($ass->modulo->titolo) ?></em>
                             <?php endif; ?>
+                            <a class="btn btn-sm btn-outline-warning ms-2" href="<?= Url::to(['/contratto/create', 'assegnazione_id' => $ass->id]) ?>">
+                                <i class="ti ti-file-plus me-1"></i>Genera contratto
+                            </a>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -59,6 +62,9 @@ use yii\helpers\Url;
                             <?php if ($lezione->modulo): ?>
                                 — <em><?= Html::encode($lezione->modulo->titolo) ?></em>
                             <?php endif; ?>
+                            <a class="btn btn-sm btn-outline-danger ms-2" href="<?= Url::to(['/calendario/update', 'id' => $lezione->id]) ?>">
+                                <i class="ti ti-clipboard-check me-1"></i>Acquisisci
+                            </a>
                         </li>
                     <?php endforeach; ?>
                     <?php if ($total > $maxShow): ?>
@@ -74,7 +80,7 @@ use yii\helpers\Url;
 <!-- Stat cards -->
 <div class="row row-cards mb-4">
     <div class="col-sm-6 col-xl-3">
-        <div class="card">
+        <a href="<?= Url::to(['/gestione/sezione', 'id' => $corso->id, 'section' => 'piano-formativo']) ?>" class="card card-link card-link-pop text-decoration-none">
             <div class="card-body">
                 <div class="d-flex align-items-center gap-3">
                     <span class="bg-indigo-lt p-3 rounded-2"><i class="ti ti-book text-indigo" style="font-size:1.5rem;"></i></span>
@@ -84,10 +90,10 @@ use yii\helpers\Url;
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="card">
+        <a href="<?= Url::to(['/gestione/sezione', 'id' => $corso->id, 'section' => 'personale']) ?>" class="card card-link card-link-pop text-decoration-none">
             <div class="card-body">
                 <div class="d-flex align-items-center gap-3">
                     <span class="bg-blue-lt p-3 rounded-2"><i class="ti ti-users text-blue" style="font-size:1.5rem;"></i></span>
@@ -97,10 +103,10 @@ use yii\helpers\Url;
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="card">
+        <a href="<?= Url::to(['/gestione/sezione', 'id' => $corso->id, 'section' => 'studenti']) ?>" class="card card-link card-link-pop text-decoration-none">
             <div class="card-body">
                 <div class="d-flex align-items-center gap-3">
                     <span class="bg-green-lt p-3 rounded-2"><i class="ti ti-school text-green" style="font-size:1.5rem;"></i></span>
@@ -110,10 +116,10 @@ use yii\helpers\Url;
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="card">
+        <a href="<?= Url::to(['/gestione/sezione', 'id' => $corso->id, 'section' => 'calendario']) ?>" class="card card-link card-link-pop text-decoration-none">
             <div class="card-body">
                 <div class="d-flex align-items-center gap-3">
                     <span class="bg-azure-lt p-3 rounded-2"><i class="ti ti-calendar text-azure" style="font-size:1.5rem;"></i></span>
@@ -123,7 +129,7 @@ use yii\helpers\Url;
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
@@ -139,7 +145,7 @@ use yii\helpers\Url;
         </a>
     </div>
     <div class="col-md-4">
-        <a href="<?= Url::to(['/istanza/create', 'avviso_id' => $corso->id]) ?>" class="card card-link card-link-pop text-decoration-none">
+        <a href="<?= Url::to(['/gestione/nuova-candidatura', 'corso_id' => $corso->id]) ?>" class="card card-link card-link-pop text-decoration-none">
             <div class="card-body text-center py-4">
                 <i class="ti ti-user-plus text-blue" style="font-size:2rem;"></i>
                 <h4 class="mt-2 mb-1" style="font-size:1rem;">Nuova Candidatura</h4>
