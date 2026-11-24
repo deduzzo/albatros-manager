@@ -3,6 +3,8 @@
 Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
+
+## [v1.0.32] - 2026-11-24
 ### Sicurezza {admin}
 - Rimossi definitivamente dal repository (anche dalla storia) documenti con dati reali, file di import e credenziali in chiaro; ora esclusi tramite `.gitignore`
 
