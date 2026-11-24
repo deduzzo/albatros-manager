@@ -90,3 +90,15 @@ PRODUCTION_SERVER.md
 
 # Dati reali sensibili (bilanci, prospetti, valutazioni)
 /docs/DATI REALI/
+
+# Dati reali di import (mantenere solo il template)
+/import/*.xlsx
+!/import/TEMPLATE_IMPORT_DATI.xlsx
+/import/definitivo/
+/docs/TEMPLATE_REGISTRAZIONE_UTENTI.xlsx
+
+# Trascrizioni riunioni (dati riservati)
+/doc/
+/docs/*riunione*.txt
+/docs/*transcript*.txt
+/import_avv28.php

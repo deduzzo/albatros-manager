@@ -6,10 +6,11 @@ Sistema di gestione per docenti e corsi finanziati da FSE, PNRR e MIM della Fond
 
 - **Framework**: Yii2 Basic Template, PHP 8.4
 - **Database**: MySQL 8.0 / MariaDB
-- **UI**: Tabler Dashboard Theme v1.4.0
+- **UI**: Tabler Dashboard Theme v1.4.0, Tabler Icons, Tom Select
 - **Container**: Docker
 - **PDF**: DOMPDF
 - **Excel**: PhpSpreadsheet
+- **2FA**: robthree/twofactorauth (TOTP)
 
 ## Ambiente di Sviluppo (Docker)
 
@@ -106,7 +107,11 @@ web/             -> Entry point, assets pubblici, uploads
 | Admin | http://localhost:8000 | utente/password (tabella `utente`) |
 | Area Docenti | http://localhost:8000/area-docenti/login | CF + password (tabella `docente_auth`) |
 | Area Studenti | http://localhost:8000/area-studenti/login | CF + password (tabella `allievo_auth`) |
+| Vista Semplificata (Gestione) | http://localhost:8000/gestione | utente/password (tabella `utente`) |
 | Bandi Pubblici | http://localhost:8000/studenti | Nessuna |
+| Questionario Valutazione | http://localhost:8000/valutazione/{CODICE} | Codice monouso |
+
+L'autenticazione a due fattori (TOTP) è disponibile, in modo facoltativo, per tutti e tre i tipi di utente.
 
 ## Import Dati
 
@@ -135,3 +140,21 @@ Il sistema genera contratti PDF differenziati per:
 - **docs/CRUD_GUIDELINES.md** - Linee guida per pagine CRUD
 - **docs/schema-er.html** - Schema ER del database
 - **import/README.md** - Documentazione import Excel
+- **docs/MAPPA_FEATURE_MANUALE.md** - Mappa feature ↔ manuali utente
+- **Manuali utente** - `/site/manuale-admin`, `/site/manuale-docente`, `/site/manuale-studente`
+
+## Dati Sensibili
+
+Il repository **non deve contenere** dati reali, credenziali o documenti riservati. Sono esclusi tramite `.gitignore` e restano solo in locale:
+
+| Percorso | Contenuto |
+|----------|-----------|
+| `PRODUCTION_SERVER.md` | Credenziali server di produzione |
+| `config/ftp.php`, `config/mail.php`, `config/db-local.php` | Credenziali FTP, SMTP, DB locale |
+| `docs/DATI REALI/` | Bilanci, prospetti docenti, valutazioni |
+| `docs/TEMPLATE_REGISTRAZIONE_UTENTI.xlsx` | Anagrafica utenti reali |
+| `import/*.xlsx` (tranne `TEMPLATE_IMPORT_DATI.xlsx`), `import/definitivo/` | File di import con dati reali |
+| `docs/*riunione*.txt`, `docs/*transcript*.txt`, `doc/` | Trascrizioni delle riunioni |
+| `web/uploads/*` | Contratti, fatture, firme, istanze caricate |
+
+> La storia git è stata ripulita da questi file e dalle password in chiaro (novembre 2026). Non inserire mai password nelle migration: usare variabili d'ambiente o password generate con cambio obbligatorio al primo accesso.
