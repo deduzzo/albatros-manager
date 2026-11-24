@@ -2,6 +2,45 @@
 
 Sistema di gestione per docenti e corsi finanziati da FSE, PNRR e MIM della Fondazione ITS Academy Albatros.
 
+**Ambiente online**: https://albatros.robertodedomenico.it (ospitato dallo sviluppatore in attesa del server definitivo della Fondazione)
+
+## Conformità ai Requisiti dell'Incarico
+
+Web application realizzata per l'incarico conferito con Determina Presidenziale prot. n. 118 del 30/12/2025: *"web application con architettura scalabile, sicura e conforme alle normative vigenti (GDPR, ISO 9001), per la gestione integrata di anagrafiche, contratti, posizioni fiscali e contributive di docenti, allievi, collaboratori e consulenti esterni, con interfaccia intuitiva e accesso multi-utente"*.
+
+Tutti i requisiti funzionali dell'offerta tecnico-economica sono implementati e in esercizio:
+
+| # | Requisito (offerta tecnica) | Stato | Implementazione |
+|---|-----------------------------|:-----:|-----------------|
+| 1 | **Gestione Anagrafica** di collaboratori, docenti, allievi con campi personalizzabili | ✅ | Anagrafiche Docenti (tipo docente/tutor/coordinatore, provenienza TP/RU), Allievi, Utenti, Sedi, Conti correnti. Personalizzazione tramite categorie e tag curriculum, tipi documento, criteri di valutazione e parametri della Fondazione configurabili da interfaccia |
+| 2 | **Assegnazione Docenza**: durata contratto, titolo modulo, progetto, importo orario | ✅ | Gerarchia Fonte → Progetto → Corso → Modulo; candidature docenti, valutazione CTS, graduatorie, long list idonei, assegnazioni, subentri; contratti con date di inizio e fine lezioni, ore e compenso orario (TP €60/h, RU €70/h, compensi variabili) |
+| 3 | **Posizione Fiscale e Contributiva**: P.IVA, co.co.co., ritenuta d'acconto | ✅ | Contratti per tipologia (Co.Co.Co., Partita IVA, prestazione occasionale) con modelli PDF dedicati FSE/PNRR; pagamenti con importo lordo, ritenute e netto (acconto, rata, saldo); richieste di fatturazione; rimborsi spese; export per il consulente del lavoro; bonifici SEPA XML (pain.001.001.03) |
+| 4 | **Reportistica Avanzata**: export PDF ed Excel | ✅ | Contratti, verbali e documenti in PDF (DOMPDF); export Excel/CSV di report, bilancio, borse di studio, dati per il consulente; rendicontazione finanziaria per progetto/corso/modulo; dashboard con grafici e alert |
+| 5 | **Accesso Sicuro**: autenticazione a più fattori, ruoli e permessi | ✅ | 2FA TOTP (app Authenticator) per admin, docenti e studenti; ruoli Amministratore, Segreteria, Coordinatore, Operatore; tre aree separate (Admin, Docenti, Studenti); rate-limiting dei tentativi, cambio password obbligatorio, password hashate |
+| 6 | **Compatibilità**: web responsive, desktop e mobile | ✅ | Interfaccia Tabler/Bootstrap 5 responsive; aree docenti e studenti utilizzabili da smartphone |
+| 7 | **Integrazione** con sistemi esistenti e API | ✅ | Import massivo da Excel (progetti, moduli, docenti, assegnazioni, calendari); export standard (Excel, CSV, PDF, SEPA XML); endpoint JSON interni; invio email SMTP |
+
+### Conformità normativa (GDPR / ISO 9001)
+
+- **Tracciabilità**: audit log di ogni modifica (chi, quando, cosa), con storico consultabile per record.
+- **Conservazione**: cancellazione logica (soft delete) su tutte le tabelle, nessuna perdita di dati accidentale.
+- **Riservatezza**: mascheramento dei dati sensibili (IBAN) nei log, segreti 2FA cifrati, contenuti HTML sanitizzati, accesso per ruolo.
+- **Privacy**: consenso privacy nelle candidature degli studenti; questionario di valutazione dei docenti anonimo, con codici monouso.
+
+### Fasi di esecuzione
+
+| Fase | Stato | Evidenze |
+|------|:-----:|----------|
+| 1. Analisi e raccolta requisiti | ✅ | Quattro riunioni di analisi con la Fondazione e una specifica funzionale |
+| 2. Progettazione e sviluppo | ✅ | 44 controller, 84 model, 77 migration del database, 22 release pubblicate su GitHub (ultima v1.0.32) |
+| 3. Test e collaudo | ✅ | Applicazione in esercizio online, con i dati reali forniti dalla Fondazione già importati |
+| 4. Formazione e rilascio | ✅ | Manuali utente HTML stampabili (Admin, Docente, Studente), guide interattive in app, changelog delle novità in app |
+| 5. Assistenza post go-live (12 mesi) | 🔄 | Supporto in corso, con form di assistenza (`/site/supporto`) e sistema di notifiche |
+
+### Funzionalità aggiuntive (oltre l'offerta)
+
+Area docenti con candidatura online e rendicontazione delle ore, area studenti con candidature e graduatorie a criteri pesati, vista semplificata "Gestione" per corso, registro presenze dei tutor, borse di studio con controllo della frequenza minima dell'80%, bilancio e movimenti di spesa, firma digitale, notifiche interne ed email.
+
 ## Stack Tecnologico
 
 - **Framework**: Yii2 Basic Template, PHP 8.4

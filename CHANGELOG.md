@@ -3,6 +3,8 @@
 Tutte le modifiche al portale Albatros Manager.
 
 ## [Unreleased]
+### Documentazione {admin}
+- README: matrice di conformità ai requisiti dell'incarico, normativa GDPR/ISO 9001 e fasi di esecuzione
 
 ## [v1.0.32] - 2026-11-24
 ### Sicurezza {admin}
